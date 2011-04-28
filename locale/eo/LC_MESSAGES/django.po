@@ -1,0 +1,147 @@
+# Esperanto translation file for tollgate
+# Copyright (C) 2010 Michael Farrell
+# This file is distributed under the same license as the tollgate package.
+# Michael Farrell <http://micolous.id.au/>, 2010
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: tollgate 2.8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-01-14 04:44+1030\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Michael Farrell <micolous@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: settings.py:115
+msgid "English (Australia)"
+msgstr "Anglino (Aŭstralia)"
+
+#: settings.py:116
+msgid "Esperanto"
+msgstr "Esperanto"
+
+#: templates/frontend/base-internet.html:3 templates/frontend/base-internet.html:4
+#: templates/frontend/base.html:31
+msgid "login other computers"
+msgstr "ensaluti alia komputiloj"
+
+#: templates/frontend/base-internet.html:8
+msgid "enable internet connectivity for this pc"
+msgstr "kapabligi interreto por mia komputilo"
+
+#: templates/frontend/base-pclist.html:3 templates/frontend/base-pclist.html.py:4
+#, fuzzy
+msgid "pc list"
+msgstr "listo de computiloj"
+
+# I'm not terribly sure about this translation.  "possession", changed to an adjective
+#: templates/frontend/base-pclist.html:8
+msgid "owned pcs"
+msgstr "posedaj komputiloj"
+
+# see "owned pcs" translation
+#: templates/frontend/base-pclist.html:9
+msgid "unowned pcs"
+msgstr "malposedaj komputiloj"
+
+#: templates/frontend/base-usage.html:3 templates/frontend/base-usage.html.py:4
+msgid "usage"
+msgstr "uzis"
+
+#: templates/frontend/base-usage.html:7
+msgid "internet usage report"
+msgstr "raporto de interreta uzo"
+
+# needs checking
+#: templates/frontend/base-usage.html:8 frontend/views.py:545
+msgid "highest quota use"
+msgstr "uzega kvoto"
+
+#: templates/frontend/base-usage.html:9 frontend/views.py:584
+msgid "most resets"
+msgstr ""
+
+#: templates/frontend/base-usage.html:10 frontend/views.py:565
+msgid "highest speed"
+msgstr "rapidega"
+
+#: templates/frontend/base.html:30
+msgid "my devices and quota"
+msgstr "mia aparatoj kaj kvoto"
+
+#: templates/frontend/base.html:36
+msgid "register attendances"
+msgstr "registri servadoj"
+
+#: templates/frontend/base.html:41
+msgid "quota management"
+msgstr "administri kvoto"
+
+#: templates/frontend/base.html:45
+msgid "computer list"
+msgstr "listo de computiloj"
+
+#: templates/frontend/base.html:49
+msgid "system administration"
+msgstr "administri sistemo"
+
+#: templates/frontend/base.html:54
+msgid "logged in as:"
+msgstr "vi estas:"
+
+#: templates/frontend/base.html:56
+msgid "logout"
+msgstr "malensaluti"
+
+#: templates/frontend/base.html:58
+msgid "not logged in"
+msgstr "gasto"
+
+#: templates/frontend/base.html:59
+msgid "login"
+msgstr "ensaluti"
+
+#: templates/frontend/base.html:69
+msgid "change language"
+msgstr "ŝanĝi lingvo"
+
+#: templates/frontend/cant-reset-yourself.html:2
+#: templates/frontend/cant-reset-yourself.html:3
+msgid "can't reset yourself again!"
+msgstr ""
+
+#: templates/frontend/cant-reset-yourself.html:11
+msgid ""
+"Sorry, due to organisational policies, you cannot reset your own quota after "
+"the first time.  Convince someone else to do it for you."
+msgstr ""
+
+#: templates/frontend/controller-error.html:3
+#: templates/frontend/controller-error.html:4
+msgid "backend error"
+msgstr ""
+
+#: templates/frontend/controller-error.html:7
+msgid ""
+"An error occured while I was trying to talk to the\n"
+"backend."
+msgstr ""
+
+#: templates/frontend/controller-error.html:24
+msgid "Traceback"
+msgstr ""
+
+#: templates/frontend/controller-error.html:29
+#, python-format
+msgid ""
+"in <code>%(file)s</code>, line <code>%(line)s</code>, in method <code>%"
+"(method)s</code>"
+msgstr ""
+
+#: frontend/views.py:526
+msgid "alphabetical"
+msgstr "alfabeta"

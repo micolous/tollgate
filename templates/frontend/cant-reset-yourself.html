@@ -1,0 +1,28 @@
+{% extends "frontend/base-internet.html" %}
+{% comment %}
+tollgate can't reset yourself page
+Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+
+{% load i18n %}
+{% block windowtitle %}{% trans "can't reset yourself again!" %}{% endblock %}
+{% block title %}{% trans "can't reset yourself again!" %}{% endblock %}
+
+{% block content %}
+	<!-- $Id: cant-reset-yourself.html 112 2010-11-10 12:42:16Z michael $
+ -->
+	<p>{% blocktrans %}Sorry, due to organisational policies, you cannot reset your own quota after the first time.  Convince someone else to do it for you.{% endblocktrans %}</p>
+{% endblock %}

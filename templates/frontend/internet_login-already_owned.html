@@ -1,0 +1,29 @@
+{% extends "frontend/base-internet.html" %}
+{% comment %}
+tollgate device already owned page
+Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+
+{% block title %}internet login error: device already owned{% endblock %}
+
+{% block content %}
+<!-- $Id: internet_login-already_owned.html 112 2010-11-10 12:42:16Z michael $
+ -->
+
+<p>Sorry, but the MAC address <code>{{ mac }}</code> has already been marked as belonging to another user.</p>
+
+<p>If you wish to claim this system as being yours, you must login to the portal system from that machine.  You cannot reclaim ownership remotely.</p>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "frontend/base.html" %}
+{% comment %}
+tollgate ipv4 port forwarding list page
+Copyright 2008-2011 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+
+
+{% block windowtitle %}ipv4 port forwarding editing{% endblock %}
+{% block title %}ipv4 port forwarding editing{% endblock %}
+
+{% block content %}
+	<form method="post">
+		{% csrf_token %}
+		<p>Are you sure you want to delete this port forwarding?</p>
+		<table>
+			<tr>
+				<th>Host</th>
+				<td>{{ object.host }}</td>
+			</tr>
+			<tr>
+				<th>Protocol / Port</th>
+				<td>{{ object.protocol.name }}{% if object.protocol.has_port %}/{{ object.port }}{% endif %}</td>
+			</tr>
+			<tr>
+				<th>Created</th>
+				<td>{{ object.created }} by {{ object.creator.user }}</td>
+			</tr>
+		</table>
+		<p><input type="submit" value="Delete" /> <a href="{% url ip4portforward_list %}">Cancel</a></p>
+	</form>
+
+{% endblock %}
+

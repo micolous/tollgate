@@ -1,0 +1,33 @@
+{% extends "frontend/base.html" %}
+{% comment %}
+tollgate no attendance error page
+Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+
+
+{% block title %}not signed in{% endblock %}
+{% block submenu %}
+{% endblock %}
+{% block content %}
+<!-- $Id: not-signed-in.html 112 2010-11-10 12:42:16Z michael $
+ -->
+
+<p>Sorry, you haven't been signed in as attending {{ event.name }}.  If you have already paid your entry fee, please see an admin as they did not sign you in correctly.</p>
+
+<p>Once this is completed, please logout of tollgate and login again, and then you will be able to access the internet and register for competitions.</p>
+
+<p><a href="/">Okay</a></p>
+{% endblock %}

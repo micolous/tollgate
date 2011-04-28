@@ -1,0 +1,201 @@
+{% extends "frontend/base-internet.html" %}
+{% comment %}
+tollgate user quota information page
+Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+
+{% load humanize %}
+{% block windowtitle %}quota usage{% endblock %}
+{% block title %}quota usage{% endblock %}
+
+{% block content %}
+<!-- $Id: quota.html 112 2010-11-10 12:42:16Z michael $
+ -->
+
+{% if quota_update_fail %}
+<p><strong>Warning:</strong> Updated data could not be retrieved.  This information is not current.</p>
+{% endif %}
+
+<h2>Quota Details</h2>
+
+<table>
+	<tr>
+		<td>
+			<table>
+				<tr>
+					<th>Quota Used</th>
+					<td class="lcd"><pre>{{ attendance.quota_used_str }}</pre></td>
+					<td>Quota usage information may be delayed by 2 minutes.</td>
+				</tr>
+	
+				<tr>
+					<th>Quota Remaining</th>
+					<td class="lcd">
+						{% if attendance.quota_unmetered %}
+							<abbr title="unlimited">U/L</abbr>
+						{% else %}
+							<pre>{{ attendance.quota_remaining_str }}</pre>
+						{% endif %}
+					</td>
+				</tr>
+	
+				<tr>
+					<th>Total Quota</th>
+					<td class="lcd">
+						{% if attendance.quota_unmetered %}
+							<abbr title="unlimited">U/L</abbr>
+						{% else %}
+							<pre>{{ attendance.quota_amount_str }}</pre>
+						{% endif %}
+					</td>
+				</tr>
+	
+				<tr>
+					<th>Total Resets</th>
+					<td class="lcd">
+						{% if attendance.quota_unmetered %}
+							0
+						{% else %}
+							{{ attendance.reset_count }}
+						{% endif %}&nbsp;&nbsp;
+					</td>
+					{% if could_get_a_reset_later %}
+						<td>You could get one free reset later.  However you have to have used a certain percentage of your quota before this option is available to you.  After you have used the reset, no more quota will be available.</td>
+					{% endif %}
+		
+					{% if has_free_reset %}
+						<td>
+								<a href="/quota/user-reset/">You have one free reset available.</a>  No more quota will be available after you have used it.
+						</td>
+					{% endif %}
+				</tr>
+			</table>
+		</td>
+		
+		<td>
+			<div id="usage_graph" style="width:500px;height:300px;">Loading...</div>
+			<p>Newest data is shown on the right.</p>
+		</td>
+	</tr>
+</table>
+
+<script type="text/javascript">
+$(function () {
+	// use the tollgate api to get usage history
+	// consider this an example of how to use the tollgate httpget api in jquery.
+	$.getJSON(
+		'/api/httpget/json/usage_history/', // usage_history()
+		null, // don't send any data
+		function(data, textStatus) {
+			// lets handle our data!
+			var clean_data = new Array();
+			for (var i in data) {
+				if (i == 0) {
+					var speed = 0;
+				} else {
+					// calculate average speed in kB/s
+					// bytes since last point / seconds since last point / 1024 == kB/s
+					speed = (((data[i][1]*1) - (data[i-1][1]*1)) / (data[i][0] - data[i-1][0])) / 1024;
+				}
+				clean_data.push([data[i][0]*1000, speed]);
+			}
+			
+			// earliest point is 36 hours ago.
+			var start = new Date();
+			start.setHours(start.getHours()-36);
+			$.plot($("#usage_graph"), [{label:'Speed (kB/s)',data:clean_data},], {
+				xaxis: {
+					mode: 'time',
+					min: start.getTime(),
+					max: (new Date()).getTime()
+				}
+			});
+		}
+	);
+});
+
+</script>
+
+<p><strong>Remember:</strong> Both uploads and downloads use quota.</p>
+
+{% comment %}
+<h2>Usage Graph</h2>
+<p>This graph is refreshed every 10 minutes, whenever you use this page, and whenever you switch on or off your internet connectivity.  As a result, peak usage is generally averaged out over the period.  Unmetered internet usage doesn't show here.</p>
+<div><img src="graph.png" alt="[usage graph]"/></div>
+{% endcomment %}
+
+<h2>Internet Switch</h2>
+{% if profile.internet_on %}
+	<p>Internet access is currently <span class="yes">enabled</span>.</p>
+{% else %}
+	<p>Internet access is currently <span class="no">disabled</span>.</p>
+{% endif %}
+<ul>
+	<li><a href="/quota/on/">Switch on internet connectivity.</a>  If you have quota available, internet access will be granted to all of your online computers and devices.</li>
+	<li><a href="/quota/off/">Switch off internet connectivity.</a>  All computers listed here will lose internet access <em>immediately</em>, and all unfinished downloads will be terminated.  Internet access will resume when you opt to, or when you try to connect another computer to the internet in your name.</li>
+</ul>
+
+<h2>Your Computers and Devices</h2>
+<p>All traffic generated by these systems will be registered in your name.  If a system listed here isn't yours, please see an administrator so it's ownership can be properly assigned.</p>
+
+<table class="internet">
+	<tr>
+		<th>Name</th>
+		<th>MAC Address</th>
+		<th>IP Address</th>
+		<th>Online</th>
+		<th>Disown/Disconnect</th>
+	</tr>
+	{% for host in my_hosts %}
+		<tr class="{% cycle row1,row2 %}">
+			<td>{{ host.computer_name }}</td>
+			<td><img src="/media/console_icons/{{ host.get_console_type }}.png" alt="{{ host.get_console_type }} " title="{{ host.get_console_type }}" class="cs"/><code>{{ host.mac_address }}</code></td>
+			<td><code>{{ host.ip_address }}</code></td>
+			<td>
+				{% if host.online %}
+					<span class="yes">Yes</span>
+				{% else %}
+					<span class="no">No</span>
+				{% endif %}
+			</td>
+			<td><a href="/internet/disown/{{ host.id }}/" title="This will make it so the computer is no longer marked as owned by you, disconnecting it from the internet">Disown Computer</a></td>
+		</tr>
+	{% endfor %}
+</table>
+
+<h2>Your Resets</h2>
+
+{% if attendance.get_resets %}
+	<table class="internet">
+		<tr>
+			<th>When</th>
+			<th>Reset performed by</th>
+			<th>Excuse</th>
+		</tr>
+		
+		{% for reset in attendance.get_resets %}
+			<tr class="{% cycle row1,row2 %}">
+				<td>{{ reset.when }}</td>
+				<td>{{ reset.performer.user }}</td>
+				<td>{{ reset.excuse }}</td>
+			</tr>
+		{% endfor %}
+	</table>
+{% else %}
+	<p>No resets have been peformed on your account this event.</p>
+{% endif %}
+
+{% endblock %}

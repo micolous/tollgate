@@ -1,0 +1,56 @@
+{% extends "frontend/base.html" %}
+{% comment %}
+tollgate controller error page
+Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+
+{% load i18n %}
+{% block windowtitle %}{% trans "backend error" %}{% endblock %}
+{% block title %}{% trans "backend error" %}{% endblock %}
+
+{% block content %}
+<!-- $Id: controller-error.html 112 2010-11-10 12:42:16Z michael $
+ -->
+
+<p>{% blocktrans %}An error occured while I was trying to talk to the
+backend.{% endblocktrans %}</p>
+
+<!--
+<p>I do my job in two parts, and this website is only half of my form. 
+There is another half of me that also runs which is responsible for
+communicating with Linux's firewall stack and reporting back on various
+telemetry.</p>
+
+<p>If the error reported is "Service Unknown", then it is likely because the backend isn't running.  Try again in a couple of minutes, and if the problem persists, talk to someone on helpdesk.</p>
+
+<p>If there is another error thrown, then it is probably because there is
+something really bad going on.  Go talk to someone on helpdesk and see if
+they can help you out.  This can sometimes means there is a bug in my
+programming which needs to be looked at.</p>
+-->
+
+<h2>{% trans "Traceback" %}</h2>
+<p>{{ excinfo }}</p>
+<ul>
+{% for file, line, method, code in traceback %}
+	<li>
+		<p>{% blocktrans %}in <code>{{ file }}</code>, line <code>{{ line }}</code>, in method <code>{{	method }}</code>{% endblocktrans %}</p>
+		<p><code>{{ code }}</code></p>
+	</li>
+{% endfor %}
+</ul>
+
+{% endblock %}

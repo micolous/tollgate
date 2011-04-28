@@ -1,0 +1,172 @@
+/*
+ * tollgate "cake" CSS
+ * Copyright 2009-2010 Michael Farrell <http://micolous.id.au/>
+ * $Id: cake.css 109 2010-11-10 12:23:25Z michael $
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* This font file is no longer included in the tollgate distribution due to licensing issues.  If you want to use it, it's available at http://www.dafont.com/digital-7.font
+@font-face {
+	font-family: 'Digital-7 Mono';
+	src: url('/media/d7m.ttf');
+}
+*/
+
+html, body {
+	color: #000;
+	background-color: transparent;
+	font-size: 1.0em;
+	font-family: sans-serif;
+}
+
+#bghack {
+	-moz-border-image: url(/media/portal-bg.png) 75 75 75 75 round round;
+	-webkit-border-image: url(/media/portal-bg.png) 75 75 75 75 round round;
+	border-image: url(/media/portal-bg.png) 75 75 75 75 round round;
+	background-color: #e6ebf1;
+	border-width: 75px;
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index: -1;
+}
+
+.atten {
+	background-color: #fbb;
+	padding: 10px;
+	border: 2px #ff0 dotted;
+}
+
+.lcd {
+	font-family: 'Digital-7 Mono', monospace;
+	font-size: 2em;
+	text-align: right;
+}
+
+.lcd code, .lcd pre {
+	font-family: 'Digital-7 Mono', monospace;
+}
+
+html, body, #menubar, #menubar ul, #menubar ul li, #submenubar, #submenubar ul, #submenubar ul li, #content, pre {
+	padding: 0;
+	margin: 0;
+}
+
+#menubar, #submenubar, h1, #content {
+	z-index: 2;
+	background-image: none;
+	background-color: transparent;
+}
+
+
+#menubar ul li, #submenubar ul li {
+	display: inline;
+	padding-right: 5px;
+	padding-left: 0;
+	border-right: 1px #000 solid;
+}
+
+#menubar, #submenubar {
+	position: relative;
+	left: 0;
+	right: 0;
+	top: 0;
+/*	font-size: 14px; */
+	border-bottom: 1px #000 solid;
+	font-weight: bold;
+}
+
+a, a:visited {
+	color: #006;
+	text-decoration: underline;
+}
+
+a:hover {
+	background-color: #006;
+	color: #fff;
+}
+
+input {
+	font-size: 1em;
+	border: none;
+	color: #000;
+	background-color: transparent;
+	text-decoration: none;
+	padding: 0;
+	margin: 0;
+}
+
+input[type="text"], input[type="password"] {
+	border: 1px #000 dotted;
+}
+
+input[type="submit"] {
+	color: #006;
+	/*text-decoration: underline;*/
+	border-bottom: #006 1px solid;
+}
+
+input[type="submit"]:hover {
+	background-color: #006;
+	color: #fff;
+	border-bottom: #fff 1px solid;
+}
+
+#content {
+	padding: 5px;
+	border-top: 1px #000 solid;
+	border-bottom: 1px #000 solid;
+}
+
+a img {
+	border: 0;
+}
+
+img.cs {
+	width: 1em;
+	height: 1em;
+}
+
+table.internet code {
+	font-size: 1.15em;
+}
+
+tr.row1, tr.row1 td, tr.row1 th {
+	background-color: #c7d0d9;
+}
+
+tr.uh, tr.uh td {
+	background-color: #a9b1b8;
+}
+table.internet {
+	width: 100%;
+}
+
+span.yes, span.no {
+	font-weight: bold;
+	padding: 2px;
+}
+
+span.yes {
+	background-color: #0f0;
+	color: #000;
+}
+
+span.no {
+	background-color: #f00;
+	color: #ff0;
+}

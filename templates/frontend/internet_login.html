@@ -1,0 +1,43 @@
+{% extends "frontend/base-internet.html" %}
+{% comment %}
+tollgate login success page
+Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+
+
+{% block title %}internet login success{% endblock %}
+
+{% block content %}
+<!-- $Id: internet_login.html 112 2010-11-10 12:42:16Z michael $
+ -->
+
+<p>{{ u.username }} has been logged in for the MAC address <code>{{ mac }}</code>.</p>
+
+<p>You should be able to access the internet now, if you have quota available.</p>
+
+<p><strong>Warning:</strong> All internet access is metered.  You have a limited amount of quota available, please see the <a href="/quota/">quota page</a> to show the current status.</p>
+
+<p>Disable programs that are downloading in the background, pause Steam updates, and <strong>shut down peer to peer programs, including Bear Share, Bittorrent, Gnutella, Hamachi, Limewire and Skype</strong>.  <strong>Both uploads and downloads are counted</strong>, and the unmetered sites list is <strong>not</strong> the same as what is available on your ISP, <strong>nor the same as the ISP we are using</strong>.  Failure to comply with this will result in <em>termination</em> of your internet connectivity after you exceed your quota.</p>
+
+<p>Downloads from local file shares on the LAN are unmetered.</p>
+
+<p>You will be taken back to the <a href="/">main portal page</a> in 30 seconds.</p>
+
+<script type="text/javascript">
+	setTimeout('location.href=\'/\';', 30000);
+</script>
+
+{% endblock %}

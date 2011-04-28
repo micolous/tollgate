@@ -1,0 +1,87 @@
+[oui]
+; This file contains a list of rules for the scraper
+;
+; Basically, you put in a regular expression here, and it'll match everything
+; that matches it to a particular company name.
+;
+; All matches are done case-insensitive.
+;
+; Stuff that isn't matched here WILL NOT be entered into the database.
+;
+; It's designed to "normalise" all the different names in the file.
+;
+; You shouldn't need to normally modify this file, unless you're planning on
+; changing the way that ouiscraper behaves, or trying to add more entries to
+; the database.
+;
+; This file gets automatically cached into outscraper.dat.cache on the first
+; run of ouiscraper.py.  This means that you don't have to wait during
+; subsequent runs of the program (these rules are intended to be numerous and
+; complex, so any speed boost we can give is a Good Thing).
+
+; Be careful of "Applera Holding" here...
+apple = ^apple([,\s].+)?$
+
+; consoles
+nintendo = ^nintendo
+sega = ^sega
+microsoft = ^microsoft
+
+; sony
+sony = ^sony corporation
+sony-sce = ^sony computer entertainment,? inc
+sony-scea = ^sony computer entertainment america
+sony-ericsson = ^sony ericsson
+tektronix = ^SONY TEKTRONIX
+
+asus = ^asustek computer
+msi = ^(msi|micro-star)
+gigabyte = ^giga-byte technology
+cisco = ^cisco (systems|SPVTG)
+linksys = ^(cisco-)?linksys
+juniper = ^juniper networks
+dlink = ^d-link
+netgear = ^netgear
+netcomm = ^netcomm
+tplink = ^tp-link
+billion = ^billion
+belkin = ^belkin
+edimax = ^edimax technology
+novell = ^novell,? inc
+nokia = ^nokia
+motorola = ^motorola
+3com = ^3com
+intel = ^intel corpor
+dfi = ^dfi
+asrock = ^asrock
+nvidia = ^nvidia
+vmware = ^vmware
+oracle = ^oracle
+amd = ^advanced micro devices
+toshiba = ^toshiba( corporation)?$
+hp = ^hewlett[- ]packard
+
+
+[oui-console]
+; could this be a console?
+nintendo = 1
+sony-sce = 1
+sony-scea = 1
+microsoft = 1
+
+
+; ip4 protocol handlers
+[ip4p-override-name]
+61 = HostInternal61
+63 = LocalNetwork63
+68 = AnyDFS68
+99 = AnyPrivCrypto99
+114 = AnyZeroHop114
+253 = Experimental253
+254 = Experimental254
+
+[ip4p-has-port]
+; These items have port numbers.
+6 = 1 ; tcp
+17 = 1 ; udp
+

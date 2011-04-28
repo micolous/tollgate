@@ -1,0 +1,57 @@
+{% extends "frontend/base.html" %}
+{% comment %}
+tollgate reset lecture page
+Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+
+{% block windowtitle %}request usage reset{% endblock %}
+{% block title %}request usage reset{% endblock %}
+
+{% block content %}
+	<!-- $Id: reset-lecture.html 110 2010-11-10 12:40:08Z michael $ -->
+	<p>Just so you know, you're about to use your <strong>only free reset</strong>.  After this, there will be no additional resets available, and when you have used your quota you will no longer have internet connectivity for the remainder of the LAN.</p>
+	
+	<p>Now is your <strong>only</strong> chance to make sure something isn't siphoning away your internet usage without you knowing, that you haven't logged in to someone else's computer and they're using all your quota, making sure you've disabled automatic updates or redirected them to local sources, and so-forth.</p>
+
+	<p>To make sure you're <strong>really sure you want to do this</strong>, you'll need to enter the text in the image below (remembering to include the punctuation as well), and provide a short reason (less than 250 characters) as to why you exceeded your quota usage this time.</p>
+	
+	<p>If you believe there are extenuating circumstances as to why you're perhaps using the internet a lot faster than you should be, then <strong>now is the time to approach an admin about it</strong>.</p>
+	
+	<div style="text-align: center">
+		<img src="/media/doasisay.png" alt="(if you are having trouble reading the text in this image, please see an admin or helper)" title="(if you are having trouble reading the text in this image, please see an admin or helper)"/>
+	</div>
+
+	
+	{% if incorrect %}
+		<div class="atten">
+			<p><strong>Reset Denied:</strong> There was a problem with your input.</p>
+		</div>
+	{% endif %}
+	
+	<form method="post" action="">
+		<table class="internet">
+			{{ reset_form.as_table }}
+			<tr>
+				<td></td>
+				<td><input type="submit" value="Submit"/></td>
+			</tr>
+		</table>
+	</form>
+	
+
+			
+		
+{% endblock %}

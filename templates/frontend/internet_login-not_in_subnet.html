@@ -1,0 +1,32 @@
+{% extends "frontend/base-internet.html" %}
+{% comment %}
+tollgate device not in subnet page
+Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+
+
+{% block title %}internet login error: not in subnet{% endblock %}
+
+{% block content %}
+<!-- $Id: internet_login-not_in_subnet.html 112 2010-11-10 12:42:16Z michael $
+ -->
+
+<p>Sorry, but the MAC address <code>{{ mac }}</code> is not currently a part of the official LAN subnet.</p>
+
+<p>Please set the computer to obtain an IP address automatically via DHCP in order to be part of the LAN network.</p>
+
+<p>Some operating systems may allow you to set multiple IP addresses on a single interface.  If you wish to use this functionality, make sure there is no route to the official LAN network or default route via that other network, otherwise it may impede your ability to access the internet and other computers on the network.</p>
+{% endblock %}

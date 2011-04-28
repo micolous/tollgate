@@ -1,0 +1,35 @@
+{% extends "frontend/base-internet.html" %}
+{% comment %}
+tollgate arp cache error page
+Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+
+{% block title %}signin system (page 2 of 3){% endblock %}
+
+{% block content %}
+	<p>The user account <code>{{ name }}</code> doesn't exist.  You'll need to provide some additional information...</p>
+	<form method="post" action="{% url signin2 %}">
+		{% csrf_token %}
+		{{ form.as_p }}
+		<p><input type="submit" value="Continue" /> <a href="{% url signin %}">Go Back</a></p>
+	</form>
+	
+	<script type="text/javascript">
+		$(function() {
+			$('#{{ form.first_name.auto_id|escapejs }}').focus();
+		});
+	</script>
+{% endblock %}
