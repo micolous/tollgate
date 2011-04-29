@@ -78,6 +78,7 @@ There are the following requirements for successful operation:
 - python-lxml
 - django-south
 - screen
+- nmap
 
 ## Installation ##
 
@@ -98,6 +99,30 @@ You'll need to do these things:
 * Setup the tollgate backend service.
 * Populate the database with OUIs and protocol numbers with the scraper.py script.  This will download the latest OUI and IPv4 protocol number definitions from IANA, and load them into tollgate's database.  This is needed for console detection and IPv4 port forwarding.
 * Setup a cron job to run every 10 minutes, that wgets https://localhost/internet/refresh/crontab/
+
+## Running on large subnets (>/24) or with more than 128 hosts ##
+
+You may encounter performance issues or hosts dropping out "randomly" when running the software on subnets larger than a /24.  This is because of the size of the ARP cache in the Linux kernel which this software is quite heavily dependant on, and populating it with responses to ARP requests sent periodically by the software.
+
+It is at this point you should seriously consider the size of your subnet.  If you have less than 200 hosts on your network, then you really only need a /24.  If you have a proper network plan in place, with DNS and static DHCP entries setup, you can still segment your network a lot more tightly.  You can use hostnames to provide memorable names to services, rather than wanting 10.0.13.37 when all your other hosts are in 10.0.1.0/24.
+
+When you're planning for a LAN party, I generally do the math based on hosts = (maximum_attendance * 2) + static_hosts.  You should only be using a /16 if you're expecting 30,000+ people attending your LAN.  And even then you should consider slicing it up into subnets, because most operating systems have an ARP cache limit of about 1024 hosts.  With dynamic DNS assignments by DHCP and routing in place, you can even keep it so that hostnames across subnets can still talk to each other by name.
+
+You can tweak the behaviour of the ARP cache on Linux to let you have a bigger ARP table.  But this comes at a price -- it uses more memory, and the cron job for tollgate's refresh process will take much longer.
+
+Linux provides three settings in /proc/sys/net/ipv4/neigh/default/:
+
+* gc_thresh1: 128 hosts.  This is the minimum number of entries to keep in the ARP cache.  The garbage collector will not run if this amount isn't exceeded, and will reduce the number of entries every 30 seconds by default.
+* gc_thresh2: 512 hosts (gc_thresh1 * 4).  This is the soft-maximum number of entries to keep in the ARP cache.  The garbage collector will allow this to be exceeded for 5 seconds.
+* gc_thresh3: 1024 hosts (gc_thresh2 * 2).  This is the hard-maximum number of entries to keep in the ARP cache.  It will always run if there are more entries in the cache.
+
+You should keep those ratios if you adjust it, but gc_thresh needs to be able to handle the base amount of hosts on your network.  So if you have 1024 hosts on your network, you'll need to tweak it so that:
+
+* gc_thresh1: 1024 hosts
+* gc_thresh2: 4096 hosts
+* gc_thresh3: 8192 hosts
+
+You can put these settings in /etc/sysctl.conf as net.ipv4.neigh.default.gc_thresh*, and it will apply on every boot.
 
 ## xtables-addons Installation Notes ##
 
