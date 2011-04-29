@@ -254,21 +254,6 @@ def internet_disown(request, host_id):
 		# not allowed.
 		return HttpResponseForbidden()
 
-def host_refresh(request):
-	# refresh information about networkhosts and quota for crontab.
-	portal = get_portalapi()
-	
-	try:
-		refresh_networkhost(portal)
-	except:
-		pass
-	apply_ip4portforwards()
-	#try:
-	refresh_all_quota_usage(portal)
-	#except:
-	#	pass
-	#return HttpResponseRedirect('/')
-
 @login_required
 def host_refresh_quick(request):
 	refresh_networkhost_quick()

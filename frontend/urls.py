@@ -46,7 +46,6 @@ urlpatterns = patterns('tollgate.frontend.views',
 	(r'^internet/login/(?P<mac_address>[\dABCEDFabcdef]{12})/$', 'internet_login'),
 	url(r'^internet/disown/(?P<host_id>\d+)/$', 'internet_disown', name='internet-disown'),
 	(r'^internet/$', 'internet'),
-	(r'^internet/refresh/crontab/$', 'host_refresh'),
 	(r'^internet/refresh/$', 'host_refresh_quick'),
 	(r'^internet/offline/$', 'internet_offline'),
 
