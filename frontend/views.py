@@ -800,9 +800,9 @@ def signin3(request, uid):
 			
 			if f.cleaned_data['quota_unlimited']:
 				# create unmetered attendance
-				a = EventAttendance(quota_unmetered=True, event=current_event, user_profile=u.get_profile())
+				a = EventAttendance(quota_unmetered=True, event=current_event, user_profile=u.get_profile(), registered_by=request.user.get_profile())
 			else:
-				a = EventAttendance(quota_amount=f.cleaned_data['quota_amount']*1048576, event=current_event, user_profile=u.get_profile())
+				a = EventAttendance(quota_amount=f.cleaned_data['quota_amount']*1048576, event=current_event, user_profile=u.get_profile(), registered_by=request.user.get_profile())
 				
 			a.save()
 			
