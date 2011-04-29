@@ -105,8 +105,10 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.humanize',
 	'django.contrib.messages',
+	'south',
     'tollgate.frontend',
     'tollgate.api'
+
 )
 AUTH_PROFILE_MODULE = 'frontend.userprofile'
 

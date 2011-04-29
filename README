@@ -76,6 +76,7 @@ There are the following requirements for successful operation:
 - python-iplib
 - python-simplejson (if using Python <2.6)
 - python-lxml
+- django-south
 - screen
 
 ## Installation ##
