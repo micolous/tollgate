@@ -269,6 +269,7 @@ def host_refresh(request):
 	#	pass
 	#return HttpResponseRedirect('/')
 
+@login_required
 def host_refresh_quick(request):
 	refresh_networkhost_quick()
 	return HttpResponseRedirect('/internet/')

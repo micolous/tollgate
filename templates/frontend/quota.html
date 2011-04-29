@@ -73,13 +73,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 						{% endif %}&nbsp;&nbsp;
 					</td>
 					{% if could_get_a_reset_later %}
-						<td>You could get one free reset later.  However you have to have used a certain percentage of your quota before this option is available to you.  After you have used the reset, no more quota will be available.</td>
+						<td>You could get one free reset later.  However you have to have used a certain percentage of your quota before this option is available to you.  After you have used the reset, no more free resets will be available.</td>
 					{% endif %}
 		
 					{% if has_free_reset %}
 						<td>
-								<a href="/quota/user-reset/">You have one free reset available.</a>  No more quota will be available after you have used it.
+								<a href="/quota/user-reset/">You have one free reset available.</a>  No more free resets will be available after you have used it.
 						</td>
+					{% endif %}
+					
+					{% if attendance.reset_count >= 1 %}
+						{% if settings.RESET_PURCHASE %}
+							<td>
+								No more free resets are available.  You may purchase additional quota resets from the admins.
+							</td>
+						{% endif %}
 					{% endif %}
 				</tr>
 			</table>

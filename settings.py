@@ -114,6 +114,13 @@ LAN_SUBNET = '10.4.0.0/23'
 LAN_IFACE = 'eth1'
 LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
+# the default amount of quota
+DEFAULT_QUOTA_AMOUNT = 150
+# are reset excuses required?
+RESET_EXCUSE_REQUIRED = True
+# changes some texts to imply that quota resets are purchasable
+RESET_PURCHASE = False
+
 
 ONLY_CONSOLE = False
 SOURCE_URL = None

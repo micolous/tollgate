@@ -44,7 +44,8 @@ class ResetLectureForm(forms.Form):
 	excuse = forms.CharField(
 		label=_('Why did you exceed your quota usage?'),
 		min_length=3,
-		max_length=256
+		max_length=256,
+		required=settings.RESET_EXCUSE_REQUIRED
 	)
 	
 	def check_answers(self):
@@ -97,7 +98,7 @@ class SignInForm3(forms.Form):
 		label=_('Quota Amount'),
 		help_text=_('The amount of quota to give to the user, in megabytes.'),
 		min_value=1,
-		initial=150L
+		initial=long(settings.DEFAULT_QUOTA_AMOUNT)
 	)
 	
 	quota_unlimited = forms.BooleanField(

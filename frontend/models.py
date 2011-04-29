@@ -129,11 +129,14 @@ class EventAttendance(Model):
 	user_profile = ForeignKey(UserProfile)
 	quota_used = PositiveIntegerField(default=0)
 	quota_multiplier = PositiveIntegerField(default=1)
-	quota_amount = PositiveIntegerField(default=100000000)
+	quota_amount = PositiveIntegerField(default=long(settings.DEFAULT_QUOTA_AMOUNT)*1048576L)
 	quota_unmetered = BooleanField(default=False)
 	
 	# ALTER TABLE `tollgate`.`frontend_eventattendance` ADD COLUMN `coffee` TINYINT(1)  NOT NULL DEFAULT 0 AFTER `quota_unmetered`;
 	coffee = BooleanField(default=False)
+	
+	registered_by = ForeignKey(UserProfile, null=True, blank=True, related_name="registered_by")
+	registered_on = DateTimeField(auto_now_add=True)
 	
 	def is_unmetered(self):
 		return self.quota_unmetered
