@@ -79,22 +79,12 @@ class NetworkHost(Model):
 	online = BooleanField(default=True)
 	
 	def get_console_type(self):
-		oui = self.mac_address[:6]
-		
-		if oui in MICROSOFT_OUI:
-			return 'xbox'
-		if oui in NINTENDO_OUI:
-			return 'nintendo'
-		if oui in PLAYSTATION_OUI:
-			return 'playstation'
-		if oui in APPLE_OUI:
-			return 'apple'
-		
-		# check cisco last as it is huge
-		if oui in CISCO_OUI:
-			return 'cisco'
-		
-		return 'pc'
+		try:
+			oui = Oui.objects.get(hex=self.mac_address[:6])
+		except ObjectDoesNotExist:
+			return 'pc'
+		else:
+			return oui.slug
 		
 	def is_console(self):
 		return is_console(host.mac_address)
