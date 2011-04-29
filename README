@@ -34,6 +34,8 @@ Please be specifically aware of Section 13 "Remote Network Interaction; Use with
 
 A notice will appear on all pages unless you set the SOURCE_URL setting to a location where the source code is stored.  This is enforced as some members of the LAN community in my experience are "lax" about following licensing obligations.  Removing the code that enforces this *does not* exempt you from the agreement - it is only there as a reminder and to assist you in license compliance.
 
+Pushing your changes upstream is a great thing to do -- it not only assists other users of the software, but also assists you as internally-developed features don't have to be patched in every time there is a new release.
+
 ### flot ###
 
 This software uses flot, a jQuery library for generating charts, copyright 2007-2009 IOLA and Ole Laursen.  A full copy of it's license is included in /media/flot/LICENSE.txt.  It's terms ONLY apply to the flot library - not to the rest of the tollgate source code.
@@ -75,6 +77,26 @@ There are the following requirements for successful operation:
 - python-simplejson (if using Python <2.6)
 - python-lxml
 - screen
+
+## Installation ##
+
+I'm going to improve these instructions and provide a virtual appliance in the future, at the moment they're pretty bare.
+
+To start, you should fork the tollgate repository in github (or fork it in a local git repository), then check out the sources.  You can then use this to select what changes to integrate from upstream, as well as managing your own contributions.  You should put tollgate into /opt/tollgate/.
+
+You'll need to do these things:
+
+* Install dependencies.
+* Setup a database.
+* Configure your network settings, DHCP and DNS.
+* Configure the Django site in settings_local.py.  Remember to setup the SOURCE_URL to point to a website where your Git repository can be accessed.
+* Setup a HTTPS site in Apache to point to tollgate's frontend Django application (mod_wsgi or mod_python).
+* Setup a HTTP site in Apache to redirect to the HTTPS one.
+* Setup a HTTP site on port 81 to run the CGI script captive_landing/index.py.  This is needed so browsers don't cache the redirects like they do with normal Apache redirects.
+* Configure dbus for the tollgate backend service.
+* Setup the tollgate backend service.
+* Populate the database with OUIs and protocol numbers with the scraper.py script.  This will download the latest OUI and IPv4 protocol number definitions from IANA, and load them into tollgate's database.  This is needed for console detection and IPv4 port forwarding.
+* Setup a cron job to run every 10 minutes, that wgets https://localhost/internet/refresh/crontab/
 
 ## xtables-addons Installation Notes ##
 

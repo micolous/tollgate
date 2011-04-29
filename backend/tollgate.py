@@ -1,7 +1,6 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 """tollgate backend service
-Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
-$Id: tollgate.py 109 2010-11-10 12:23:25Z michael $
+Copyright 2008-2011 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -16,7 +15,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from ConfigParser import ConfigParser
+from configparser_plus import ConfigParserPlus
 from sys import argv, exit
 import BaseHTTPServer, iptables
 
@@ -73,7 +72,7 @@ def parse_hostlist(hostlist, action):
 				action(host, proto, port)
 
 # begin!
-config = ConfigParser(DEFAULT_SETTINGS)
+config = ConfigParserPlus(DEFAULT_SETTINGS)
 
 if len(argv) >= 2:
 	SETTINGS_FILE = argv[1]

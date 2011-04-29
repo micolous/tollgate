@@ -356,7 +356,11 @@ def quota_user_reset(request):
 				# to regain internet access after having it revoked forcefully.
 				if attendance.quota_multiplier == 1:
 					# create a log of this event
-					excuse = reset_form.cleaned_data['excuse']
+					if settings.RESET_EXCUSE_REQUIRED:
+						excuse = reset_form.cleaned_data['excuse']
+					else:
+						# clear out the reset excuse if one was provided but not allowed.
+						excuse = ''
 					QuotaResetEvent.objects.create(event_attendance=attendance, performer=profile, excuse=excuse)
 			
 					attendance.quota_multiplier = 2

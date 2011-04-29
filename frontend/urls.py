@@ -77,8 +77,8 @@ urlpatterns = patterns('tollgate.frontend.views',
 	
 	(r'^captive_landing/?$', 'captive_landing'),
 	
-	(r'^help/new/$', direct_to_template, dict(template='frontend/help/new.html')),
-	(r'^help/api/$', direct_to_template, dict(template='frontend/help/api.html')),
+	(r'^help/new/$', direct_to_template, dict(template='frontend/help/new.html', extra_context=dict(settings=settings))),
+	(r'^help/api/$', direct_to_template, dict(template='frontend/help/api.html', extra_context=dict(settings=settings))),
 	
 	# signin system
 	url(r'^signin/$', 'signin1', name='signin'),
@@ -133,7 +133,7 @@ urlpatterns = patterns('tollgate.frontend.views',
 	url(
 		r'^help/source/$',
 		direct_to_template,
-		dict(template='frontend/help/source.html'),
+		dict(template='frontend/help/source.html', extra_context=dict(settings=settings)),
 		name='source'
 	),
 	
