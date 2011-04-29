@@ -35,19 +35,20 @@ Default values will be cast for getint and getfloat, unless the default value is
 	
 	def __init__(self, defaults, allow_no_value=False):
 		SafeConfigParser.__init__(self)
-		self._defaults = defaults
+		# apparently self._defaults is used by the default implementation.
+		self._cfp_defaults = defaults
 		self._allow_no_value = allow_no_value
 	
 	def defaults(self):
 		"""Return the 2D dict that is providing defaults.."""
-		return self._defaults
+		return self._cfp_defaults
 		
 	def _get_with_default(self, section, option, method, coercion=None):
 		try:
 			return getattr(SafeConfigParser, method)(self, section, option)
 		except NoOptionError:
 			try:
-				v = self._defaults[section][option]
+				v = self._cfp_defaults[section][option]
 			except KeyError, ex:
 				if self._allow_no_value:
 					return None
