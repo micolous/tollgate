@@ -108,7 +108,7 @@ class Event(Model):
 	end = DateTimeField()
 	def is_active(self):
 		current_time = datetime.now()
-		return start < current_time < end
+		return self.start < current_time < self.end
 	is_active.boolean = True
 
 	def __unicode__(self):
