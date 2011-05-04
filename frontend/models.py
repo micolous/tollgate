@@ -24,13 +24,21 @@ from tollgate.commons import *
 from os import popen
 from django.core.exceptions import ObjectDoesNotExist
 from socket import gethostbyaddr
-from iplib import CIDR
+try:
+	from iplib import CIDR
+except ImportError:
+	CIDR = None
+	import IPy
+
 from django.utils.translation import ugettext as _
 from tollgate.frontend import *
 from django.core.exceptions import *
 
 BYTES_MULTIPLIER = 1024.0
-LAN_CIDR = CIDR(settings.LAN_SUBNET)
+if CIDR:
+	LAN_CIDR = CIDR(settings.LAN_SUBNET)
+else:
+	LAN_CIDR = IPy.IP(settings.LAN_SUBNET)
 
 def bytes_str(v):
 	if v >= pow(BYTES_MULTIPLIER, 4) * 2:
@@ -367,7 +375,10 @@ def get_signed_in_users(event):
 	return EventAttendance.objects.filter(event__exact=event).order_by('user_profile')
 
 def in_lan_subnet(ip):
-	return LAN_CIDR.is_valid_ip(ip)
+	if CIDR:
+		return LAN_CIDR.is_valid_ip(ip)
+	else:
+		return IPy.IP(ip) in LAN_CIDR
 
 def get_mac_address(ip):
 	fh = open('/proc/net/arp', 'r')
