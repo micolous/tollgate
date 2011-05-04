@@ -58,26 +58,26 @@ def download_file(filename, url):
 	if exists(filename):
 		if not isfile(filename):
 			raise Exception('ERROR: %s exists but is not a file.  Please check this, and move it out of the way so I can run.' % filename)
-	
+
 	# lets also check for an etag, and use it if it's there.
 	etag = None
 	if exists(etag_filename):
 		etag = open(etag_filename, 'rb').read()
 		mtime = asctime(gmtime(getmtime(filename))) + ' GMT'
-	
+
 	# connect to the IEEE website, and grab the current OUI data, if it is
 	# older that the one currently on the system.
-	
+
 	print "Attempting to download data from %s..." % url
 	request = Request(url, headers={
 		'User-Agent': UA
 	})
-	
+
 	if mtime != None:
 		request.add_header('If-Modified-Since', mtime)
 	if etag != None:
 		request.add_header('If-None-Match', etag)
-	
+
 	response = None
 	try:
 		response = urlopen(request)
@@ -86,7 +86,7 @@ def download_file(filename, url):
 			print "Data that is present appears to be current."
 		else:
 			raise ex
-	
+
 	if response != None:
 		length = response.info()['Content-Length']
 		print "Copying %s bytes..." % length
@@ -101,15 +101,15 @@ def download_file(filename, url):
 				print "%s / %s bytes done, %.0f KiB/s" % (fp.tell(), length, ((fp.tell() - last_pos) / delta) / 1024.)
 				last_pos = fp.tell()
 				last_time = time()
-		
+
 		# write out etag
 		try:
 			open(etag_filename, 'wb').write(response.info()['ETag'])
 		except:
 			print "Warning: Couldn't write ETag data.  This will mean when this script runs again, it will redownload all the content."
-		
+
 		print "File downloaded."
-	
+
 	# done
 
 def parse_oui_data(filename):
@@ -124,11 +124,11 @@ def parse_oui_data(filename):
 			print "There was a problem compiling the regular expression for %s." % k
 			print "Expression: %s" % v
 			raise ex
-	
+
 	# we're good.  lets clear the existing Oui table because it's data is now outdated.
 	# because we don't care about foreign relations, we should grab the cursor and nuke the table directly.
 	cursor = connection.cursor()
-	
+
 	# these sql queries don't work properly with "correct" escaping.  maybe vulnerable to sqli.
 	try:
 		cursor.execute('TRUNCATE TABLE `%s`' % (Oui._meta.db_table,))
@@ -136,7 +136,7 @@ def parse_oui_data(filename):
 		# truncate may not be supported.  delete it the "slow" way.
 		cursor.execute('DELETE FROM `%s`' % (Oui._meta.db_table,))
 	print "Deleted existing OUI data."
-	
+
 	# now parse the new oui data with the regular expressions provided.
 	for line in fp:
 		m = OUI_RE.match(line)
@@ -146,7 +146,7 @@ def parse_oui_data(filename):
 				if v.match(m.group(2)):
 					# match it up with a particular group
 					#print "%s = %s (%s)" % (k, m.group(1), m.group(2))
-					
+
 					# lets pump this into the database.
 					Oui.objects.create(
 						hex=m.group(1),
@@ -154,7 +154,7 @@ def parse_oui_data(filename):
 						slug=k,
 						is_console=(config.has_option('oui-console', k) and config.getboolean('oui-console', k))
 					)
-	
+
 	print 'Added %d entries to Oui table.' % Oui.objects.count()
 
 def parse_ip4p_data(filename):
@@ -163,7 +163,7 @@ def parse_ip4p_data(filename):
 	root = tree.getroot()
 	if root.registry.get('id') != 'protocol-numbers-1':
 		raise Exception, 'This does not look like the protocol numbers XML'
-	
+
 	cursor = connection.cursor()
 
 	# these sql queries don't work properly with "correct" escaping.  maybe vulnerable to sqli.
@@ -173,25 +173,25 @@ def parse_ip4p_data(filename):
 		# truncate may not be supported.  delete it the "slow" way.
 		cursor.execute('DELETE FROM `%s`' % (IP4Protocol._meta.db_table,))
 	print "Deleted existing IP4P data."
-	
+
 	# now walk
 	for record in root.registry.record:
 		#print objectify.dump(record)
-		
+
 		if '-' in str(record.value):
 			continue
-		
+
 		# some items don't have proper names.  fix this.
 		if config.has_option('ip4p-override-name', str(record.value)):
 			name = config.get('ip4p-override-name', str(record.value))
 		else:
 			name = record.name
-		
+
 		try:
 			description = record.description
 		except:
 			description = ''
-		
+
 		try:
 			IP4Protocol.objects.create(
 				id=record.value,
@@ -202,13 +202,13 @@ def parse_ip4p_data(filename):
 		except IntegrityError:
 			# dupe PK
 			print "Warning: duplicate protocol number %s." % (record.value)
-	
+
 	print 'Added %d entries to Protocol table.' % IP4Protocol.objects.count()
-	
+
 
 if __name__ == '__main__':
 	download_file(OUI_LIST_FILE, OUI_LIST_URL)
 	download_file(IP4P_LIST_FILE, IP4P_LIST_URL)
-	
+
 	parse_oui_data(OUI_LIST_FILE)
 	parse_ip4p_data(IP4P_LIST_FILE)

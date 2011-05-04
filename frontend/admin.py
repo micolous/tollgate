@@ -20,29 +20,29 @@ from tollgate.frontend.models import *
 
 class EventAttendanceAdmin(admin.ModelAdmin):
 	list_display = ("event", "user_profile", "quota_used", "quota_multiplier", "quota_amount", "quota_unmetered", "coffee")
-	
+
 class EventAdmin(admin.ModelAdmin):
 	list_display = ("name", "start", "end", "is_active")
-	
+
 class NetworkHostAdmin(admin.ModelAdmin):
 	list_display = ("mac_address", "ip_address", "computer_name", "user_profile")
 
 class UserProfileAdmin(admin.ModelAdmin):
 	list_display = ("user", "internet_on")
-	
+
 class QuotaResetEventAdmin(admin.ModelAdmin):
 	list_display = ("when", "event_attendance", "performer", "excuse")
 
 class NetworkHostOwnerChangeEventAdmin(admin.ModelAdmin):
 	list_display = ("when", "old_owner", "new_owner", "network_host")
-	
+
 class NetworkUsageDataPointAdmin(admin.ModelAdmin):
 	list_display = ("when", "event_attendance", "bytes")
 
 class OuiAdmin(admin.ModelAdmin):
 	list_display = ("hex", "full_name", "slug", "is_console")
 	list_filter = ('is_console', 'slug')
-	
+
 class IP4ProtocolAdmin(admin.ModelAdmin):
 	list_display = ('name', 'description', 'has_port')
 

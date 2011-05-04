@@ -40,20 +40,20 @@ class ResetLectureForm(forms.Form):
 	q1 = forms.CharField(
 		label=_('Enter the confirmation text in the image above.  Remember to include punctuation as it appears.')
 	) # Yes, do as I say!
-	
+
 	excuse = forms.CharField(
 		label=_('Why did you exceed your quota usage?'),
 		min_length=3,
 		max_length=256,
 		required=settings.RESET_EXCUSE_REQUIRED
 	)
-	
+
 	def check_answers(self):
 		if not self.is_bound: return False
 		if not self.is_valid(): return False
-		
+
 		if self.cleaned_data['q1'].lower() != u'yes, do as i say!': return False
-		
+
 		return True
 
 class ResetExcuseForm(forms.Form):
@@ -62,21 +62,21 @@ class ResetExcuseForm(forms.Form):
 		min_length=3,
 		max_length=256
 	)
-	
+
 class CoffeeForm(forms.Form):
 	coffee = forms.BooleanField(
 		label=_('Unlimited Coffee?'),
 		help_text=_('Allows coffee requests to be sent by the user.'),
 		required=False
 	)
-	
+
 class SignInForm1(forms.Form):
 	username = forms.CharField(
 		label=_('Username'),
 		min_length=3,
 		max_length=30
 	)
-	
+
 class SignInForm2(SignInForm1):
 	first_name = forms.CharField(
 		label=_('First name'),
@@ -84,15 +84,15 @@ class SignInForm2(SignInForm1):
 		max_length=30,
 		required=False
 	)
-	
+
 	last_name = forms.CharField(
 		label=_('Last name'),
 		min_length=3,
 		max_length=30,
 		required=False
 	)
-	
-	
+
+
 class SignInForm3(forms.Form):
 	quota_amount = forms.IntegerField(
 		label=_('Quota Amount'),
@@ -100,14 +100,14 @@ class SignInForm3(forms.Form):
 		min_value=1,
 		initial=long(settings.DEFAULT_QUOTA_AMOUNT)
 	)
-	
+
 	quota_unlimited = forms.BooleanField(
 		label=_("Unlimited Quota"),
 		help_text=_('Usage information will still be recorded for the user, but no limits will be imposed on the user\'s traffic.'),
 		required=False,
 		initial=False
 	)
-	
+
 class ThemeChangeForm(forms.Form):
 	theme = forms.ChoiceField(
 		label=_('Theme'),

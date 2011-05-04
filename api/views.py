@@ -75,10 +75,10 @@ def whatis_ip(ip):
 	Takes one argument, the IP of the computer to look up, in dotted-quad format (XXX.XXX.XXX.XXX).
 	Returns False if the host is unknown or offline.
 	Raises an error if input is invalid."""
-	
+
 	if not is_valid_ip(ip):
 		raise ValueError, 'Invalid IPv4 address specified'
-	
+
 	# lookup the IP address
 	try:
 		h = NetworkHost.objects.filter(ip_address__exact=ip, online__exact=True)[0]
@@ -90,26 +90,26 @@ def whoami():
 	"""Returns the identity of the user who is currently logged in (via cookies),
 	or the one who is logged in this computer (via mac address).
 	Returns False if the user is unknown."""
-	
+
 	request = steal_request()
 	if request.user.is_authenticated():
 		return marshal_UserProfile(request.user.get_profile(), hide_name=False)
 
-	profile = None	
+	profile = None
 	ip = request.META['REMOTE_ADDR']
 	mac = get_mac_address(ip)
 	if mac == None:
 		return False
-		
+
 	try:
 		h = NetworkHost.objects.get(mac_address__iexact=mac)
 		if h.user_profile == None:
 			return False # no user association
-		
+
 		return marshal_UserProfile(h.user_profile, hide_name=False)
 	except:
 		return False
-	
+
 def whois_ip(ip):
 	"""Returns the identity of the user associated with a computer on an IPv4 address.
 	Takes one argument, the IP of the computer to look up, in dotted-quad format (XXX.XXX.XXX.XXX).
@@ -118,27 +118,27 @@ def whois_ip(ip):
 
 	if not is_valid_ip(ip):
 		raise ValueError, 'Invalid IPv4 address specified'
-	
+
 	# lookup the IP address
 	try:
 		h = NetworkHost.objects.filter(ip_address__exact=ip, online__exact=True)[0]
-		
+
 		if h.user_profile == None:
 			return False # no user association
-		
+
 		return marshal_UserProfile(h.user_profile)
 	except:
 		return False
-		
+
 def ping():
 	"""Always returns True."""
 	return True
-	
+
 def usage():
 	"""Returns the usage data for the person logged in (via cookies), or the person
 	logged in to this computer (by IP).
 	Returns a dict of Usage, or False if there are problems."""
-	
+
 	request = steal_request()
 	if request.user.is_authenticated():
 		try:
@@ -146,30 +146,30 @@ def usage():
 		except:
 			# fallback to ip method
 			pass
-	
+
 	ip = request.META['REMOTE_ADDR']
 	mac = get_mac_address(ip)
 	if mac == None:
 		return False
-		
+
 	try:
 		h = NetworkHost.objects.get(mac_address__iexact=mac)
 		if h.user_profile == None:
 			return False # no user association
-		
+
 		# now get the event information
 		attendance = get_attendance_currentevent(h.user_profile)
-		
+
 		return marshal_Usage(attendance)
 	except:
 		return False
-		
+
 def usage_history():
 	"""Returns a 2-list of usage history information attached to the account for
 	the last 36 hours.  Returns False if the user is not logged in.
-	
+
 	This is determined first by cookies, then by mac address if that fails.
-	
+
 	It is formatted as such:
 		[
 			[datetime, usageBytes],
@@ -185,37 +185,37 @@ def usage_history():
 		except:
 			# fallback
 			pass
-			
+
 	if attendance == None:
 		# try to get by other means
 		ip = request.META['REMOTE_ADDR']
 		mac = get_mac_address(ip)
 		if mac == None:
 			return False
-		
+
 		try:
 			h = NetworkHost.objects.get(mac_address__iexact=mac)
 			if h.user_profile == None:
 				return False # no user association
-		
+
 			# now get the event information
 			attendance = get_attendance_currentevent(h.user_profile)
 		except:
 			# couldn't get attendance object
 			return False
-	
+
 	try:
 		# try to get usage
 		usage_points = NetworkUsageDataPoint.objects.filter(event_attendance=attendance, when__gte=datetime.now()-timedelta(hours=36))
 		o = []
 		for point in usage_points:
 			o.append(marshal_NetworkUsageDataPoint(point))
-		
+
 		return o
 	except:
 		return False
-	
-	
+
+
 def r_disown_mac(mac, authhash):
 	"""Attempts to remotely log out a specific computer by MAC.  Returns True on successful call, False otherwise.
 	This function requires that you send an authhash, which is an SHA512 hashed string (in BASE16 representation) in the following format:
@@ -226,24 +226,24 @@ def r_disown_mac(mac, authhash):
 	# validate the MAC
 	if not is_valid_mac(mac):
 		return (False, 'invalmac')
-	
+
 	# validate the authhash
 	if not verify_authhash(mac, authhash):
 		return (False,'invalauthhash')
-	
+
 	# now see if the computer exists
 	try:
 		h = NetworkHost.objects.get(mac_address__iexact=mac)
-		
+
 		if h.user_profile != None:
 			profile = h.user_profile
 			NetworkHostOwnerChangeEvent.objects.create(old_owner=profile, new_owner=None, network_host=h)
 			h.user_profile = None
 	                h.save()
-	                
+
 			# resync internet for user
         	        sync_user_connections(profile)
-                
+
         	        # now we're done
 	                return True
 		else:
@@ -261,7 +261,7 @@ def coffee_ip(ip):
 
 	if not is_valid_ip(ip):
 		raise ValueError, 'Invalid IPv4 address specified'
-	
+
 	# lookup the IP address
 	try:
 		h = NetworkHost.objects.filter(ip_address__exact=ip, online__exact=True)[0]
@@ -269,8 +269,8 @@ def coffee_ip(ip):
 		return attendance.coffee == 1
 	except:
 		return False
-	
-		
+
+
 registrations = {
 	'whatis_ip': whatis_ip,
 	'whois_ip': whois_ip,
@@ -289,26 +289,26 @@ for k in registrations:
 class JSONDateTimeEncoder(json.JSONEncoder):
 	def default(self, o=datetime):
 		return mktime(o.timetuple())
-	
+
 def httpget_handler(request, output_format, method):
 	# this handles requests through our "simple" api handler.
 	# this outputs in a few formats.
 	output_format = output_format.lower()
 	supported_formats = ['json', 'pickle', 'csv', 'python']
-	
+
 	if output_format not in supported_formats:
 		raise Exception, "Unsupported output format"
-	
+
 	if method not in registrations.keys():
 		raise Exception, "Unknown method"
-	
+
 	# argument names and values mustn't be unicode
 	args = {}
 	for k in request.GET.keys():
 		args[str(k)] = str(request.GET[k])
-		
+
 	output = registrations[method](**args)
-		
+
 	response = HttpResponse()
 	if output_format == 'json':
 		response['Content-Type'] = 'text/javascript'
@@ -334,24 +334,24 @@ def httpget_handler(request, output_format, method):
 				response.write("%s, %s\n" % (k, output[k]))
 		else:
 			response.write(output)
-		
-		
-	
+
+
+
 	return response
-	
-	
+
+
 #def httpget_handler(request, method):
 #	"""HTTP GET API.  This needs to be after all the methods as we use a rather
 #	hackish way of dealing with stuff so we don't have to repeat ourselves."""
 #	if not registrations.has_key(method):
 #		return 'ERR:InvalidMethod:That method does not exist.'
-#	
+#
 #	m = registrations[method]
 #	try:
 #		v = m(**kwargs=request.REQUEST)
 #	except Exception:
 #		e = exc_info()
 #		return 'ERR:%s:%s' % )e[0], e[1])
-#	
+#
 #	return 'OK' # need to output the data in a crossplatform and easy to deal with way.
 

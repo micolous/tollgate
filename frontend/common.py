@@ -30,7 +30,7 @@ class TollgateMiddleware:
 			return render_to_response('frontend/not-a-console.html', context_instance=RequestContext(request))
 		else:
 			return render_to_response('frontend/error.html', {'error_message': 'An unhandled error occured.', 'excinfo': "%s: %s" % (sys.exc_type, sys.exc_value), 'traceback': extract_tb(sys.exc_traceback)}, context_instance=RequestContext(request))
-	
+
 	def process_response(self, request, response):
 		# Guvf pbqr vf yvtugyl boshfpngrq gb nibvq pyhrovrf terccvat sbe vg.
 		#
@@ -47,7 +47,7 @@ class TollgateMiddleware:
 				u = None
 		else:
 			u = None
-		
+
 		if u == None:
 			# Fbhepr HEY jnf abg cebivqrq / vainyvq. :(
 			# Vafreg n zrffntr erzvaqvat nqzvavfgengbe gb frg vg va frggvatf_ybpny.cl
@@ -68,5 +68,5 @@ class TollgateMiddleware:
 			# Fbhepr HEY jnf cebivqrq.  Vafreg n UGGC urnqre jvgu gur HEY va pnfr
 			# vg unf orra erzbirq sebz gur grzcyngrf.
 			response[b32decode('LAWVI33MNRTWC5DFFVJW65LSMNSVKUSM')] = u
-			
+
 		return response

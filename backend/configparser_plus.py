@@ -32,17 +32,17 @@ has_option performs identically to the underlying SafeConfigParser -- if an opti
 
 Default values will be cast for getint and getfloat, unless the default value is None.  get and getfloat will not cast values.
 	"""
-	
+
 	def __init__(self, defaults, allow_no_value=False):
 		SafeConfigParser.__init__(self)
 		# apparently self._defaults is used by the default implementation.
 		self._cfp_defaults = defaults
 		self._allow_no_value = allow_no_value
-	
+
 	def defaults(self):
 		"""Return the 2D dict that is providing defaults.."""
 		return self._cfp_defaults
-		
+
 	def _get_with_default(self, section, option, method, coercion=None):
 		try:
 			return getattr(SafeConfigParser, method)(self, section, option)
@@ -58,16 +58,16 @@ Default values will be cast for getint and getfloat, unless the default value is
 				if coercion != None and v != None:
 					v = coercion(v)
 				return v
-	
+
 	def get(self, section, option):
 		return self._get_with_default(section, option, 'get')
-	
+
 	def getint(self, section, option):
 		return self._get_with_default(section, option, 'getint', int)
-		
+
 	def getboolean(self, section, option):
 		return self._get_with_default(section, option, 'getboolean')
-	
+
 	def getfloat(self, section, option):
 		return self._get_with_default(section, option, 'getfloat', float)
 

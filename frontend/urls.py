@@ -35,12 +35,12 @@ urlpatterns = patterns('tollgate.frontend.views',
 	(r'^login/$', 'login'),
 	(r'^logout/$', 'logout'),
 	url(
-		r'^account/password_change/$', 
+		r'^account/password_change/$',
 		password_change,
 		dict(post_change_redirect='../..'),
 		name='account_password_change'
 	),
-	
+
 	# captive portal
 	(r'^internet/login/here/$', 'internet_login_here'),
 	(r'^internet/login/(?P<mac_address>[\dABCEDFabcdef]{12})/$', 'internet_login'),
@@ -54,11 +54,11 @@ urlpatterns = patterns('tollgate.frontend.views',
 	(r'^quota/user-reset/$', 'quota_user_reset'),
 	#(r'^quota/graph.png$', 'quota_graph'),
 	(r'^quota/$', 'quota'),
-	
+
 	(r'^usage/all/on/$', 'usage_all_on'),
 	(r'^usage/all/really-on/$', 'usage_all_really_on'),
 	(r'^usage/all/off/$', 'usage_all_off'),
-	
+
 	url(r'^usage/(?P<aid>\d+)/on/$', 'usage_on', name='usage-on'),
 	url(r'^usage/(?P<aid>\d+)/off/$', 'usage_off', name='usage-off'),
 	url(r'^usage/(?P<aid>\d+)/reset/$', 'usage_reset', name='usage-reset'),
@@ -70,20 +70,20 @@ urlpatterns = patterns('tollgate.frontend.views',
 	(r'^usage/sort/heavy$', 'usage_heavy'),
 	(r'^usage/sort/speed$', 'usage_speed'),
 	(r'^usage/sort/morereset$', 'usage_morereset'),
-	
+
 	(r'^pclist/unowned/$', 'pclist_unowned'),
 	(r'^pclist/$', 'pclist'),
-	
+
 	(r'^captive_landing/?$', 'captive_landing'),
-	
+
 	(r'^help/new/$', direct_to_template, dict(template='frontend/help/new.html', extra_context=dict(settings=settings))),
 	(r'^help/api/$', direct_to_template, dict(template='frontend/help/api.html', extra_context=dict(settings=settings))),
-	
+
 	# signin system
 	url(r'^signin/$', 'signin1', name='signin'),
 	url(r'^signin/create/$', 'signin2', name='signin2'),
 	url(r'^signin/(?P<uid>\d+)/$', 'signin3', name='signin3'),
-	
+
 	# port forwarding system
 	url(
 		r'^ip4portforwards/$',
@@ -91,43 +91,43 @@ urlpatterns = patterns('tollgate.frontend.views',
 		ip4portforward_qsd,
 		name='ip4portforward_list'
 	),
-	
+
 	url(
 		r'^ip4portforwards/force-apply/$',
 		permission_required('frontend.can_ip4portforward')(ip4portforward_forceapply),
 		name='ip4portforward_forceapply'
 	),
-	
+
 	url(
 		r'^ip4portforwards/add/$',
 		permission_required('frontend.can_ip4portforward')(create_object),
 		dict(model=IP4PortForward),
 		name='ip4portforward_add'
 	),
-	
+
 	url(
 		r'^ip4portforwards/(?P<object_id>\d+)/$',
 		permission_required('frontend.can_ip4portforward')(update_object),
 		dict(model=IP4PortForward),
 		name='ip4portforward_edit'
 	),
-	
+
 	url(
 		r'^ip4portforwards/(?P<object_id>\d+)/toggle/$',
 		permission_required('frontend.can_ip4portforward')(ip4portforward_toggle),
 		name='ip4portforward_toggle'
 	),
-	
+
 	url(
 		r'^ip4portforwards/(?P<object_id>\d+)/delete/$',
 		permission_required('frontend.can_ip4portforward')(delete_object),
 		dict(model=IP4PortForward, post_delete_redirect='../..'),
 		name='ip4portforward_delete'
 	),
-	
-	
-	
-	
+
+
+
+
 	(r'^preferences/theme-change/$', 'theme_change'),
 	url(
 		r'^help/source/$',
@@ -135,7 +135,7 @@ urlpatterns = patterns('tollgate.frontend.views',
 		dict(template='frontend/help/source.html', extra_context=dict(settings=settings)),
 		name='source'
 	),
-	
+
 	url(
 		r'^$',
 		'index',

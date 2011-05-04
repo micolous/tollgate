@@ -17,6 +17,6 @@ class Command(BaseCommand):
 		except Exception, ex:
 			print "Failed applying port forwards."
 			print ex
-		
+
 		refresh_all_quota_usage(portal)
 

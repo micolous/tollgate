@@ -30,10 +30,10 @@ from time import time
 def is_valid_ip(ip):
 	"""Validate an IP address input."""
 	a = ip.split('.')
-	
+
 	if len(a) != 4:
 		return False
-		
+
 	for x in a:
 		try:
 			y = int(x)
@@ -41,27 +41,27 @@ def is_valid_ip(ip):
 				return False
 		except:
 			return False
-	
+
 	return True
 
 def is_valid_mac(mac):
 	mac = mac.upper()
-	
+
 	if len(mac) != 12:
 		return False
-		
+
 	for x in mac:
 		y = ord(x)
 		if (y < ord('0') or y > ord('9')) and (y < ord('A') or y > ord('F')):
 			return False
-			
+
 	return True
 
 def steal_local(n):
-	"""Steals a local variable from higher up in the call stack.  This will 
+	"""Steals a local variable from higher up in the call stack.  This will
 	continually work it's way backwards, until it reaches the main, and return the
 	first result it finds.  Throws an Exception if the variable cannot be found.
-	 
+
 	Yes, this function is evil, but unfortunately this is required to work around
 	a limitation in Django's handling of XMLRPC."""
 	try:
@@ -71,10 +71,10 @@ def steal_local(n):
 		while tb != None:
 			if tb.f_locals.has_key(n):
 				return tb.f_locals[n]
-			tb = tb.f_back 
+			tb = tb.f_back
 		# we have a problem
 		raise Exception, "That doesn't exist."
-	
+
 def steal_request():
 	return steal_local('request')
 
@@ -91,8 +91,8 @@ def verify_authhash(data, authhash):
 		if real_ah == authhash:
 			return True
 	return False
-	
-	
+
+
 def marshal_NetworkHost(nh):
 	"""Marshalls a NetworkHost into a simple dict for xmlrpc calls"""
 	if nh.online:
@@ -116,12 +116,12 @@ def marshal_UserProfile(p, hide_name=True):
 		first_name = p.user.first_name,
 		last_name = p.user.last_name
 	)
-	
+
 
 	if hide_name:
 		o['first_name'] = ''
 		o['last_name'] = ''
-	
+
 	return o
 
 def marshal_Usage(a):
@@ -133,7 +133,7 @@ def marshal_Usage(a):
 		resets = False,
 		available = True
 	)
-	
+
 	if not a.is_unmetered():
 		o['remaining'] = str(a.quota_remaining())
 		o['total'] = str(a.quota_amount)
@@ -143,4 +143,4 @@ def marshal_Usage(a):
 
 def marshal_NetworkUsageDataPoint(a):
 	return (a.when, str(a.bytes))
-	
+

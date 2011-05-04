@@ -41,7 +41,7 @@ DEFAULT_SETTINGS = {
 		'enable': True,
 		'port': 81
 	}
-	
+
 }
 SETTINGS_FILE = 'tollgate.ini'
 
@@ -59,12 +59,12 @@ def parse_hostlist(hostlist, action):
 					port = a2[0]
 				else:
 					port = None
-			
+
 				if len(a2) == 2:
 					proto = a2[1]
 				else:
 					proto = None
-					
+
 			if proto == None and port != None:
 				action(host, 'tcp', port)
 				action(host, 'udp', port)
@@ -110,7 +110,7 @@ if config.has_section('unmetered'):
 blacklist_hosts = None
 if config.has_section('blacklist'):
 	blacklist_hosts = config.items('blacklist')
-	
+
 print "Creating DBUS API..."
 iptables.setup_dbus()
 
@@ -123,8 +123,8 @@ if unmetered_hosts != None:
 if blacklist_hosts != None:
 	print "Setting blacklist hosts..."
 	parse_hostlist(blacklist_hosts, iptables.add_blacklist)
-	
-	
+
+
 print "Starting DBUS Server (only debug messages will appear now)"
 try:
 	iptables.boot_dbus()

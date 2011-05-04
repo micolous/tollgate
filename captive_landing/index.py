@@ -33,7 +33,7 @@ Cache-Control: no-cache
     <title>Captive Portal Logon Required</title>
     <meta http-equiv="refresh" content="0;URL=%s">
   </head>
-  
+
   <body>
     <h1>Captive Portal Logon Required</h1>
     <p>A captive portal logon is required to access the requested site.  <a href="%s">Click here to login.</a></p>
