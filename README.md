@@ -132,8 +132,8 @@ xtables-addons requires at least iptables 1.4.3.  Debian GNU/Linux 5.0 "lenny" c
 
 If you have xtables-addons-source 1.22-1 or later available to you, this will have the required patches available.  You can easily install the package with module-assistant:
 
-# apt-get install module-assistant
-# m-a a-i xtables-addons
+    apt-get install module-assistant
+    m-a a-i xtables-addons
 
 ### Manual Installation ###
 
