@@ -141,12 +141,12 @@ You'll also need build-essential, autoconf, automake, libtool, iptables-dev, lin
 
 So, installation process for that part:
 
-# apt-get install build-essential autoconf automake libtool iptables-dev linux-headers-2.6-686 pkg-config
-# ./autogen.sh
-# ./configure
-# make
-# make install
-# cp -s /usr/local/libexec/xtables/* /lib/xtables/
+   apt-get install build-essential autoconf automake libtool iptables-dev linux-headers-2.6-686 pkg-config
+   ./autogen.sh
+   ./configure
+   make
+   make install
+   cp -s /usr/local/libexec/xtables/* /lib/xtables/
 
 ## Known Issues ##
 
