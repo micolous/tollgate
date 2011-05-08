@@ -112,9 +112,9 @@ You can tweak the behaviour of the ARP cache on Linux to let you have a bigger A
 
 Linux provides three settings in /proc/sys/net/ipv4/neigh/default/:
 
-* gc_thresh1: 128 hosts.  This is the minimum number of entries to keep in the ARP cache.  The garbage collector will not run if this amount isn't exceeded, and will reduce the number of entries every 30 seconds by default.
-* gc_thresh2: 512 hosts (gc_thresh1 * 4).  This is the soft-maximum number of entries to keep in the ARP cache.  The garbage collector will allow this to be exceeded for 5 seconds.
-* gc_thresh3: 1024 hosts (gc_thresh2 * 2).  This is the hard-maximum number of entries to keep in the ARP cache.  It will always run if there are more entries in the cache.
+* `gc_thresh1`: 128 hosts.  This is the minimum number of entries to keep in the ARP cache.  The garbage collector will not run if this amount isn't exceeded, and will reduce the number of entries every 30 seconds by default.
+* `gc_thresh2`: 512 hosts (gc_thresh1 * 4).  This is the soft-maximum number of entries to keep in the ARP cache.  The garbage collector will allow this to be exceeded for 5 seconds.
+* `gc_thresh3`: 1024 hosts (gc_thresh2 * 2).  This is the hard-maximum number of entries to keep in the ARP cache.  It will always run if there are more entries in the cache.
 
 You should keep those ratios if you adjust it, but gc_thresh needs to be able to handle the base amount of hosts on your network.  So if you have 1024 hosts on your network, you'll need to tweak it so that:
 
@@ -137,20 +137,20 @@ If you have xtables-addons-source 1.22-1 or later available to you, this will ha
 
 ### Manual Installation ###
 
-You'll also need build-essential, autoconf, automake, libtool, iptables-dev, linux-headers-2.6-686 and pkg-config to compile xtables-addons.  Make sure you run ./autogen.sh again if you were missing packages when you last ran it, otherwise it may repeatedly fail when you re-run ./configure.
+You'll also need `build-essential`, `autoconf`, `automake`, `libtool`, `iptables-dev`, `linux-headers-2.6-686` and `pkg-config` to compile `xtables-addons`.  Make sure you run `./autogen.sh` again if you were missing packages when you last ran it, otherwise it may repeatedly fail when you re-run `./configure`.
 
 So, installation process for that part:
 
-   apt-get install build-essential autoconf automake libtool iptables-dev linux-headers-2.6-686 pkg-config
-   ./autogen.sh
-   ./configure
-   make
-   make install
-   cp -s /usr/local/libexec/xtables/* /lib/xtables/
+    apt-get install build-essential autoconf automake libtool iptables-dev linux-headers-2.6-686 pkg-config
+    ./autogen.sh
+    ./configure
+    make
+    make install
+    cp -s /usr/local/libexec/xtables/* /lib/xtables/
 
 ## Known Issues ##
 
-- xt_quota2 doesn't always show current quota data in iptables command.  It should not be relied on for accurate display of quota information via iptables command, use /proc/net/xt_quota/ instead because that is accurate.  The actual accounting process is accurate however.
+- `xt_quota2` doesn't always show current quota data in iptables command.  It should not be relied on for accurate display of quota information via `iptables` command, use `/proc/net/xt_quota/` instead because that is accurate.  The actual accounting process is accurate however.
 	- This may only effect SMP systems, but using procfs is still recommended.
 	- Why the in-kernel quota system doesn't work for us: http://bugzilla.netfilter.org/show_bug.cgi?id=541
 - Port forwarding doesn't work correctly when the internal and external ports are different.
