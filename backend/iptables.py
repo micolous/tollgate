@@ -55,8 +55,13 @@ def run_capture_output(args):
 
 def create_nat():
 	# enable forwarding
-	system('echo 1 > /proc/sys/net/ipv4/ip_forward')
-
+	write_file('/proc/sys/net/ipv4/ip_forward', 1)
+	
+	if IPV6:
+		for x in (EXTERN_IFACE, INTERN_IFACE):
+			write_file('/proc/sys/net/ipv6/conf/%s/forwarding', 1)
+	
+	#$ IPv4 rules (NAT)
 	# define NAT rule
 	run((IPTABLES,'-t','nat','-F','POSTROUTING'))
 	run((IPTABLES,'-t','nat','-A','POSTROUTING','-o',EXTERN_IFACE,'-j','MASQUERADE'))
@@ -117,6 +122,10 @@ def create_nat():
 	run((IPTABLES,'-t','nat','-A',CAPTIVE_RULE,'-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','REDIRECT','--to-port',str(CAPTIVE_PORT)))
 
 	run((IPTABLES,'-t','nat','-A','PREROUTING','-j',CAPTIVE_RULE))
+	
+	
+	## IPv6 rules
+	
 
 def add_unmetered(ip,proto=None,port=None):
 	cmd1 = [IPTABLES,'-A',UNMETERED_RULE,'-i',INTERN_IFACE,'-d',ip,'-j','ACCEPT']
@@ -197,8 +206,13 @@ def set_quota2_amount(label=str, value=long):
 	f = join(QUOTA2_PATH, label)
 	if not exists(f):
 		raise Exception, "label %s not found, perhaps it doesn't exist?" % label
+	
+	write_file(f, value)
 
-	fh = open(f, 'w')
+
+def write_file(filename, value):
+	"Writes over a file with this content."
+	fh = open(filename, 'w')
 	fh.write(str(value))
 	fh.close()
 

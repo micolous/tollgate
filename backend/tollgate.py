@@ -35,7 +35,8 @@ DEFAULT_SETTINGS = {
 		'ip4pf_rule': 'p2_ip4pf',
 		'user_rule_prefix': 'p2u_',
 		'limit_rule_prefix': 'p2l_',
-		'debug': True
+		'debug': True,
+		'ipv6': False
 	},
 	'captive': {
 		'enable': True,
@@ -94,9 +95,11 @@ iptables.LIMIT_RULE_PREFIX = config.get('tollgate', 'limit_rule_prefix')
 iptables.REJECT_MODE = config.get('tollgate', 'reject_mode')
 iptables.REJECT_TCP_RESET = config.getboolean('tollgate', 'reject_reset_tcp')
 iptables.DEBUG = config.getboolean('tollgate', 'debug')
+iptables.IPV6 = config.getboolean('tollgate', 'ipv6')
 
 iptables.CAPTIVE_ENABLED = config.getboolean('captive', 'enable')
 iptables.CAPTIVE_PORT = config.getint('captive', 'port')
+
 
 if iptables.USER_RULE_PREFIX == iptables.LIMIT_RULE_PREFIX:
 	raise Exception, "user rule prefix must be different to the limit rule prefix"
