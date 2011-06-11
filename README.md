@@ -68,8 +68,8 @@ There are the following requirements for successful operation:
 - python-dbus, as well as a local DBUS installation
 - A HTTPS-secured webserver to run the django site in (like apache2)
   - You could run the service without protection, but that's really silly.
-- iptables 1.4.3 or later.  This is REALLY NEW, not in Debian GNU/Linux 5.0 "lenny"
-- Linux 2.4.21 or later, with netfilter support (most distributions ship with support for this).  However it has only been tested with 2.6 kernels.
+- iptables 1.4.3 or later.
+- Linux 2.6.14 or later, with netfilter support (most distributions ship with support for this).  However it has only been tested with 2.6 kernels.
 - xtables-addons, you can either:
   - use v1.22 or later, as they include my patch.
   - It is available in GIT commit ID 7952a7d253a66a504df0589d4143088213451fe8 and later <http://xtables-addons.git.sourceforge.net/git/gitweb.cgi?p=xtables-addons/xtables-addons;a=commit;h=7952a7d253a66a504df0589d4143088213451fe8> which was added to the tree on Thu, 31 Dec 2009 15:24:47 +0000.
