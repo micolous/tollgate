@@ -26,6 +26,7 @@ DEFAULT_SETTINGS = {
 		'reject_mode': 'icmp-net-unreachable',
 		'reject_tcp_rst': True,
 		'iptables': '/sbin/iptables',
+		'ip6tables': '/sbin/ip6tables',
 		'internal_iface': 'eth1',
 		'external_iface': 'eth0',
 		'captive_rule': 'p2_captive',
@@ -36,7 +37,8 @@ DEFAULT_SETTINGS = {
 		'user_rule_prefix': 'p2u_',
 		'limit_rule_prefix': 'p2l_',
 		'debug': True,
-		'ipv6': False
+		'ipv6': False,
+		'reject6_mode': 'icmp6-port-unreachable'
 	},
 	'captive': {
 		'enable': True,
@@ -95,7 +97,10 @@ iptables.LIMIT_RULE_PREFIX = config.get('tollgate', 'limit_rule_prefix')
 iptables.REJECT_MODE = config.get('tollgate', 'reject_mode')
 iptables.REJECT_TCP_RESET = config.getboolean('tollgate', 'reject_reset_tcp')
 iptables.DEBUG = config.getboolean('tollgate', 'debug')
+
 iptables.IPV6 = config.getboolean('tollgate', 'ipv6')
+iptables.IP6TABLES = config.get('tollgate', 'ip6tables')
+iptables.REJECT6_MODE = config.get('tollgate', 'reject6_mode')
 
 iptables.CAPTIVE_ENABLED = config.getboolean('captive', 'enable')
 iptables.CAPTIVE_PORT = config.getint('captive', 'port')
@@ -119,6 +124,10 @@ iptables.setup_dbus()
 
 print "Creating NAT..."
 iptables.create_nat()
+
+if iptables.IPV6:
+	print "Creating IPv6 routing rules..."
+	iptables.create_ipv6_router()
 
 if unmetered_hosts != None:
 	print "Setting unmetered hosts..."

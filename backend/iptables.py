@@ -27,6 +27,9 @@ DEBUG = False
 PARSE_REGEXP_RULE = r'^[\s]*(?P<rule_num>\d+)[\s]+(?P<user>p2u_\d+)[\s]+all[\s]+\-\-[\s]+(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(.+MAC (?P<mac>[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}).*$)?'
 PARSE_RULE = re_compile(PARSE_REGEXP_RULE)
 
+PARSE6_REGEXP_RULE = r'^[\s]*(?P<rule_num>\d+)[\s]+(?P<user>p2u_\d+)[\s]+all[\s]+\-\-[\s]+(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(.+MAC (?P<mac>[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}).*$)?'
+PARSE6_RULE = re_compile(PARSE6_REGEXP_RULE)
+
 DBUS_INTERFACE = 'au.id.micolous.TollgateBackendInterface'
 DBUS_SERVICE = 'au.id.micolous.TollgateBackendService'
 DBUS_PATH = '/TollgateBackendAPI'
@@ -52,14 +55,17 @@ def run_capture_output(args):
 	p = Popen(args, stdout=PIPE)
 	stdout = p.communicate()[0]
 	return stdout
+	
+def ipt_dual(*args):
+	"Calls an iptables command on both ipv4 and ipv6, if ipv6 support is on."
+	run((IPTABLES,) + args)
+	if IPV6:
+		run((IP6TABLES,) + args)
+	
 
 def create_nat():
 	# enable forwarding
 	write_file('/proc/sys/net/ipv4/ip_forward', 1)
-	
-	if IPV6:
-		for x in (EXTERN_IFACE, INTERN_IFACE):
-			write_file('/proc/sys/net/ipv6/conf/%s/forwarding', 1)
 	
 	#$ IPv4 rules (NAT)
 	# define NAT rule
@@ -123,9 +129,47 @@ def create_nat():
 
 	run((IPTABLES,'-t','nat','-A','PREROUTING','-j',CAPTIVE_RULE))
 	
+def create_ipv6_router():
+	if not IPV6:
+		raise Exception("ipv6 support not enabled...")
+		
+	for x in (EXTERN_IFACE, INTERN_IFACE):
+		write_file('/proc/sys/net/ipv6/conf/%s/forwarding'%x, 1)	
+
+	# we need to setup similar rules to ipv4 in ip6tables.
+	# we don't need NAT though.  so we can skip that part.
 	
-	## IPv6 rules
+	# define allowed chain
+	run((IP6TABLES,'-N',ALLOWED_RULE))
+	run((IP6TABLES,'-F',ALLOWED_RULE))
+	run((IP6TABLES,'-A',ALLOWED_RULE,'-i',EXTERN_IFACE,'-o',INTERN_IFACE,'-m','state','--state','RELATED,ESTABLISHED','-j','ACCEPT'))
+	run((IP6TABLES,'-A',ALLOWED_RULE,'-i',INTERN_IFACE,'-o',EXTERN_IFACE,'-j','ACCEPT'))
+
+	# define unmetered chain
+	run((IP6TABLES,'-D','FORWARD','-j',UNMETERED_RULE))
+	run((IP6TABLES,'-N',UNMETERED_RULE))
+	run((IP6TABLES,'-F',UNMETERED_RULE))
+	run((IP6TABLES,'-I','FORWARD','1','-j',UNMETERED_RULE))
+
+	# define blacklist chain
+	run((IP6TABLES,'-D','FORWARD','-j',BLACKLIST_RULE))
+	run((IP6TABLES,'-N',BLACKLIST_RULE))
+	run((IP6TABLES,'-F',BLACKLIST_RULE))
+	run((IP6TABLES,'-I','FORWARD','2','-j',BLACKLIST_RULE))
+
+	# create rejection rule
+	run((IP6TABLES,'-D','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset'))
+	run((IP6TABLES,'-D','FORWARD','-j','REJECT','--reject-with',REJECT6_MODE))
+	if REJECT_TCP_RESET:
+		run((IP6TABLES,'-A','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset'))
+	run((IP6TABLES,'-A','FORWARD','-j','REJECT','--reject-with',REJECT6_MODE))
+	run((IP6TABLES,'-P','FORWARD','DROP'))
 	
+	# ipv6 captivity isn't supported until i can figure some stuff out
+	# it lacks the REDIRECT target, and requires interesting socket options
+	# to use TPROXY target support (in mangle).
+	#
+	# in future i'll move ipv4 captivity to the tproxy target.  probably.
 
 def add_unmetered(ip,proto=None,port=None):
 	cmd1 = [IPTABLES,'-A',UNMETERED_RULE,'-i',INTERN_IFACE,'-d',ip,'-j','ACCEPT']
@@ -224,7 +268,7 @@ class PortalBackendAPI(dbus.service.Object):
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def create_user(self, uid):
 		"""Creates a user in the firewall."""
-		run((IPTABLES,'-N',user_rule(uid)))
+		ipt_dual('-N',user_rule(uid))
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def enable_user_unmetered(self, uid):
@@ -235,13 +279,14 @@ class PortalBackendAPI(dbus.service.Object):
 	def enable_user(self, uid, quota):
 		"""Enables a user and sets a quota on a user."""
 		# delete all rules on that user first
-		run((IPTABLES,'-F',user_rule(uid)))
-
+		ipt_dual('-F',user_rule(uid))
+		
 		# then make them allowed
-		run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',user_rule(uid),'--grow'))
+		ipt_dual('-A',user_rule(uid),'-m','quota2','--name',user_rule(uid),'--grow')
+		
 		set_quota2_amount(user_rule(uid), 0L)
 		if quota != None:
-			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota',str(quota),'-j',ALLOWED_RULE))
+			ipt_dual('-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota',str(quota),'-j',ALLOWED_RULE)
 			set_quota2_amount(limit_rule(uid), long(quota))
 		else:
 			# cheat here to allow all traffic through, because later on there is
@@ -249,7 +294,7 @@ class PortalBackendAPI(dbus.service.Object):
 			# packet through.  it's no-count mode so it'll never change
 			#
 			# however this has no effect if no rule exists that actually uses it
-			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota','999999','--no-change','-j',ALLOWED_RULE))
+			ipt_dual('-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota','999999','--no-change','-j',ALLOWED_RULE)
 			set_quota2_amount(limit_rule(uid), 999999)
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='sss', out_signature='')
@@ -264,45 +309,71 @@ class PortalBackendAPI(dbus.service.Object):
 		# take the host out of captivity
 		start_at = '4'
 		run((IPTABLES,'-t','nat','-I','PREROUTING',start_at,'-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT'))
+		
+	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='sss', out_signature='')
+	def add_host6(self, uid, mac, ip):
+		"""Registers a host as belonging to a certain user id in the ipv6 firewall."""
+		if not IPV6:
+			raise Exception("ipv6 support not enabled!")
+			
+		# filter outgoing packets by ip + mac
+		run((IP6TABLES,'-I','FORWARD','4','-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-j',user_rule(uid)))
+
+		# filter outgoing packets by ip only... after all you can't establish a connection without a correct MAC
+		run((IPT6ABLES,'-I','FORWARD','4','-o',INTERN_IFACE,'-d',ip,'-j',user_rule(uid)))
+
+		# take the host out of captivity\
+		# captivity doesn't work on ipv6
+		#start_at = '4'
+		#run((IPT6ABLES,'-t','nat','-I','PREROUTING',start_at,'-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT'))
+	
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def flush_hosts(self, uid):
 		"""Removes all hosts for a user."""
-		# TODO: This is somewhat dangerous, really should prevent multiple actions occuring while this one is.
-		d = run_capture_output((IPTABLES,'-L','FORWARD','-n','--line-numbers'))
-		a = d.split('\n')
+		
+		q = ((IPTABLES, PARSE_RULE),)
+		if IPV6:
+			q += ((IP6TABLES, PARSE6_RULE),)
+		
+		for cmd, parser in q:
+			# TODO: This is somewhat dangerous, really should prevent multiple actions occuring while this one is.
+			d = run_capture_output((cmd,'-L','FORWARD','-n','--line-numbers'))
+			a = d.split('\n')
 
-		rules_to_remove = []
-		for line in a:
-			r = PARSE_RULE.search(line)
-			# debugging
-			#if r != None:
-			#	print "Parsed with user-rule %s and line %s" % (r.group('user'), r.group('rule_num'))
-			#else:
-			#	print "no match: %s" % (line,)
+			rules_to_remove = []
+			for line in a:
+				r = parser.search(line)
+				# debugging
+				#if r != None:
+				#	print "Parsed with user-rule %s and line %s" % (r.group('user'), r.group('rule_num'))
+				#else:
+				#	print "no match: %s" % (line,)
 
-			if r != None and r.group('user') == user_rule(uid):
-				try:
-					rules_to_remove.append(long(r.group('rule_num')))
+				if r != None and r.group('user') == user_rule(uid):
+					try:
+						rules_to_remove.append(long(r.group('rule_num')))
+						
+						# note: ipv6 doesn't use captivity yet
+						if cmd == IPTABLES and r.group('mac') != None:
+							# take the host out of captive-exempt mode, we know it's mac address.
+							run((cmd,'-t','nat','-D','PREROUTING','-i',INTERN_IFACE,'-s',r.group('ip'),'-m','mac','--mac-source',r.group('mac'),'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT'))
+					except:
+						# Non-match, we don't care.
+						pass
 
-					if r.group('mac') != None:
-						# take the host out of captive-exempt mode, we know it's mac address.
-						run((IPTABLES,'-t','nat','-D','PREROUTING','-i',INTERN_IFACE,'-s',r.group('ip'),'-m','mac','--mac-source',r.group('mac'),'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT'))
-				except:
-					# Non-match, we don't care.
-					pass
+			# sort out the list of rules, and put it in reverse order as otherwise the numbering shuffles
+			rules_to_remove.sort()
+			rules_to_remove.reverse()
 
-		# sort out the list of rules, and put it in reverse order as otherwise the numbering shuffles
-		rules_to_remove.sort()
-		rules_to_remove.reverse()
+			#print "Will delete: %s" % (rules_to_remove,)
+			# now remove those rules
+			for ln in rules_to_remove:
+				run((cmd,'-D','FORWARD',str(ln)))
 
-		#print "Will delete: %s" % (rules_to_remove,)
-		# now remove those rules
-		for ln in rules_to_remove:
-			run((IPTABLES,'-D','FORWARD',str(ln)))
-
-		# doesn't work as you have to provide exact rule
-		#run((IPTABLES,'-D','FORWARD','-j',user_rule(uid)))
+			# doesn't work as you have to provide exact rule
+			#run((IPTABLES,'-D','FORWARD','-j',user_rule(uid)))
+				
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='bt')
 	def get_quota(self, uid):
@@ -409,3 +480,4 @@ def setup_dbus():
 def boot_dbus():
 	mainloop = gobject.MainLoop()
 	mainloop.run()
+
