@@ -68,8 +68,8 @@ There are the following requirements for successful operation:
 - python-dbus, as well as a local DBUS installation
 - A HTTPS-secured webserver to run the django site in (like apache2)
   - You could run the service without protection, but that's really silly.
-- iptables 1.4.3 or later.  This is REALLY NEW, not in Debian GNU/Linux 5.0 "lenny"
-- Linux 2.4.21 or later, with netfilter support (most distributions ship with support for this).  However it has only been tested with 2.6 kernels.
+- iptables 1.4.3 or later.
+- Linux 2.6.14 or later, with netfilter support (most distributions ship with support for this).  However it has only been tested with 2.6 kernels.
 - xtables-addons, you can either:
   - use v1.22 or later, as they include my patch.
   - It is available in GIT commit ID 7952a7d253a66a504df0589d4143088213451fe8 and later <http://xtables-addons.git.sourceforge.net/git/gitweb.cgi?p=xtables-addons/xtables-addons;a=commit;h=7952a7d253a66a504df0589d4143088213451fe8> which was added to the tree on Thu, 31 Dec 2009 15:24:47 +0000.
@@ -98,9 +98,31 @@ You'll need to do these things:
 * Configure dbus for the tollgate backend service.
 * Setup the tollgate backend service.
 * Populate the database with OUIs and protocol numbers with the scraper.py script.  This will download the latest OUI and IPv4 protocol number definitions from IANA, and load them into tollgate's database.  This is needed for console detection and IPv4 port forwarding.
-* Setup a cron job to run every 10 minutes, that wgets https://localhost/internet/refresh/crontab/
+* Setup a cron job to run `./manage.py refresh_hosts` every 10 minutes or so.  This job will synchronise the in-kernel counters to a database, and look for new hosts on the network (and setup their internet access if they've been here before).
 
-## Running on large subnets (>/24) or with more than 128 hosts ##
+## Deployment Notes ##
+
+### Clustering tollgate ###
+
+tollgate can run in a clustered configuration with CARP (Common Address Redundancy Protocol).  You'll need to also set up redundant DHCP, DNS and database (eg: multi-master MySQL, or a single external database server) for this to work.
+
+tollgate's quota saving procedures are written in such a way that it will work with multiple copies of tollgate simultaneously.  No special configuration of tollgate is required in order for it to work (apart from possibly changing database settings).
+
+However, there is a window (between `refresh_hosts` calls, normally every 10 minutes) where you can use all of your quota via one tollgate and still have it available on the other, because the counters aren't synchronised live (and doing so is quite expensive).
+
+In typical deployments however I haven't had this as a real problem, as it hasn't been possible to use more than 50% of the allocated quota in 10 minutes.  Doing so would require quite fast internet access, and you're generally competing for that resource with other clients on the network.
+
+Be sure when configuring your network infrastructure for redundancy that:
+
+* Your two tollgate machines have different power sources.  This could mean they're supplied via a different mains circuit, or one of them has a battery backup.
+* You also provide redundancy for the switch, if you have one.
+* You have either a multi-master database server setup, or a single database server with redundant power supplies or battery backup.
+* If running with one database server, make sure that if one half of your power goes down, that the database server is still accessible (ie: use two switches and two NICs in your database server).
+* Use protocols like Spanning Tree Protocol (STP) on your switches to break routing loops.
+
+At the moment, tollgate doesn't support running multiple instances of itself managing *different* subnets.  That's a plan for down the track.
+
+### Running on large subnets (>/24) or with more than 128 hosts ###
 
 You may encounter performance issues or hosts dropping out "randomly" when running the software on subnets larger than a /24.  This is because of the size of the ARP cache in the Linux kernel which this software is quite heavily dependant on, and populating it with responses to ARP requests sent periodically by the software.
 
@@ -154,4 +176,4 @@ So, installation process for that part:
 	- This may only effect SMP systems, but using procfs is still recommended.
 	- Why the in-kernel quota system doesn't work for us: http://bugzilla.netfilter.org/show_bug.cgi?id=541
 - Port forwarding doesn't work correctly when the internal and external ports are different.
-
+- There's no way to deregister a console from an account that hasn't signed in to the current event.  (ie: Previous event the console is marked as being owned by user X, next event user Y can't sign it in because user X hasn't attended)
