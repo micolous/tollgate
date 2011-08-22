@@ -128,8 +128,11 @@ def create_nat():
 	run((IPTABLES,'-t','mangle','-F',CAPTIVE_RULE))
 	run((IPTABLES,'-t','mangle','-A',CAPTIVE_RULE,'-j','MARK','--set-mark','1'))
 	run((IPTABLES,'-t','mangle','-A',CAPTIVE_RULE,'-m','socket','-j','ACCEPT'))
-
+	
+	# define the catch-all
+	run((IPTABLES,'-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-p','tcp','-j',CAPTIVE_RULE))
 	run((IPTABLES,'-t','mangle','-A','PREROUTING','-i',INTERN_IFACE,'-p','tcp','-j',CAPTIVE_RULE))
+	run((IPTABLES,'-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-m','mark','--mark','1','-p','tcp','--dport','80','-j','TPROXY','--tproxy-mark','0x1/0x1','--on-port',str(CAPTIVE_PORT)))
 	run((IPTABLES,'-t','mangle','-A','PREROUTING','-i',INTERN_IFACE,'-m','mark','--mark','1','-p','tcp','--dport','80','-j','TPROXY','--tproxy-mark','0x1/0x1','--on-port',str(CAPTIVE_PORT)))
 
 
