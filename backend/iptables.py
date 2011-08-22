@@ -129,7 +129,7 @@ def create_nat():
 	run((IPTABLES,'-t','mangle','-A',CAPTIVE_RULE,'-j','MARK','--set-mark','1'))
 	run((IPTABLES,'-t','mangle','-A',CAPTIVE_RULE,'-m','socket','-j','ACCEPT'))
 
-	run((IPTABLES,'-t','mangle','-A','PREROUTING','-p','tcp','-j',CAPTIVE_RULE))
+	run((IPTABLES,'-t','mangle','-A','PREROUTING','-i',INTERN_IFACE,'-p','tcp','-j',CAPTIVE_RULE))
 	run((IPTABLES,'-t','mangle','-A','PREROUTING','-i',INTERN_IFACE,'-m','mark','--mark','1','-p','tcp','--dport','80','-j','TPROXY','--tproxy-mark','0x1/0x1','--on-port',str(CAPTIVE_PORT)))
 
 
@@ -264,7 +264,7 @@ class PortalBackendAPI(dbus.service.Object):
 
 		# take the host out of captivity
 		start_at = '4'
-		run((IPTABLES,'-t','nat','-I','PREROUTING',start_at,'-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT'))
+		run((IPTABLES,'-t','mangle','-I','PREROUTING',start_at,'-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT'))
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def flush_hosts(self, uid):
