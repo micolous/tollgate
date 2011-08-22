@@ -33,6 +33,8 @@ DBUS_PATH = '/TollgateBackendAPI'
 
 QUOTA2_PATH = '/proc/net/xt_quota/'
 
+GC_THRESH = None
+
 # global level functions that aren't supposed to be exposed to the API
 def run(args):
 	"""Wrapper function for executing commands in a blocking fashion.  This is
@@ -55,12 +57,19 @@ def run_capture_output(args):
 
 def create_nat():
 	# enable forwarding
-	system('echo 1 > /proc/sys/net/ipv4/ip_forward')
+	write_file('/proc/sys/net/ipv4/ip_forward', 1)
 	
 	# enable tproxy captivity routing
 	system('ip rule add fwmark 0x1/0x1 lookup 100')
 	system('ip route add local 0.0.0.0/0 dev lo table 100')
-
+	
+	if GC_THRESH != None:
+		write_file('/proc/sys/net/ipv4/neigh/default/gc_thresh1', GC_THRESH)
+		write_file('/proc/sys/net/ipv4/neigh/default/gc_thresh2', GC_THRESH * 4)
+		write_file('/proc/sys/net/ipv4/neigh/default/gc_thresh3', GC_THRESH * 8)
+		
+		
+		
 	# define NAT rule
 	run((IPTABLES,'-t','nat','-F','POSTROUTING'))
 	run((IPTABLES,'-t','nat','-A','POSTROUTING','-o',EXTERN_IFACE,'-j','MASQUERADE'))
@@ -215,8 +224,12 @@ def set_quota2_amount(label=str, value=long):
 	f = join(QUOTA2_PATH, label)
 	if not exists(f):
 		raise Exception, "label %s not found, perhaps it doesn't exist?" % label
-
-	fh = open(f, 'w')
+	
+	write_file(f, value)
+	
+def write_file(filename, value):
+	"Writes over a file with this content."
+	fh = open(filename, 'w')
 	fh.write(str(value))
 	fh.close()
 

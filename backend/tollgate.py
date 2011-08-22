@@ -98,6 +98,9 @@ iptables.DEBUG = config.getboolean('tollgate', 'debug')
 iptables.CAPTIVE_ENABLED = config.getboolean('captive', 'enable')
 iptables.CAPTIVE_PORT = config.getint('captive', 'port')
 
+if config.has_option('tollgate', 'arp_table_size'):
+	iptables.GC_THRESH = config.getint('tollgate', 'arp_table_size')
+
 if iptables.USER_RULE_PREFIX == iptables.LIMIT_RULE_PREFIX:
 	raise Exception, "user rule prefix must be different to the limit rule prefix"
 
