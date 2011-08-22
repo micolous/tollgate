@@ -62,7 +62,7 @@ class TProxyRequestHandler(BaseHTTPRequestHandler):
 class TProxyServer:
 	keep_running = True
 	server_address = ('', 50080)
-	mark = 2
+	mark = 1
 	
 	def run(self):
 		self.httpd = HTTPServer(self.server_address, TProxyRequestHandler)
