@@ -1,14 +1,29 @@
 #!/usr/bin/env python
 
-from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
-from urllib import quote
 from socket import SOL_IP
+from warnings import warn
+
+try:
+	# py3
+	from urllib.parse import quote
+except ImportError:
+	# py2
+	from urllib import quote
+
+try:
+	# py3
+	from http.server import HTTPServer, BaseHTTPRequestHandler
+except ImportError:
+	# py2
+	from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+	
 try:
 	from socket import IP_TRANSPARENT
 except ImportError:
-	# this isn't implemented in python yet
+	# this isn't implemented in python yet, submitted a patch.
 	# /usr/include/linux/in.h says this is 19.
 	IP_TRANSPARENT = 19
+	warn("Your version of Python doesn't support socket.IP_TRANSPARENT.  It could also be that you're running this on a non-Linux platform, which probably won't work.")
 
 class TProxyRequestHandler(BaseHTTPRequestHandler):
 	def do_GET(self):
@@ -23,7 +38,7 @@ class TProxyRequestHandler(BaseHTTPRequestHandler):
 		self.send_header('Connection', 'close')
 		self.end_headers()
 		
-		self.wfile.write("""
+		page = """
 <html>
   <head>
     <title>Captive Portal Logon Required</title>
@@ -34,7 +49,13 @@ class TProxyRequestHandler(BaseHTTPRequestHandler):
     <h1>Captive Portal Logon Required</h1>
     <p>A captive portal logon is required to access the requested site.  <a href="%(url)s">Click here to login.</a></p>
   </body>
-</html>""" % dict(url=url))		
+</html>""" % dict(url=url)
+		
+		# in py3, we need to do some encoding
+		if str != bytes:
+			page = bytes(page, 'UTF-8')
+			
+		self.wfile.write(page)
 		
 	do_HEAD = do_POST = do_GET
 
@@ -54,6 +75,7 @@ class TProxyServer:
 			
 if __name__ == '__main__':
 	# boot the httpd
+	print("Booting httpd.")
 	server = TProxyServer()
 	server.run()
 
