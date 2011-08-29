@@ -124,7 +124,7 @@ At the moment, tollgate doesn't support running multiple instances of itself man
 
 ### Running on large subnets (>/24) or with more than 128 hosts ###
 
-You may encounter performance issues or hosts dropping out "randomly" when running the software on subnets larger than a /24.  This is because of the size of the ARP cache in the Linux kernel which this software is quite heavily dependent on, and populating it with responses to ARP requests sent periodically by the software.
+You may encounter performance issues or hosts dropping out "randomly" when running the software on subnets larger than a /24.  This is because of the size of the ARP table in Linux is effectively limited to 128 hosts, and the software will automatically send large amounts of ARP requests to see who currently holds each IP address on the network.
 
 It is at this point you should seriously consider the size of your subnet.  If you have less than 200 hosts on your network, then you really only need a /24.  If you have a proper network plan in place, with DNS and static DHCP entries setup, you can still segment your network a lot more tightly.  You can use hostnames to provide memorable names to services, rather than wanting 10.0.13.37 when all your other hosts are in 10.0.1.0/24.
 
