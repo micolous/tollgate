@@ -2,6 +2,7 @@
 
 from socket import SOL_IP
 from warnings import warn
+from os.path import join, dirname
 
 try:
 	# py3
@@ -67,7 +68,12 @@ class TProxyServer:
 	def run(self):
 		self.httpd = HTTPServer(self.server_address, TProxyRequestHandler)
 		self.httpd.server_version = 'tollgate'
-		self.httpd.redirect = 'https://portal.onadelaide.blackhats.net.au/captive_landing/?u=%s'
+		try:
+			LANDING_URI = open(join(dirname(__file__),'tollgate_uri'), 'rb').read().strip()
+		except IOError:
+			raise IOError, 'Please create a file called "tollgate_uri" with the path to to tollgate\'s HTTPS site.'
+
+		self.httpd.redirect = '%s/captive_landing/?u=%%s' % LANDING_URI
 		self.httpd.socket.setsockopt(SOL_IP, IP_TRANSPARENT, self.mark)
 		
 		while self.keep_running:
