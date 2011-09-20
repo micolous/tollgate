@@ -1,0 +1,9 @@
+/*
+ * This is a simple WPAD configuration that disables using a proxy server.
+ */
+ 
+function FindProxyForURL(url, host) {
+	return "DIRECT";
+}
+
+
