@@ -68,6 +68,8 @@
 	</Directory>
 	
 	WSGIScriptAlias / /opt/tollgate/tollgate.wsgi
+	ScriptAlias /gitweb/ /usr/lib/cgi-bin/gitweb.cgi
+	SetEnv GITWEB_CONFIG /etc/gitweb.conf
 	
 	# TODO: Replace this with a staticfiles-based setup.
 	<Location "/media/">
