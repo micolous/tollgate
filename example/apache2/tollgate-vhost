@@ -68,9 +68,16 @@
 	</Directory>
 	
 	WSGIScriptAlias / /opt/tollgate/tollgate.wsgi
-	ScriptAlias /gitweb/ /usr/lib/cgi-bin/gitweb.cgi
-	SetEnv GITWEB_CONFIG /etc/gitweb.conf
 	
+	Alias /gitweb/ /usr/share/gitweb/
+	<Directory /usr/share/gitweb>
+		DirectoryIndex index.cgi
+		Options ExecCGI FollowSymlinks
+		<Files index.cgi>
+			SetHandler cgi-script
+		</Files>
+		SetEnv GITWEB_CONFIG /etc/gitweb.conf
+	</Directory>
 	# TODO: Replace this with a staticfiles-based setup.
 	<Location "/media/">
 		SetHandler none
