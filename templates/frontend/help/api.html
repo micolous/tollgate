@@ -1,7 +1,7 @@
 {% extends "frontend/base.html" %}
 {% comment %}
 tollgate api docs page
-Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2011 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -21,8 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% block title %}api{% endblock %}
 
 {% block content %}
-<!-- $Id: api.html 112 2010-11-10 12:42:16Z michael $
- -->
 
 <p>tollgate has an API allowing for applications to pull some data from the portal system and interact with it.</p>
 
@@ -53,7 +51,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			<li>computer_name (str): The NetBIOS name of the machine.</li>
 			<li>first_connection (date): The date when the system first was seen by tollgate.</li>
 			<li>online (bool): Whether the system is currently online or not.</li>
-			<li>type (str): The type of system this has been detected as.  Can be one of apple, cisco, nintendo, pc, playstation or xbox.  If unknown, it will return pc.</li>
+			<li>type (str): The type of system this has been detected as.  As of 2.8.4, this can be one of several options, described in <a href="https://github.com/micolous/tollgate/blob/master/scraper.dat">scraper.dat</a>.  If unknown, it will return pc.</li>
+			<li>is_console (bool): Whether the device is a video game console or not.  (New in 2.8.4.)</li>
 		</ul>
 	</dd>
 	
