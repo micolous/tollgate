@@ -27,8 +27,8 @@ DEBUG = False
 PARSE_REGEXP_RULE = r'^[\s]*(?P<rule_num>\d+)[\s]+(?P<user>p2u_\d+)[\s]+all[\s]+\-\-[\s]+(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(.+MAC (?P<mac>[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}).*$)?'
 PARSE_RULE = re_compile(PARSE_REGEXP_RULE)
 
-DBUS_INTERFACE = 'au.id.micolous.TollgateBackendInterface'
-DBUS_SERVICE = 'au.id.micolous.TollgateBackendService'
+DBUS_INTERFACE = 'au.org.tollgate.TollgateBackendInterface'
+DBUS_SERVICE = 'au.org.tollgate.TollgateBackendService'
 DBUS_PATH = '/TollgateBackendAPI'
 
 QUOTA2_PATH = '/proc/net/xt_quota/'

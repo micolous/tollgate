@@ -59,7 +59,7 @@ http://www.dafont.com/virtue.font
 
 ## System Requirements ##
 
-The recommended platform for this software is Debian GNU/Linux 6.0.  It has only been tested on i386, however should work correctly with other architectures as well.
+The recommended platform for this software is Debian GNU/Linux 6.0.  It has only been tested on amd64 and i386 systems, however should work correctly with other architectures as well.
 
 There are the following requirements for successful operation:
 
@@ -70,6 +70,7 @@ There are the following requirements for successful operation:
   - You could run the service without protection, but that's really silly.
 - iptables 1.4.3 or later.
 - Linux 2.6.14 or later, with netfilter support (most distributions ship with support for this).  However it has only been tested with 2.6 kernels.
+  - Linux 2.6.28 is required for the TPROXY-based captivity handler.  Currently this is the only handler available.
 - xtables-addons, you can either:
   - use v1.22 or later, as they include my patch.
   - It is available in GIT commit ID 7952a7d253a66a504df0589d4143088213451fe8 and later <http://xtables-addons.git.sourceforge.net/git/gitweb.cgi?p=xtables-addons/xtables-addons;a=commit;h=7952a7d253a66a504df0589d4143088213451fe8> which was added to the tree on Thu, 31 Dec 2009 15:24:47 +0000.
