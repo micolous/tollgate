@@ -107,7 +107,6 @@ def marshal_NetworkHost(nh):
 		online = nh.online == 1,
 		type = nh.get_console_type(),
 		is_console = nh.is_console()
-		
 	)
 
 def marshal_UserProfile(p, hide_name=True):

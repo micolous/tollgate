@@ -86,16 +86,24 @@ class NetworkHost(Model):
 	user_profile = ForeignKey(UserProfile, blank=True, null=True)
 	online = BooleanField(default=True)
 
-	def get_console_type(self):
+	def get_console_oui(self):
 		try:
 			oui = Oui.objects.get(hex=self.mac_address[:6])
 		except ObjectDoesNotExist:
+			return None
+		else:
+			return oui
+	
+	def get_console_type(self):
+		o = self.get_console_oui()
+		if o == None:
 			return 'pc'
 		else:
-			return oui.slug
+			return o.slug
 
 	def is_console(self):
-		return is_console(host.mac_address)
+		o = self.get_console_oui()
+		return o != None and o.is_console
 
 	def __unicode__(self):
 		return u'%s (Name = %s, User = %s)' % (self.mac_address, self.computer_name, self.user_profile)
