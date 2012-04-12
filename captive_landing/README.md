@@ -8,13 +8,7 @@ Both require a file called `tollgate_uri`.  You can generate it like this:
 
 It's just a one-line configuration and both scripts will try to read from it.
 
-There are two implementations of this handler here:
-
-## CGI-based handler ##
-
-TODO: Make this old handler available as an option in Backend.  At the moment the TPROXY handler is the only one that is available.
-
-The CGI-based handler is in `index.py`.  This is the old setup.  You use mod_rewrite in Apache to listen on port 81, then REDIRECT all unknown HTTP traffic to the system.
+There is one implementation of this handler here:
 
 ## TPROXY-based handler ##
 
@@ -23,3 +17,7 @@ The TPROXY-based handler is in `tproxy.py`.  This is the new setup.  It uses the
 Once the user is logged on and has quota, neither of these scripts handle web requests.
 
 This requires Linux 2.6.28 or later.
+
+## CGI-based handler ##
+
+This handler has been removed because it is no longer supported in the tollgate backend.

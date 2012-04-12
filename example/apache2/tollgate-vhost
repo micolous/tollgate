@@ -37,26 +37,6 @@
 	DocumentRoot /opt/tollgate/www/wfc/
 </VirtualHost>
 
-### Captive Portal Landing ###
-# Old versions of tollgate use this.  Now we have TPROXY target support, so we
-# don't use this anymore.
-
-<VirtualHost *:81>
-	DocumentRoot /opt/tollgate/captive_landing/
-	<Directory /opt/tollgate/captive_landing/>
-		SetHandler mod_python
-		PythonHandler mod_python.cgihandler
-		RewriteEngine On
-		RewriteBase /
-		RewriteRule ^.*$ index.py
-	</Directory>
-	
-	# Disable keep-alive, otherwise browsers will leave the connection open and
-	# get stuck in captivity.
-	KeepAlive off
-</VirtualHost>
-
-
 <VirtualHost _default_:443>
 	# CHANGE ME: This should be set to a proper host name.
 	ServerName portal.example.tollgate.org.au
