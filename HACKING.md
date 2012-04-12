@@ -15,7 +15,7 @@ I've started implementing IPv6 support in the backend of tollgate in a seperate 
 
 This is a fairly general task, anyone can pick this up.  Particularly a step-by-step installation guide would be helpful, or some sort of bootstrap script so you can put that on a system, it pulls deps and then the git repo.
 
-As a secondary project, a virtual machine of this stuff would be good too, as well as some build script for making that VM from "nothing".  This could form part of a testing framework.
+This has been now started in the form of the `tollgatebuilder` project: https://github.com/micolous/tollgatebuilder
 
 
 ## Testing framework ##
