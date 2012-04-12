@@ -32,6 +32,7 @@ except ImportError:
 from django.utils.translation import ugettext as _
 from tollgate.frontend import *
 from django.core.exceptions import *
+from tollgate.frontend.platform import *
 
 BYTES_MULTIPLIER = 1024.0
 if CIDR:
@@ -419,61 +420,6 @@ def get_mac_address(ip):
 				return mac
 
 	return None
-
-def get_ip_address(mac):
-	if settings.ONLY_CONSOLE and not is_console(mac):
-		return None
-	fh = open('/proc/net/arp', 'r')
-	# skip header
-	fh.readline()
-	d = fh.readlines()
-	fh.close()
-
-	# try active entries first
-	for l in d:
-		a = l.split()
-		if a[3] == mac and a[5] == settings.LAN_IFACE and in_lan_subnet(a[0]) and a[2] == "0x2":
-			return a[0]
-
-	# try expired ones.
-	for l in d:
-		a = l.split()
-		if a[3] == mac and a[5] == settings.LAN_IFACE and in_lan_subnet(a[0]):
-			return a[0]
-	return None
-
-def get_arp_cache():
-	fh = open('/proc/net/arp', 'r')
-	# skip header
-	fh.readline()
-	d = fh.readlines()
-	fh.close()
-
-	# now generate pretty table
-	o = {}
-
-	# expired entries first, so they get overwritten by active ones.
-	for l in d:
-		a = l.split()
-		if a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE and in_lan_subnet(a[0]) and a[2] == "0x0":
-			mac = a[3].replace(":","")
-			if settings.ONLY_CONSOLE and not is_console(mac):
-				# skip this one, it's not a console.
-				continue
-
-			o[a[0]] = mac
-
-	# active entries overwrite expired ones.
-	for l in d:
-		a = l.split()
-		if a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE and in_lan_subnet(a[0]) and a[2] == "0x2":
-			mac = a[3].replace(":","")
-			if settings.ONLY_CONSOLE and not is_console(mac):
-				# skip this one, it's not a console.
-				continue
-
-			o[a[0]] = mac
-	return o
 
 def get_portalapi():
 	return TollgateController()
