@@ -27,7 +27,7 @@ class Command(BaseCommand):
 	def handle(self, *args, **kwargs):
 		# take a copy of the original local.py
 		local_py_location = os.path.join(settings.PROJECT_PATH, 'settings', 'local.py')
-		if os.path.exists(local_py_location:
+		if os.path.exists(local_py_location):
 			fh = open(local_py_location, 'rb')
 			local_py = fh.read()
 			fh.close()
