@@ -25,15 +25,13 @@ from ConfigParser import ConfigParser
 from sys import path
 from os import environ
 from lxml import objectify
+from progressbar import ProgressBar, Percentage, Bar, ETA
 
-# bootstrap the bits of django we need.
-path.append(realpath(join(dirname(__file__), '..')))
-environ['DJANGO_SETTINGS_MODULE'] = 'tollgate.settings'
-
-# now import django bits
 from tollgate.frontend.models import Oui, IP4Protocol
 from django.db import connection
 from django.db.utils import DatabaseError, IntegrityError
+from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
 
 # other constants
 OUI_LIST_URL = 'http://standards.ieee.org/develop/regauth/oui/oui.txt'
@@ -43,13 +41,10 @@ OUI_RE = re_compile(r'^([0-9A-F]{6})\s+\(base 16\)\s+(.*)\s*$')
 IP4P_LIST_URL = 'http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xml'
 IP4P_LIST_FILE = 'protocol-numbers.xml'
 
-HELPER_DATA = 'scraper.dat'
+HELPER_DATA = join(settings.PROJECT_PATH, 'scraper.dat')
 
 UA = 'tollgate/2.8.4 (scraper.py; Python)'
-
-config = ConfigParser()
-config.read(HELPER_DATA)
-
+PBAR_WIDGET_STYLE = [Percentage(), Bar(), ETA()]
 
 def download_file(filename, url):
 	etag_filename = filename + '.etag'
@@ -88,19 +83,16 @@ def download_file(filename, url):
 			raise ex
 
 	if response != None:
-		length = response.info()['Content-Length']
+		length = long(response.info()['Content-Length'])
 		print "Copying %s bytes..." % length
 		# download the file to disk
 		fp = open(filename, 'wb')
-		last_time = time()
-		last_pos = 0
+		progress = ProgressBar(widgets=PBAR_WIDGET_STYLE, maxval=length).start()
+
 		for data in response:
 			fp.write(data)
-			delta = time() - last_time
-			if delta > 2:
-				print "%s / %s bytes done, %.0f KiB/s" % (fp.tell(), length, ((fp.tell() - last_pos) / delta) / 1024.)
-				last_pos = fp.tell()
-				last_time = time()
+			progress.update(fp.tell())
+		progress.finish()
 
 		# write out etag
 		try:
@@ -112,10 +104,14 @@ def download_file(filename, url):
 
 	# done
 
-def parse_oui_data(filename):
-	global config
+def parse_oui_data(filename, config):
 	# open the oui file into memory
 	fp = open(filename, 'rb')
+	# get the size of the file
+	fp.seek(0,2)
+	oui_bytes = fp.tell()
+	fp.seek(0, 0)
+	
 	oui_regexps = {}
 	for k, v in config.items('oui'):
 		try:
@@ -138,7 +134,10 @@ def parse_oui_data(filename):
 	print "Deleted existing OUI data."
 
 	# now parse the new oui data with the regular expressions provided.
+	print "Reading and populating OUI data..."
+	progress = ProgressBar(widgets=PBAR_WIDGET_STYLE, maxval=oui_bytes).start()
 	for line in fp:
+		progress.update(fp.tell())
 		m = OUI_RE.match(line)
 		if m != None and m.group(2) != "":
 			# try to match it
@@ -154,11 +153,10 @@ def parse_oui_data(filename):
 						slug=k,
 						is_console=(config.has_option('oui-console', k) and config.getboolean('oui-console', k))
 					)
-
+	progress.finish()
 	print 'Added %d entries to Oui table.' % Oui.objects.count()
 
-def parse_ip4p_data(filename):
-	global config
+def parse_ip4p_data(filename, config):
 	tree = objectify.parse(open(filename, 'rb'))
 	root = tree.getroot()
 	if root.registry.get('id') != 'protocol-numbers-1':
@@ -175,7 +173,11 @@ def parse_ip4p_data(filename):
 	print "Deleted existing IP4P data."
 
 	# now walk
-	for record in root.registry.record:
+	print "Reading and populating IP4P data..."
+	record_count = len(root.registry.record)
+	progress = ProgressBar(widgets=PBAR_WIDGET_STYLE, maxval=record_count).start()
+	for i, record in enumerate(root.registry.record):
+		progress.update(i)
 		#print objectify.dump(record)
 
 		if '-' in str(record.value):
@@ -202,13 +204,18 @@ def parse_ip4p_data(filename):
 		except IntegrityError:
 			# dupe PK
 			print "Warning: duplicate protocol number %s." % (record.value)
-
+			
+	progress.finish()
 	print 'Added %d entries to Protocol table.' % IP4Protocol.objects.count()
 
+class Command(BaseCommand):
+	args = ''
+	help = 'Populates the database with information about IPv4 protocol types and vendor OUIs.'
+	def handle(self, *args, **options):
+		config = ConfigParser()
+		config.read(HELPER_DATA)
+		download_file(OUI_LIST_FILE, OUI_LIST_URL)
+		download_file(IP4P_LIST_FILE, IP4P_LIST_URL)
 
-if __name__ == '__main__':
-	download_file(OUI_LIST_FILE, OUI_LIST_URL)
-	download_file(IP4P_LIST_FILE, IP4P_LIST_URL)
-
-	parse_oui_data(OUI_LIST_FILE)
-	parse_ip4p_data(IP4P_LIST_FILE)
+		parse_oui_data(OUI_LIST_FILE, config)
+		parse_ip4p_data(IP4P_LIST_FILE, config)
