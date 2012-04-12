@@ -44,9 +44,6 @@ flot itself also includes:
 
  - excanvas: Copyright 2006 Google Inc., licensed under the terms of the Apache License v2.0.
  - jQuery: Copyright 2009 John Resig and The Dojo Foundation, dual-licensed under the MIT and GPL.
- - in jquery.flot.navigate.js:
-   - jQuery.event.drag: Copyright 2008 Three Dub Media <http://threedubmedia.com>, MIT licensed
-   - jquery.mousewheel: Copyright 2009 Brandon Aaron <http://brandonaaron.net> dual-licensed under the MIT and GPL.
 
 Additional licensing information about these components is in headers of their source files (in /frontend/media/flot/).
 
