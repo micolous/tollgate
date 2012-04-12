@@ -19,13 +19,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from os.path import getmtime, exists, isfile, realpath, dirname, join
 from time import gmtime, asctime, time
 from urllib2 import Request, urlopen, HTTPError
-from re import compile as re_compile
-from re import I
 from ConfigParser import ConfigParser
 from sys import path
 from os import environ
+
 from lxml import objectify
 from progressbar import ProgressBar, Percentage, Bar, ETA
+
+# attempt use of better regex library.
+try:
+	from regex import compile as re_compile
+	from regex import I
+except ImportError:
+	from re import compile as re_compile
+	from re import I
 
 from tollgate.frontend.models import Oui, IP4Protocol
 from django.db import connection
