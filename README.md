@@ -94,7 +94,6 @@ You'll need to do these things:
 * Configure the Django site in settings_local.py.  Remember to setup the SOURCE_URL to point to a website where your Git repository can be accessed.
 * Setup a HTTPS site in Apache to point to tollgate's frontend Django application (mod_wsgi or mod_python).
 * Setup a HTTP site in Apache to redirect to the HTTPS one.
-* Setup a HTTP site on port 81 to run the CGI script captive_landing/index.py.  This is needed so browsers don't cache the redirects like they do with normal Apache redirects.
 * Configure dbus for the tollgate backend service.
 * Setup the tollgate backend service.
 * Populate the database with OUIs and protocol numbers with the scraper.py script.  This will download the latest OUI and IPv4 protocol number definitions from IANA, and load them into tollgate's database.  This is needed for console detection and IPv4 port forwarding.
