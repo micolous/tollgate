@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import os
-PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
+PROJECT_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 
 # You probably should turn this off in an actual deployment.  We have stricter tracebacks anyways.
 DEBUG = True
@@ -107,7 +107,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'south',
     'tollgate.frontend',
-    'tollgate.api'
+    'tollgate.api',
+	'tollgate.scripts',
 
 )
 AUTH_PROFILE_MODULE = 'frontend.userprofile'
@@ -123,7 +124,6 @@ RESET_EXCUSE_REQUIRED = True
 # changes some texts to imply that quota resets are purchasable
 RESET_PURCHASE = False
 
-
 ONLY_CONSOLE = False
 SOURCE_URL = None
 
@@ -136,11 +136,4 @@ LANGUAGES = (
   ('en', _('English (Australia)')),
   ('eo', _('Esperanto'))
 )
-
-try:
-	from settings_local import *
-except ImportError:
-	print "There was a problem importing your settings_local.py.  Please read the README file for more information."
-	raise ImportError, "Error importing settings_local.py"
-
 

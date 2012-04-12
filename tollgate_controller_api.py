@@ -15,9 +15,15 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-import dbus
 from pickle import loads
 from django.conf import settings
+import warnings
+
+try:
+	import dbus
+except ImportError:
+	warnings.warn("The Python DBUS module is unavailable.  We cannot connect to the backend.", UserWarning)
+
 DBUS_INTERFACE = 'au.id.micolous.TollgateBackendInterface'
 DBUS_SERVICE = 'au.id.micolous.TollgateBackendService'
 DBUS_PATH = '/TollgateBackendAPI'
