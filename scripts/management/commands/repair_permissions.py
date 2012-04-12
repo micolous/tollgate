@@ -27,7 +27,6 @@ class Command(BaseCommand):
 	def handle(self, *args, **kwargs):
 		executable_files = [
 			'manage.py',
-			'scraper.py',
 			os.path.join('backend', 'tollgate.py'),
 			os.path.join('backend', 'tollgate.sh'),
 		]
