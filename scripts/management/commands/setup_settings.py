@@ -34,6 +34,9 @@ SECRET_KEY = %r
 # URL.  If your VCS does not provide access over HTTP, provide a link to a web
 # page where instructions to configure access to your repository are.
 #
+# Warning: Do not link back to any of the official tollgate repositories.  You
+# MUST link to your own copy, with a copy of any of your modifications!
+#
 # Tip: You can use the "fork" functionality in GitHub to do this.  Make sure
 # you push back to your fork.
 #
