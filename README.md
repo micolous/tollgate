@@ -65,7 +65,6 @@ There are the following requirements for successful operation:
 
 - Python 2.4 or later.
 - Django 1.2 or later, as well as a database module (such as sqlite3, python-mysql) and database server (if applicable).
-- python-dbus, as well as a local DBUS installation
 - A HTTPS-secured webserver to run the django site in (like apache2)
   - You could run the service without protection, but that's really silly.
 - iptables 1.4.3 or later.
@@ -73,12 +72,16 @@ There are the following requirements for successful operation:
 - xtables-addons, you can either:
   - use v1.22 or later, as they include my patch.
   - It is available in GIT commit ID 7952a7d253a66a504df0589d4143088213451fe8 and later <http://xtables-addons.git.sourceforge.net/git/gitweb.cgi?p=xtables-addons/xtables-addons;a=commit;h=7952a7d253a66a504df0589d4143088213451fe8> which was added to the tree on Thu, 31 Dec 2009 15:24:47 +0000.
-- python-iplib
-- python-simplejson (if using Python <2.6)
+- python-dbus, as well as a local DBUS installation.  The web interface will attempt to run in it's absence for development.
+- python-iplib or python IPy
 - python-lxml
+- python-progressbar
+- python mrab-regex-hg (optional)
+- python-simplejson (if using Python <2.6)
 - django-south
 - screen
 - nmap
+
 
 ## Installation ##
 
