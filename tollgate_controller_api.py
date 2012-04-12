@@ -23,6 +23,7 @@ try:
 	import dbus
 except ImportError:
 	warnings.warn("The Python DBUS module is unavailable.  We cannot connect to the backend.", UserWarning)
+	dbus = None
 
 DBUS_INTERFACE = 'au.id.micolous.TollgateBackendInterface'
 DBUS_SERVICE = 'au.id.micolous.TollgateBackendService'
