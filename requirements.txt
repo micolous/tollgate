@@ -2,4 +2,4 @@ Django>=1.3
 South==0.7.4
 lxml==2.3.2
 progressbar==2.2
-
+git+https://github.com/micolous/configparser_plus.git@v1.0#egg=configparser_plus
