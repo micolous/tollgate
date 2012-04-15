@@ -31,6 +31,7 @@ class Command(BaseCommand):
 			os.path.join('backend', 'tollgate.sh'),
 			os.path.join('debian', 'init.d', 'tollgate-backend'),
 			os.path.join('debian', 'init.d', 'tollgate-captivity'),
+			os.path.join('captive_landing', 'tproxy.py'),
 		]
 		
 		for x in executable_files:
