@@ -1,0 +1,6 @@
+
+BACKEND_DAEMON=/usr/lib64/tollgate/backend/tollgate.py
+BACKEND_ARGS="/usr/lib64/tollgate/backend/tollgate.ini"
+
+CAPTIVITY_DAEMON=""
+CAPTIVITY_ARGS=""
