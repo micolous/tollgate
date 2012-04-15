@@ -1,0 +1,1 @@
+*/10 * * * * root cd /opt/tollgate; ./manage.py refresh_hosts
