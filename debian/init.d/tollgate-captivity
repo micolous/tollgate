@@ -17,8 +17,8 @@
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="tollgate captivity handler"
-NAME=tproxy.py
-DAEMON=/opt/tollgate/captive_landing/$NAME
+NAME=tollgate-captivity
+DAEMON=/opt/tollgate/captive_landing/tproxy.py
 DAEMON_ARGS=""
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
