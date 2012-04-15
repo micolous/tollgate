@@ -6,8 +6,7 @@ After=network.target dbus.service
 Type=forking
 PIDFile=/var/run/tollgate-backend.pid
 EnvironmentFile=/etc/sysconfig/tollgate
-ExecStart=$DAEMON $OPTIONS
-ExecReload=/bin/kill -HUP $PIDFILE
+ExecStart=/usr/bin/python /usr/lib/tollgate/backend/tollgate.py $BACKEND_ARGS
 
 [Install]
 WantedBy=tollgate.target
