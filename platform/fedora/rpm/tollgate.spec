@@ -1,13 +1,14 @@
 Name:		tollgate
 Version:	2.8.4
-Release:	1%{?dist}
+Release:	4%{?dist}
 Summary:	Django based captive internet portal
 
+BuildArch: noarch
 Group:		System Environment/Daemons
 License:	AGPL3
 URL:		https://github.com/micolous/tollgate
 #This doesn't play nice ...... need to distrib the zip inside the SRPM
-Source0:	https://github.com/micolous/tollgate/zipball/master
+Source:		%{name}-%{version}.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 BuildRequires:	httpd
@@ -18,17 +19,15 @@ This is a captive portal system for Linux, designed for operating LAN parties.  
 
 %prep
 #Alternately, it will be micolous-tollgate-*.zip
-%setup -q %{name}-%{version}.tar.gz
+%setup -q -n %{name}
 
 %build
-#%configure
-#make %{?_smp_mflags}
-
+echo "Nothing to build"
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/usr/lib/tollgate/
-cp -r ./* $RPM_BUILD_ROOT/usr/lib/tollgate/
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/tollgate/
+cp -r ./* $RPM_BUILD_ROOT%{_libdir}/tollgate/
 
 
 %clean
