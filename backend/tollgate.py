@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from configparser_plus import ConfigParserPlus
 from sys import argv, exit
+from optparse import OptionParser
 import BaseHTTPServer, iptables
 
 # constants
@@ -74,9 +75,16 @@ def parse_hostlist(hostlist, action):
 # begin!
 config = ConfigParserPlus(DEFAULT_SETTINGS)
 
-if len(argv) >= 2:
-	SETTINGS_FILE = argv[1]
+parser = OptionParser(usage='%prog [--daemon] tollgate.ini')
+parser.add_option('-D', '--daemon', action='store_true', dest='daemon', help='start as a daemon')
+options, args = parser.parse_args()
 
+if len(args) == 1:
+	SETTINGS_FILE = args[0]
+
+if options.daemon:
+	import daemon
+	
 print "Loading configuration: %s" % SETTINGS_FILE
 config.read(SETTINGS_FILE)
 
@@ -130,7 +138,11 @@ if blacklist_hosts != None:
 
 print "Starting DBUS Server (only debug messages will appear now)"
 try:
-	iptables.boot_dbus()
+	if options.daemon:
+		with daemon.DaemonContext():
+			iptables.boot_dbus()
+	else:
+		iptables.boot_dbus()
 except KeyboardInterrupt:
 	print "Got Control-C!"
 	exit(0)
