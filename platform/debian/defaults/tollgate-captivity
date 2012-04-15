@@ -1,0 +1,6 @@
+#!/bin/sh
+# You need to specify a URI where the captivity handler should send requests
+# to, in order for it to work.
+#
+# You will need to change this!!
+DAEMON_ARGS="-l https://tollgate.example.com/"
