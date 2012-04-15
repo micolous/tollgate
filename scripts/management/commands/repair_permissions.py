@@ -29,6 +29,8 @@ class Command(BaseCommand):
 			'manage.py',
 			os.path.join('backend', 'tollgate.py'),
 			os.path.join('backend', 'tollgate.sh'),
+			os.path.join('debian', 'init.d', 'tollgate-backend'),
+			os.path.join('debian', 'init.d', 'tollgate-captivity'),
 		]
 		
 		for x in executable_files:
