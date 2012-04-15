@@ -3,6 +3,7 @@
 from socket import SOL_IP
 from warnings import warn
 from os.path import join, dirname
+from optparse import OptionParser
 
 try:
 	# py3
@@ -62,26 +63,50 @@ class TProxyRequestHandler(BaseHTTPRequestHandler):
 
 class TProxyServer:
 	keep_running = True
-	server_address = ('', 50080)
-	mark = 1
+	
+	def __init__(self, tollgate_uri, server_port, mark):
+		self.server_address = ('', server_port)
+		self.mark = mark
+		self.tollgate_uri = tollgate_uri
 	
 	def run(self):
 		self.httpd = HTTPServer(self.server_address, TProxyRequestHandler)
 		self.httpd.server_version = 'tollgate'
-		try:
-			LANDING_URI = open(join(dirname(__file__),'tollgate_uri'), 'rb').read().strip()
-		except IOError:
-			raise IOError, 'Please create a file called "tollgate_uri" with the path to to tollgate\'s HTTPS site.'
-
-		self.httpd.redirect = '%s/captive_landing/?u=%%s' % LANDING_URI
+		self.httpd.redirect = '%s/captive_landing/?u=%%s' % self.tollgate_uri
 		self.httpd.socket.setsockopt(SOL_IP, IP_TRANSPARENT, self.mark)
 		
 		while self.keep_running:
 			self.httpd.handle_request()
 			
 if __name__ == '__main__':
-	# boot the httpd
-	print("Booting httpd.")
-	server = TProxyServer()
-	server.run()
+	parser = OptionParser(usage="%prog [-D] -l 'https://tollgate.example.com'")
+	parser.add_option('-D', '--daemon', action='store_true', dest='daemon', help='start as a daemon')
+	parser.add_option('-l', '--tollgate-uri', dest='tollgate_uri', metavar='URI', help='root URI of tollgate frontend HTTPS server')
+	parser.add_option('-p', '--port', dest='port', type='int', metavar='PORT', help='port of the tproxy service', default=50080)
+	parser.add_option('-m', '--mark', dest='mark', type='int', metavar='MARK', help='TPROXY mark tag for this service', default=1)
+	options, args = parser.parse_args()
+	
+	if not options.tollgate_uri:
+		parser.error('A URI to the tollgate site is required.')
+	
+	if not options.port:
+		parser.error('A port to listen on is required.')
+	
+	if options.port < 0 or options.port > 65535:
+		parser.error('Port specified is invalid.')
+	
+	if not options.mark:
+		parser.error('Mark tag is required.')
+		
+	if options.mark <= 0 or options.mark > 255:
+		parser.error('Mark value is invalid.')
+	
+	server = TProxyServer(options.tollgate_uri, options.port, options.mark)
+	
+	if options.daemon:
+		import daemon
+		with daemon.DaemonContext():
+			server.run()
+	else:
+		server.run()
 

@@ -2,11 +2,7 @@
 
 When a request comes in for a site and you're not logged in to the captive portal, part of the captivity process is redirecting that request back to the captive portal page.  This also needs to be done in a way that has some funny HTTP headers (so that the client doesn't try to ever cache it) and that can handle requests from any site.
 
-Both require a file called `tollgate_uri`.  You can generate it like this:
-
-    # echo http://portal.example.tollgate.org.au/ > tollgate_uri
-
-It's just a one-line configuration and both scripts will try to read from it.
+There is a Debian init script with defaults file which will allow this to run as a daemon.
 
 There is one implementation of this handler here:
 
