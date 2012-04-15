@@ -19,7 +19,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="tollgate backend service"
 NAME=tollgate-backend
 DAEMON=/opt/tollgate/backend/tollgate.py
-DAEMON_ARGS="/opt/tollgate/backend/tollgate.ini"
+DAEMON_ARGS="--daemon /opt/tollgate/backend/tollgate.ini"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
