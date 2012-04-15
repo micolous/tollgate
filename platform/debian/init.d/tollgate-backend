@@ -19,7 +19,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="tollgate backend service"
 NAME=tollgate-backend
 DAEMON=/opt/tollgate/backend/tollgate.py
-DAEMON_ARGS="--daemon /opt/tollgate/backend/tollgate.ini"
+DAEMON_ARGS="/opt/tollgate/backend/tollgate.ini"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
@@ -48,7 +48,7 @@ do_start()
         #   2 if daemon could not be started
         #start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
         #        || return 1
-        start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- \
+        start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- -D \
                 $DAEMON_ARGS \
                 || return 2
         # Add code here, if necessary, that waits for the process to be ready
