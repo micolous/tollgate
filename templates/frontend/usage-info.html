@@ -1,7 +1,7 @@
 {% extends "frontend/base-usage.html" %}
 {% comment %}
 tollgate admin usage info page
-Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -22,9 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% block title %}internet usage report for {{ a.user_profile.user.username }} {% endblock %}
 
 {% block content %}
-<!-- $Id: usage-info.html 112 2010-11-10 12:42:16Z michael $
- -->
-
 {% if quota_update_fail %}
 <p><strong>Warning:</strong> The firewall controller system is currently down, so this data hasn't been updated.  Go start it up again so I can get current usage data.</p>
 {% endif %}
@@ -112,7 +109,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		{% for host in a.user_profile.get_hosts %}
 			<tr class="{% cycle row1,row2 %}">
 				<td>{{ host.computer_name }}</td>
-				<td><img src="/media/console_icons/{{ host.get_console_type }}.png" alt="{{ host.get_console_type }} " title="{{ host.get_console_type }}"  class="cs"/><code>{{ host.mac_address }}</code></td>
+				<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.get_console_type }}.png" alt="{{ host.get_console_type }} " title="{{ host.get_console_type }}"  class="cs"/><code>{{ host.mac_address }}</code></td>
 				<td><code>{{ host.ip_address }}</code></td>
 				<td>
 					{% if host.online %}
@@ -161,7 +158,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 				</td>	
 				<td>{{ change.when }}</td>
 				<td>{{ change.network_host.computer_name }}</td>
-				<td><img src="/media/console_icons/{{ change.network_host.get_console_type }}.png" alt="{{ change.network_host.get_console_type }} " title="{{ change.network_host.get_console_type }}" class="cs"/><code>{{ change.network_host.mac_address }}</code></td>
+				<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ change.network_host.get_console_type }}.png" alt="{{ change.network_host.get_console_type }} " title="{{ change.network_host.get_console_type }}" class="cs"/><code>{{ change.network_host.mac_address }}</code></td>
 				<td><code>{{ change.network_host.ip_address }}</code></td>
 				<td>
 					{% if change.network_host.online %}

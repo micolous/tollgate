@@ -1,8 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 {% comment %}
-tollgate base internet page
-Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+tollgate base template page
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -20,17 +20,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% load i18n %}
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{{ LANGUAGE_CODE }}" lang="{{ LANGUAGE_CODE }}">
 	<head>
-		<script language="javascript" type="text/javascript" src="/media/flot/jquery.min.js"></script> 
-		<script language="javascript" type="text/javascript" src="/media/flot/jquery.flot.min.js"></script> 
+		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/flot/jquery.min.js"></script> 
+		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/flot/jquery.flot.min.js"></script> 
 
 		{% if user.is_authenticated %}
-			<link rel="stylesheet" href="/media/{{ user.get_profile.theme }}.css" media="screen" type="text/css" />
+			<link rel="stylesheet" href="{{ STATIC_URL }}tollgate/{{ user.get_profile.theme }}.css" media="screen" type="text/css" />
 		{% else %}
-			<link rel="stylesheet" href="/media/cake.css" media="screen" type="text/css" />
+			<link rel="stylesheet" href="{{ STATIC_URL }}tollgate/cake.css" media="screen" type="text/css" />
 		{% endif %}
 		
 		{% for f,n in themes %}
-			<link rel="alternate stylesheet" href="/media/{{ f }}.css" media="screen" title="{{ n }}" type="text/css" />
+			<link rel="alternate stylesheet" href="{{ STATIC_URL }}tollgate/{{ f }}.css" media="screen" title="{{ n }}" type="text/css" />
 		{% endfor %}
 		<title>tollgate :: {% block windowtitle %}(default){% endblock %}</title>
 		<!--
@@ -129,7 +129,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		</div>
 		
 		<div id="copyrights">
-			<p>tollgate <abbr title="date 2012-04-12">v2.8.4-dev</abbr> is <abbr title="copyright">&copy;</abbr> 2008-2012 Michael Farrell and contributors.  <a href="{% url source %}">Source code and licensing information</a>.</p>
+			<p>tollgate <abbr title="date 2012-04-20">v2.8.4-dev</abbr> is <abbr title="copyright">&copy;</abbr> 2008-2012 Michael Farrell and contributors.  <a href="{% url source %}">Source code and licensing information</a>.</p>
 		</div>
 	</body>
 </html>

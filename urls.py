@@ -1,5 +1,5 @@
 """tollgate frontend urls
-Copyright 2008-2011 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -17,27 +17,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from django.conf.urls.defaults import *
 from django.conf import settings
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
 
-
-
 urlpatterns = patterns('',
-	# Example:
-	# (r'^frontend/', include('frontend.foo.urls')),
-
-	# Uncomment the next line to enable admin documentation:
-	# (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-	# Uncomment the next line to enable the admin:
 	(r'^admin/', include(admin.site.urls)),
-
-	# DEVELOPMENT ONLY: media path
-	(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
-
 	(r'^i18n/', include('django.conf.urls.i18n')),
 	(r'^api/', include('tollgate.api.urls')),
 	(r'^', include('tollgate.frontend.urls')),
 )
+
+urlpatterns += staticfiles_urlpatterns()

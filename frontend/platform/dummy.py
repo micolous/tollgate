@@ -22,3 +22,7 @@ def get_arp_cache():
 
 def get_ip_address(mac):
 	return None
+	
+def get_mac_address(ip):
+	return None
+

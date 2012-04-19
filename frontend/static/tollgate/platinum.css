@@ -1,7 +1,6 @@
 /*
  * tollgate "platinum" CSS
- * Copyright 2009-2010 Michael Farrell
- * $Id: platinum.css 109 2010-11-10 12:23:25Z michael $
+ * Copyright 2009-2012 Michael Farrell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,7 +18,7 @@
 
 @font-face {
 	font-family: 'virtue';
-	src: url('/media/virtue.ttf');
+	src: url('virtue.ttf');
 }
 
 html, body {

@@ -1,7 +1,7 @@
 {% extends "frontend/base-internet.html" %}
 {% comment %}
 tollgate can't find mac page
-Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -21,44 +21,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% block title %}internet login error: cannot find mac{% endblock %}
 
 {% block content %}
-<!-- $Id: internet_login_here-failure.html 112 2010-11-10 12:42:16Z michael $
- -->
+<p>There was a problem resolving your MAC address, and it couldn't be found in the ARP cache.  <strong>Please contact the network administrator for assistance.</strong></p>
 
-<p>There was a glitch in the matrix, making it impossible for me to get your MAC address.</p>
+<p>This happens primarily for one of these reasons:</p>
 
-<p>Without this, I cannot log you in.  Please write down your MAC address and IP address and see an admin.</p>
-
-<h2>Getting your MAC Address in Windows NT, 2000, XP, 2003, Vista, 2008</h2>
 <ol>
-	<li>Start → Run → <code>cmd</code> → OK</li>
-	<li>Type <code>ipconfig /all</code></li>
-	<li>Copy down your <em>IP address</em> and <em>Physical Address</em> (MAC)</li>
+	<li>
+		<p>The platform that tollgate is running on (the server) is not supported.  Currently only Linux is supported.</p>
+		
+		<p>In development, running the software on other platforms will throw this error, and can be ignored.  In production it can not.</p>
+	</li>
+	
+	<li>The server's ARP cache can not be accessed.  This could be caused by restrictive SELinux policies.</li>
+	
+	<li>The server's ARP cache is full.  Please see the <code>README</code> for information on how to tune the ARP cache, and performance tuning on larger networks.</li>
 </ol>
 
-<h2>Getting your MAC Address in Linux</h2>
-<ol>
-	<li>Open a Terminal</li>
-	<li>Type <code>/sbin/ifconfig | grep -A1 HWaddr</code></li>
-	<li>Copy down your <em>IP address</em> (<code>inet addr</code>) and <em>MAC Address</em> (<code>HWaddr</code>)</li>
-</ol>
-
-<h3>Example</h3>
-<pre>$ <strong>/sbin/ifconfig | grep -A1 HWaddr</strong>
-<strong>eth0</strong>      Link encap:Ethernet  HWaddr <strong>00:18:XX:XX:XX:XX</strong>
-          inet addr:<strong>10.13.XX.XXX</strong>  Bcast:10.13.3.255  Mask:255.255.240.0
---
-vmnet1    Link encap:Ethernet  HWaddr 00:50:56:C0:00:01  
-          inet addr:192.168.10.1  Bcast:192.168.10.255  Mask:255.255.255.0
---
-vmnet8    Link encap:Ethernet  HWaddr 00:50:56:C0:00:08  
-          inet addr:192.168.12.1  Bcast:192.168.12.255  Mask:255.255.255.0</pre>
-
-<p>In this example, <code>eth0</code> is the primary network interface.  Ignore <code>vmnet</code> interfaces, they are created for VMware's Virtual Networking system.</p>
-
-<h2>Information for administrators</h2>
-<p>This error may also occur because you have improperly set the LAN_IFACE setting, or you are accessing it from a non-LAN address.  In which case, go ahead and fix that.</p>
-
-<p>It could also mean that there's a problem with tollgate trying to access the system's ARP table.  Improper configuration of security extensions may cause this.</p>
-
-<p>todo: finish page</p>
 {% endblock %}

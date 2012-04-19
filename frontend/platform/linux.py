@@ -71,3 +71,36 @@ def get_arp_cache():
 
 			o[a[0]] = mac
 	return o
+
+def get_mac_address(ip):
+	fh = open('/proc/net/arp', 'r')
+	# skip header
+	fh.readline()
+	d = fh.readlines()
+	fh.close()
+
+	# don't return anything if this is not part of the LAN subnet.
+	if not in_lan_subnet(ip):
+		return None
+
+	# try active entries first
+	for l in d:
+		a = l.split()
+		if a[0] == ip and a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE and a[2] == "0x2":
+			mac = a[3].replace(':','')
+			if settings.ONLY_CONSOLE and not is_console(mac):
+				return None
+			else:
+				return mac
+
+	# now expired ones.
+	for l in d:
+		a = l.split()
+		if a[0] == ip and a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE:
+			mac = a[3].replace(':','')
+			if settings.ONLY_CONSOLE and not is_console(mac):
+				return None
+			else:
+				return mac
+
+	return None
