@@ -97,7 +97,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		 		
 				<!--
 		 		<li>
-					<form action="/i18n/setlang/" method="post">
+					<form action="/i18n/setlang/" method="post">{% csrf_token %}
 						<select name="language">
 							{% for lang in LANGUAGES %}
 								<option value="{{ lang.0 }}">{{ lang.1 }}</option>

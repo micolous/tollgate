@@ -46,7 +46,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			<li>Cannot reset quota as it is unlimited.</li>
 		{% else %}
 			<li>
-				<form method="post" action="/usage/{{ a.id }}/reset/">
+				<form method="post" action="/usage/{{ a.id }}/reset/">{% csrf_token %}
 					{{ reset_form.as_p }}
 					<p><strong>Warning:</strong> This excuse will be logged and visible to the user as well, even if they're not an administrator.  Be polite. :)</p>
 					<p><input type="submit" value="Reset {{ a.user_profile.user.username }}'s quota."/>  They will gain an additional {{ a.quota_amount_str }} of quota, and their internet access will be enabled (if it is disabled).</p>
@@ -63,7 +63,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <ul>
 	{% if perms.frontend.can_change_coffee %}
 		<li>
-			<form method="post" action="/usage/{{ a.id }}/coffee/">
+			<form method="post" action="/usage/{{ a.id }}/coffee/">{% csrf_token %}
 				{{ coffee_form.as_p }}
 				<p><input type="submit" value="Change"/></p>
 			</form>

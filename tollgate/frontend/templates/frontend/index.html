@@ -49,7 +49,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% if user.is_authenticated %}
 	<h2 id="prefs">Preferences</h2>
 	<ul>
-		<form method="post" action="/preferences/theme-change/">
+		<form method="post" action="/preferences/theme-change/">{% csrf_token %}
 			<li>Change Theme: {{ theme_change_form.theme }} <input type="submit" value="Okay" /></li>
 		</form>
 	</ul>

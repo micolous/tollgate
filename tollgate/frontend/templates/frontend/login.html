@@ -46,7 +46,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <p><strong>Please log in.</strong></p>
 
-<form method="post" action="/login/">
+<form method="post" action="/login/">{% csrf_token %}
 	{{ f.as_p }}
 	<p><input type="submit" value="Login"> <a href="/">Cancel</a></p>
 </form>
