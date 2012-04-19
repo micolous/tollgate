@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """tollgate backend service
-Copyright 2008-2011 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -44,7 +44,7 @@ DEFAULT_SETTINGS = {
 	}
 
 }
-SETTINGS_FILE = 'tollgate.ini'
+SETTINGS_FILE = '/etc/tollgate/backend.ini'
 
 def parse_hostlist(hostlist, action):
 	for x, v in hostlist:
