@@ -18,7 +18,7 @@ from django import forms
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from traceback import extract_tb
-from tollgate.tollgate_controller_api import NotAConsoleException
+from tollgate.frontend.tollgate_controller_api import NotAConsoleException
 from django.conf import settings
 from base64 import b32decode, b64decode
 from django.core.validators import URLValidator

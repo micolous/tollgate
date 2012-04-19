@@ -19,7 +19,7 @@ from django.db.models import *
 from django.contrib.auth.models import User
 from datetime import datetime
 from django.conf import settings
-from tollgate.tollgate_controller_api import TollgateController
+from tollgate.frontend.tollgate_controller_api import TollgateController
 from os import popen
 from django.core.exceptions import ObjectDoesNotExist
 from socket import gethostbyaddr

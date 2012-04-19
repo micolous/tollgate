@@ -78,7 +78,8 @@ class TProxyServer:
 		while self.keep_running:
 			self.httpd.handle_request()
 			
-if __name__ == '__main__':
+def main_optparse():
+	"Entrypoint for the tproxy handler, that uses optparse to parse commandline arguments."
 	parser = OptionParser(usage="%prog [-D] -l 'https://tollgate.example.com'")
 	parser.add_option('-D', '--daemon', action='store_true', dest='daemon', help='start as a daemon')
 	parser.add_option('-l', '--tollgate-uri', dest='tollgate_uri', metavar='URI', help='root URI of tollgate frontend HTTPS server')
@@ -110,3 +111,5 @@ if __name__ == '__main__':
 	else:
 		server.run()
 
+if __name__ == '__main__':
+	main_optparse()
