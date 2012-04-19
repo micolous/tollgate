@@ -29,5 +29,6 @@ oui.txt.etag
 protocol-numbers.xml
 protocol-numbers.xml.etag
 tollgate/settings/local.py
-
 /build
+/dist
+*.egg-info

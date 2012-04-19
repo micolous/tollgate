@@ -1,0 +1,10 @@
+include setup.py README.md HACKING.md LICENSE Makefile CREDITS tollgate/captive_landing/README.md tollgate/tollgate.wsgi tollgate/scraper.dat
+recursive-include example *
+recursive-include platform *
+recursive-include www *
+recursive-include tollgate/frontend/static *
+recursive-include tollgate/frontend/templates *
+
+recursive-include tollgate/locale *
+
+global_exclude *~

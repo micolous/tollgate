@@ -10,6 +10,7 @@ setup(
 	author_email="micolous@gmail.com",
 	url="https://github.com/micolous/tollgate",
 	license="AGPL3",
+	zip_safe=False,
 	requires=(
 		'Django (>=1.3)',
 		'South (>=0.7.4)',
@@ -20,7 +21,7 @@ setup(
 		'daemon',
 	),
 	
-	packages=find_packages(),
+	packages=find_packages(exclude=['tollgate.settings.local']),
 	include_package_data=True,
 	
 	entry_points = {
@@ -29,6 +30,12 @@ setup(
 			'tollgate_captivity = tollgate.captive_landing.tproxy:main_optparse',
 		],
 	},
+	
+	classifiers=[
+		'Framework :: Django',
+		'Intended Audience :: Network Administrators',
+		'Operating System :: Linux',
+	],
 	
 )
 
