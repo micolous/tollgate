@@ -48,7 +48,7 @@ OUI_RE = re_compile(r'^([0-9A-F]{6})\s+\(base 16\)\s+(.*)\s*$')
 IP4P_LIST_URL = 'http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xml'
 IP4P_LIST_FILE = 'protocol-numbers.xml'
 
-HELPER_DATA = join(settings.PROJECT_PATH, 'scraper.dat')
+HELPER_DATA = join(realpath(dirname(__file__)), 'scraper.dat')
 
 UA = 'tollgate/2.8.4 (scraper.py; Python)'
 PBAR_WIDGET_STYLE = [Percentage(), Bar(), ETA()]
