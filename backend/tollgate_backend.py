@@ -72,79 +72,87 @@ def parse_hostlist(hostlist, action):
 			else:
 				action(host, proto, port)
 
-# begin!
-config = ConfigParserPlus(DEFAULT_SETTINGS)
-
-parser = OptionParser(usage='%prog [--daemon] tollgate.ini')
-parser.add_option('-D', '--daemon', action='store_true', dest='daemon', help='start as a daemon')
-options, args = parser.parse_args()
-
-if len(args) == 1:
-	SETTINGS_FILE = args[0]
-
-if options.daemon:
-	import daemon
+def main(daemon=True, settings_file=SETTINGS_FILE):
+	# begin!
+	config = ConfigParserPlus(DEFAULT_SETTINGS)
 	
-print "Loading configuration: %s" % SETTINGS_FILE
-config.read(SETTINGS_FILE)
-
-print "Setting configuration values..."
-iptables.IPTABLES = config.get('tollgate', 'iptables')
-iptables.INTERN_IFACE = config.get('tollgate', 'internal_iface')
-iptables.EXTERN_IFACE = config.get('tollgate', 'external_iface')
-iptables.CAPTIVE_RULE = config.get('tollgate', 'captive_rule')
-iptables.ALLOWED_RULE = config.get('tollgate', 'allowed_rule')
-iptables.UNMETERED_RULE = config.get('tollgate', 'unmetered_rule')
-iptables.BLACKLIST_RULE = config.get('tollgate', 'blacklist_rule')
-iptables.IP4PF_RULE = config.get('tollgate', 'ip4pf_rule')
-iptables.USER_RULE_PREFIX = config.get('tollgate', 'user_rule_prefix')
-iptables.LIMIT_RULE_PREFIX = config.get('tollgate', 'limit_rule_prefix')
-iptables.REJECT_MODE = config.get('tollgate', 'reject_mode')
-iptables.REJECT_TCP_RESET = config.getboolean('tollgate', 'reject_reset_tcp')
-iptables.DEBUG = config.getboolean('tollgate', 'debug')
-
-iptables.CAPTIVE_ENABLED = config.getboolean('captive', 'enable')
-iptables.CAPTIVE_PORT = config.getint('captive', 'port')
-
-if config.has_option('tollgate', 'arp_table_size'):
-	iptables.GC_THRESH = config.getint('tollgate', 'arp_table_size')
-
-if iptables.USER_RULE_PREFIX == iptables.LIMIT_RULE_PREFIX:
-	raise Exception, "user rule prefix must be different to the limit rule prefix"
-
-# get unmetered firewall rules
-unmetered_hosts = None
-if config.has_section('unmetered'):
-	unmetered_hosts = config.items('unmetered')
-
-# get blacklist
-blacklist_hosts = None
-if config.has_section('blacklist'):
-	blacklist_hosts = config.items('blacklist')
-
-print "Creating DBUS API..."
-iptables.setup_dbus()
-
-print "Creating NAT..."
-iptables.create_nat()
-
-if unmetered_hosts != None:
-	print "Setting unmetered hosts..."
-	parse_hostlist(unmetered_hosts, iptables.add_unmetered)
-if blacklist_hosts != None:
-	print "Setting blacklist hosts..."
-	parse_hostlist(blacklist_hosts, iptables.add_blacklist)
-
-
-print "Starting DBUS Server (only debug messages will appear now)"
-try:
 	if options.daemon:
-		with daemon.DaemonContext():
+		import daemon
+		
+	print "Loading configuration: %s" % settings_file
+	config.read(settings_file)
+
+	print "Setting configuration values..."
+	iptables.IPTABLES = config.get('tollgate', 'iptables')
+	iptables.INTERN_IFACE = config.get('tollgate', 'internal_iface')
+	iptables.EXTERN_IFACE = config.get('tollgate', 'external_iface')
+	iptables.CAPTIVE_RULE = config.get('tollgate', 'captive_rule')
+	iptables.ALLOWED_RULE = config.get('tollgate', 'allowed_rule')
+	iptables.UNMETERED_RULE = config.get('tollgate', 'unmetered_rule')
+	iptables.BLACKLIST_RULE = config.get('tollgate', 'blacklist_rule')
+	iptables.IP4PF_RULE = config.get('tollgate', 'ip4pf_rule')
+	iptables.USER_RULE_PREFIX = config.get('tollgate', 'user_rule_prefix')
+	iptables.LIMIT_RULE_PREFIX = config.get('tollgate', 'limit_rule_prefix')
+	iptables.REJECT_MODE = config.get('tollgate', 'reject_mode')
+	iptables.REJECT_TCP_RESET = config.getboolean('tollgate', 'reject_reset_tcp')
+	iptables.DEBUG = config.getboolean('tollgate', 'debug')
+
+	iptables.CAPTIVE_ENABLED = config.getboolean('captive', 'enable')
+	iptables.CAPTIVE_PORT = config.getint('captive', 'port')
+
+	if config.has_option('tollgate', 'arp_table_size'):
+		iptables.GC_THRESH = config.getint('tollgate', 'arp_table_size')
+
+	if iptables.USER_RULE_PREFIX == iptables.LIMIT_RULE_PREFIX:
+		raise Exception, "user rule prefix must be different to the limit rule prefix"
+
+	# get unmetered firewall rules
+	unmetered_hosts = None
+	if config.has_section('unmetered'):
+		unmetered_hosts = config.items('unmetered')
+
+	# get blacklist
+	blacklist_hosts = None
+	if config.has_section('blacklist'):
+		blacklist_hosts = config.items('blacklist')
+
+	print "Creating DBUS API..."
+	iptables.setup_dbus()
+
+	print "Creating NAT..."
+	iptables.create_nat()
+
+	if unmetered_hosts != None:
+		print "Setting unmetered hosts..."
+		parse_hostlist(unmetered_hosts, iptables.add_unmetered)
+	if blacklist_hosts != None:
+		print "Setting blacklist hosts..."
+		parse_hostlist(blacklist_hosts, iptables.add_blacklist)
+
+
+	print "Starting DBUS Server (only debug messages will appear now)"
+	try:
+		if options.daemon:
+			with daemon.DaemonContext():
+				iptables.boot_dbus()
+		else:
 			iptables.boot_dbus()
-	else:
-		iptables.boot_dbus()
-except KeyboardInterrupt:
-	print "Got Control-C!"
-	exit(0)
+	except KeyboardInterrupt:
+		print "Got Control-C!"
+		exit(0)
 
+def main_optparse():
+	"Version of main() that takes arguments as if it were a normal program."
+	parser = OptionParser(usage='%prog [--daemon] tollgate.ini')
+	parser.add_option('-D', '--daemon', action='store_true', dest='daemon', help='start as a daemon')
+	options, args = parser.parse_args()
 
+	a = [options.daemon]
+	
+	if len(args) == 1:
+		a.append(args[0])
+	
+	main(*a)
+		
+if __name__ == '__main__':
+	main_optparse()
