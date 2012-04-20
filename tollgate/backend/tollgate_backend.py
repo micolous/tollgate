@@ -132,7 +132,7 @@ def main(daemon_enable=True, settings_file=SETTINGS_FILE):
 
 	print "Starting DBUS Server (only debug messages will appear now)"
 	try:
-		if options.daemon:
+		if daemon_enable:
 			with daemon.DaemonContext():
 				iptables.boot_dbus()
 		else:
