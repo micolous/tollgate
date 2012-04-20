@@ -40,7 +40,7 @@ DEFAULT_SETTINGS = {
 	},
 	'captive': {
 		'enable': True,
-		'port': 81
+		'port': 50080
 	}
 
 }
