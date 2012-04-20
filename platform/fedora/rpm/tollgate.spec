@@ -15,13 +15,13 @@ Source:		%{name}-%{version}.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 BuildRequires:	httpd
-Requires:	python, Django, httpd, akmod-xtables-addons, python-daemon, dbus-python, python-IPy, python-lxml, python-progressbar, python-simplejson, Django-south, nmap, mod_wsgi, mod_ssl, python-pip
+Requires:	python, Django, httpd, akmod-xtables-addons, python-daemon, dbus-python, python-IPy, python-lxml, python-progressbar, python-simplejson, Django-south, nmap, mod_wsgi, mod_ssl, python-pip, tollgate-selinux
 
 %package selinux
 
 BuildArch: noarch
-BuildRequires:	httpd
-Requires:	python
+BuildRequires:	selinux-policy
+Requires:	selinux-policy, policycoreutils
 Summary:	SELinux policies for tollgate captive internet portal
 
 %description 
@@ -36,6 +36,8 @@ SELinux policies for the Tollgate captive internet portal.
 
 %build 
 python setup.py build
+cd ./platform/fedora/selinux/
+make -f /usr/share/selinux/devel/Makefile 
 
 %install
 #Do I use _libdir?
@@ -66,6 +68,8 @@ cp ./platform/fedora/sysconfig/tollgate $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/
 
 mv $RPM_BUILD_ROOT%{_bindir}/tollgate_backend $RPM_BUILD_ROOT%{_sbindir}/
 mv $RPM_BUILD_ROOT%{_bindir}/tollgate_captivity $RPM_BUILD_ROOT%{_sbindir}/
+mkdir -p $RPM_BUILD_ROOT%{_prefix}/share/selinux/targeted/
+cp ./platform/fedora/selinux/tollgate.pp $RPM_BUILD_ROOT%{_prefix}/share/selinux/targeted/
 
 %clean 
 rm -rf $RPM_BUILD_ROOT
@@ -88,13 +92,22 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0755,root,root) %{_sbindir}/tollgate_backend
 %attr(0755,root,root) %{_sbindir}/tollgate_captivity
 
+%files selinux
+%attr(0644,root,root) %{_prefix}/share/selinux/targeted/tollgate.pp
+
 %post
 systemctl --system daemon-reload
 systemctl reload dbus.service
 
+%post selinux
+semodule -i %{_prefix}/share/selinux/targeted/tollgate.pp
+
 %postun
 systemctl --system daemon-reload
 systemctl reload dbus.service
+
+%postun selinux
+semodule -r tollgate
 
 %changelog 
 

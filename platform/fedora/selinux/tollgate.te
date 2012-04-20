@@ -1,0 +1,6 @@
+policy_module(tollgate,1.0.0)
+
+type tollgate_t;
+type tollgate_exec_t;
+type tollgate_conf_t;
+type tollgate_sqlite_t;
