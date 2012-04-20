@@ -18,7 +18,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="tollgate captivity handler"
 NAME=tollgate-captivity
-DAEMON=/opt/tollgate/captive_landing/tproxy.py
+DAEMON=/usr/local/bin/tollgate_captivity
 DAEMON_ARGS=""
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

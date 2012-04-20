@@ -1,8 +1,8 @@
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          tollgate-backend
-# Required-Start:    $remote_fs $syslog $network
-# Required-Stop:     $remote_fs $syslog $network
+# Required-Start:    $remote_fs $syslog $network dbus
+# Required-Stop:     $remote_fs $syslog $network dbus
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: tollgate backend
@@ -18,8 +18,8 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="tollgate backend service"
 NAME=tollgate-backend
-DAEMON=/opt/tollgate/backend/tollgate.py
-DAEMON_ARGS="/opt/tollgate/backend/tollgate.ini"
+DAEMON=/usr/local/bin/tollgate_backend
+DAEMON_ARGS=""
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 

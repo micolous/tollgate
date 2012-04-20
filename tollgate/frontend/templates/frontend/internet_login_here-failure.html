@@ -1,0 +1,40 @@
+{% extends "frontend/base-internet.html" %}
+{% comment %}
+tollgate can't find mac page
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+
+
+{% block title %}internet login error: cannot find mac{% endblock %}
+
+{% block content %}
+<p>There was a problem resolving your MAC address, and it couldn't be found in the ARP cache.  <strong>Please contact the network administrator for assistance.</strong></p>
+
+<p>This happens primarily for one of these reasons:</p>
+
+<ol>
+	<li>
+		<p>The platform that tollgate is running on (the server) is not supported.  Currently only Linux is supported.</p>
+		
+		<p>In development, running the software on other platforms will throw this error, and can be ignored.  In production it can not.</p>
+	</li>
+	
+	<li>The server's ARP cache can not be accessed.  This could be caused by restrictive SELinux policies.</li>
+	
+	<li>The server's ARP cache is full.  Please see the <code>README</code> for information on how to tune the ARP cache, and performance tuning on larger networks.</li>
+</ol>
+
+{% endblock %}

@@ -1,0 +1,14 @@
+# Example /etc/hosts file for tollgate
+# For use with dnsmasq as the nameserver.
+#
+# dnsmasq reads static entries from this file.  We should add all of tollgate's URLs to it.
+# In reality, you'd add your own stuff here.
+10.4.0.1 portal.example.tollgate.org.au portal
+
+# Add WPAD (proxy discovery) vhost
+# This stops Windows machines from being hijacked by false NETBIOS named hosts.
+10.4.0.1 wpad wpad.example.tollgate.org.au
+
+# Add Nintendo WiFi Connection (WFC)
+# Allows Nintendo Wii and DS to use the captive portal.
+10.4.0.1 conntest.nintendowifi.net

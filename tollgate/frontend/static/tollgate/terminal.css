@@ -1,0 +1,135 @@
+/*
+ * tollgate "terminal" CSS
+ * Copyright 2008-2012 Michael Farrell
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
+html, body {
+	color: #fff;
+	background-color: #000;
+	font-size: 1em;
+}
+
+html, body, #menubar, #menubar ul, #menubar ul li, #submenubar, #submenubar ul, #submenubar ul li, #content {
+	padding: 0;
+	margin: 0;
+}
+
+#menubar ul li, #submenubar ul li {
+	display: inline;
+	padding-right: 5px;
+	padding-left: 0;
+	border-right: 1px #0f0 solid;
+}
+
+#menubar, #submenubar {
+	background-color: #001a00;
+	background-image: url('greenstripes.png');
+	position: relative;
+	left: 0;
+	right: 0;
+	top: 0;
+	font-size: 14px;
+	font-family: sans-serif;
+	border-bottom: 1px #0f0 solid;
+	font-weight: bold;
+}
+
+a, a:visited {
+	color: #0f0;
+	text-decoration: none;
+}
+
+a:hover {
+	background-color: #0f0;
+	color: #000;
+}
+
+input {
+	font-size: 1em;
+	border: none;
+	color: #0f0;
+	background-color: transparent;
+	text-decoration: none;
+	padding: 0;
+	margin: 0;
+}
+
+input[type="text"], input[type="password"] {
+	border: 1px #0f0 dotted;
+}
+
+input[type="submit"] {
+	color: #0f0;
+	border-bottom: none;
+}
+
+input[type="submit"]:hover {
+	background-color: #0f0;
+	color: #000;
+	border-bottom: none;
+}
+
+#content {
+	padding: 5px;
+	background-color: #001a00;
+	background-image: url('greenstripes.png');
+	border-top: 1px #0f0 solid;
+	border-bottom: 1px #0f0 solid;
+}
+
+a img {
+	border: 0;
+}
+
+img.cs {
+	width: 1em;
+	height: 1em;
+}
+
+table.internet code {
+	font-size: 1.15em;
+}
+
+tr.row1, tr.row1 td, tr.row1 th {
+	background-color: #030;
+}
+
+tr.uh, tr.uh td {
+	background-color: #060;
+}
+table.internet {
+	width: 100%;
+}
+
+span.yes, span.no {
+	font-weight: bold;
+	padding: 2px;
+}
+
+span.yes {
+	background-color: #0f0;
+	color: #000;
+}
+
+span.no {
+	background-color: #f00;
+	color: #ff0;
+}
+
+#usage_graph {
+	background-color: #fff;
+	color: #000;
+}
