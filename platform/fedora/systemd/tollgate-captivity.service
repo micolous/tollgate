@@ -1,0 +1,11 @@
+[Unit]
+Description=Tollgate captivity service
+After=network.target dbus.service
+
+[Service]
+PIDFile=/var/run/tollgate-captivity.pid
+ExecStart=/usr/sbin/tollgate_captivity 
+
+[Install]
+WantedBy=tollgate.target
+

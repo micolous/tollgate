@@ -3,10 +3,8 @@ Description=Tollgate backend service
 After=network.target dbus.service
 
 [Service]
-Type=forking
 PIDFile=/var/run/tollgate-backend.pid
-EnvironmentFile=/etc/sysconfig/tollgate
-ExecStart=/usr/bin/python /usr/lib/tollgate/backend/tollgate.py $BACKEND_ARGS
+ExecStart=/usr/sbin/tollgate_backend 
 
 [Install]
 WantedBy=tollgate.target
