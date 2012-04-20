@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import os
-PROJECT_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
+PROJECT_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 # You probably should turn this off in an actual deployment.  We have stricter tracebacks anyways.
 DEBUG = True

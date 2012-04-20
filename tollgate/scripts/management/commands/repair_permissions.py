@@ -27,16 +27,18 @@ class Command(BaseCommand):
 	def handle(self, *args, **kwargs):
 		executable_files = [
 			'manage.py',
-			os.path.join('backend', 'tollgate.py'),
-			os.path.join('backend', 'tollgate.sh'),
-			os.path.join('debian', 'init.d', 'tollgate-backend'),
-			os.path.join('debian', 'init.d', 'tollgate-captivity'),
-			os.path.join('captive_landing', 'tproxy.py'),
+			os.path.join('tollgate', 'backend', 'tollgate_backend.py'),
+			os.path.join('platform', 'debian', 'init.d', 'tollgate-backend'),
+			os.path.join('platform', 'debian', 'init.d', 'tollgate-captivity'),
+			os.path.join('tollgate', 'captive_landing', 'tproxy.py'),
 		]
+		
+		tollgate_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
 		
 		for x in executable_files:
 			# chmod the file such that all that have read access have execute as well.
-			fp = os.path.join(settings.PROJECT_PATH, x)
+			fp = os.path.join(tollgate_path, x)
+			print " %s" % fp
 			mode = os.stat(fp).st_mode
 			
 			if mode & stat.S_IRUSR:
