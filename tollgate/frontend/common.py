@@ -67,6 +67,9 @@ class TollgateMiddleware:
 		else:
 			# Fbhepr HEY jnf cebivqrq.  Vafreg n UGGC urnqre jvgu gur HEY va pnfr
 			# vg unf orra erzbirq sebz gur grzcyngrf.
-			response[b32decode('LAWVI33MNRTWC5DFFVJW65LSMNSVKUSM')] = u
+			try:
+				response[b32decode('LAWVI33MNRTWC5DFFVJW65LSMNSVKUSM')] = u
+			except TypeError:
+				return response
 
 		return response

@@ -83,8 +83,8 @@ def main_optparse():
 	parser = OptionParser(usage="%prog [-D] -l 'https://tollgate.example.com'")
 	parser.add_option('-D', '--daemon', action='store_true', dest='daemon', help='start as a daemon')
 	parser.add_option('-l', '--tollgate-uri', dest='tollgate_uri', metavar='URI', help='root URI of tollgate frontend HTTPS server')
-	parser.add_option('-p', '--port', dest='port', type='int', metavar='PORT', help='port of the tproxy service', default=50080)
-	parser.add_option('-m', '--mark', dest='mark', type='int', metavar='MARK', help='TPROXY mark tag for this service', default=1)
+	parser.add_option('-p', '--port', dest='port', type='int', metavar='PORT', help='port of the tproxy service [default: %default]', default=50080)
+	parser.add_option('-m', '--mark', dest='mark', type='int', metavar='MARK', help='TPROXY mark tag for this service [default: %default]', default=1)
 	options, args = parser.parse_args()
 	
 	if not options.tollgate_uri:
