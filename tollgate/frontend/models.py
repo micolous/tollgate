@@ -382,12 +382,6 @@ def find_user_exact(name):
 def get_signed_in_users(event):
 	return EventAttendance.objects.filter(event__exact=event).order_by('user_profile')
 
-def in_lan_subnet(ip):
-	if CIDR:
-		return LAN_CIDR.is_valid_ip(ip)
-	else:
-		return IPy.IP(ip) in LAN_CIDR
-
 def get_portalapi():
 	return TollgateController()
 

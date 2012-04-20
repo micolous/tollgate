@@ -80,7 +80,10 @@ def main(daemon_enable=True, settings_file=SETTINGS_FILE):
 		import daemon
 		
 	print "Loading configuration: %s" % settings_file
-	config.read(settings_file)
+	
+	if not config.read(settings_file):
+		print "Failure reading configuration file!"
+		exit(1)
 
 	print "Setting configuration values..."
 	iptables.IPTABLES = config.get('tollgate', 'iptables')

@@ -640,7 +640,8 @@ def captive_landing(request):
 	ip = request.META['REMOTE_ADDR']
 	mac = get_mac_address(ip)
 	if mac == None:
-		return False
+		# The mac address doesn't exist
+		return render_to_response('frontend/internet_login_here-failure.html', context_instance=RequestContext(request))
 
 	reasons = {'reason_blacklist': False, 'reason_quota': False, 'reason_disabled': False, 'reason_sync': False, 'reason_login': False}
 	try:

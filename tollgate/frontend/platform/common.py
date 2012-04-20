@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-tollgate frontend platform-specific code distributor
+tollgate frontend commonly-platform-specific-code
 Copyright 2008-2012 Michael Farrell
 
 This program is free software: you can redistribute it and/or modify
@@ -16,14 +16,20 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-
-from platform import system
-import warnings
-system = system().lower()
-from tollgate.frontend.platform.common import *
-
-if system == 'linux':
-	from tollgate.frontend.platform.linux import *
+from django.conf import settings
+try:
+	from iplib import CIDR
+except ImportError:
+	CIDR = None
+	import IPy
+	
+if CIDR:
+	LAN_CIDR = CIDR(settings.LAN_SUBNET)
 else:
-	warnings.warn('Platform %r is unsupported.  Some OS-specific functionality will not work.' % system, UserWarning)
-	from tollgate.frontend.platform.dummy import *
+	LAN_CIDR = IPy.IP(settings.LAN_SUBNET)
+
+def in_lan_subnet(ip):
+	if CIDR:
+		return LAN_CIDR.is_valid_ip(ip)
+	else:
+		return IPy.IP(ip) in LAN_CIDR
