@@ -72,11 +72,11 @@ def parse_hostlist(hostlist, action):
 			else:
 				action(host, proto, port)
 
-def main(daemon=True, settings_file=SETTINGS_FILE):
+def main(daemon_enable=True, settings_file=SETTINGS_FILE):
 	# begin!
 	config = ConfigParserPlus(DEFAULT_SETTINGS)
 	
-	if options.daemon:
+	if daemon_enable:
 		import daemon
 		
 	print "Loading configuration: %s" % settings_file
@@ -132,7 +132,7 @@ def main(daemon=True, settings_file=SETTINGS_FILE):
 
 	print "Starting DBUS Server (only debug messages will appear now)"
 	try:
-		if options.daemon:
+		if daemon_enable:
 			with daemon.DaemonContext():
 				iptables.boot_dbus()
 		else:
