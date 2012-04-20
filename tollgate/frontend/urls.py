@@ -25,15 +25,18 @@ from django.views.generic.list_detail import object_list
 from django.views.generic.create_update import update_object, delete_object, create_object
 from tollgate.frontend.models import IP4PortForward
 from django.contrib.auth.views import password_change
+from django.utils.decorators import decorator_from_middleware
+from django.core.urlresolvers import get_callable
+from tollgate.frontend.common import TollgateMiddleware
 
 ip4portforward_qsd = dict(
 	queryset = IP4PortForward.objects.all()
 )
 
-urlpatterns = patterns('tollgate.frontend.views',
+urlpatterns = (
 	# login system
-	(r'^login/$', 'login'),
-	(r'^logout/$', 'logout'),
+	url(r'^login/$', 'login'),
+	url(r'^logout/$', 'logout'),
 	url(
 		r'^account/password_change/$',
 		password_change,
@@ -42,22 +45,22 @@ urlpatterns = patterns('tollgate.frontend.views',
 	),
 
 	# captive portal
-	(r'^internet/login/here/$', 'internet_login_here'),
-	(r'^internet/login/(?P<mac_address>[\dABCEDFabcdef]{12})/$', 'internet_login'),
+	url(r'^internet/login/here/$', 'internet_login_here'),
+	url(r'^internet/login/(?P<mac_address>[\dABCEDFabcdef]{12})/$', 'internet_login'),
 	url(r'^internet/disown/(?P<host_id>\d+)/$', 'internet_disown', name='internet-disown'),
-	(r'^internet/$', 'internet'),
-	(r'^internet/refresh/$', 'host_refresh_quick'),
-	(r'^internet/offline/$', 'internet_offline'),
+	url(r'^internet/$', 'internet'),
+	url(r'^internet/refresh/$', 'host_refresh_quick'),
+	url(r'^internet/offline/$', 'internet_offline'),
 
-	(r'^quota/on/$', 'quota_on'),
-	(r'^quota/off/$', 'quota_off'),
-	(r'^quota/user-reset/$', 'quota_user_reset'),
+	url(r'^quota/on/$', 'quota_on'),
+	url(r'^quota/off/$', 'quota_off'),
+	url(r'^quota/user-reset/$', 'quota_user_reset'),
 	#(r'^quota/graph.png$', 'quota_graph'),
-	(r'^quota/$', 'quota'),
+	url(r'^quota/$', 'quota'),
 
-	(r'^usage/all/on/$', 'usage_all_on'),
-	(r'^usage/all/really-on/$', 'usage_all_really_on'),
-	(r'^usage/all/off/$', 'usage_all_off'),
+	url(r'^usage/all/on/$', 'usage_all_on'),
+	url(r'^usage/all/really-on/$', 'usage_all_really_on'),
+	url(r'^usage/all/off/$', 'usage_all_off'),
 
 	url(r'^usage/(?P<aid>\d+)/on/$', 'usage_on', name='usage-on'),
 	url(r'^usage/(?P<aid>\d+)/off/$', 'usage_off', name='usage-off'),
@@ -66,18 +69,18 @@ urlpatterns = patterns('tollgate.frontend.views',
 	url(r'^usage/(?P<aid>\d+)/coffee/$', 'usage_coffee', name='usage-coffee'),
 	#url(r'^usage/(?P<aid>\d+)/graph.png$', 'usage_graph', name='usage-graph'),
 	url(r'^usage/(?P<aid>\d+)/$', 'usage_info', name='usage-info'),
-	(r'^usage/$', 'usage'),
-	(r'^usage/sort/heavy$', 'usage_heavy'),
-	(r'^usage/sort/speed$', 'usage_speed'),
-	(r'^usage/sort/morereset$', 'usage_morereset'),
+	url(r'^usage/$', 'usage'),
+	url(r'^usage/sort/heavy$', 'usage_heavy'),
+	url(r'^usage/sort/speed$', 'usage_speed'),
+	url(r'^usage/sort/morereset$', 'usage_morereset'),
 
-	(r'^pclist/unowned/$', 'pclist_unowned'),
-	(r'^pclist/$', 'pclist'),
+	url(r'^pclist/unowned/$', 'pclist_unowned'),
+	url(r'^pclist/$', 'pclist'),
 
-	(r'^captive_landing/?$', 'captive_landing'),
+	url(r'^captive_landing/?$', 'captive_landing'),
 
-	(r'^help/new/$', direct_to_template, dict(template='frontend/help/new.html', extra_context=dict(settings=settings))),
-	(r'^help/api/$', direct_to_template, dict(template='frontend/help/api.html', extra_context=dict(settings=settings))),
+	url(r'^help/new/$', direct_to_template, dict(template='frontend/help/new.html', extra_context=dict(settings=settings))),
+	url(r'^help/api/$', direct_to_template, dict(template='frontend/help/api.html', extra_context=dict(settings=settings))),
 
 	# signin system
 	url(r'^signin/$', 'signin1', name='signin'),
@@ -128,7 +131,7 @@ urlpatterns = patterns('tollgate.frontend.views',
 
 
 
-	(r'^preferences/theme-change/$', 'theme_change'),
+	url(r'^preferences/theme-change/$', 'theme_change'),
 	url(
 		r'^help/source/$',
 		direct_to_template,
@@ -141,3 +144,16 @@ urlpatterns = patterns('tollgate.frontend.views',
 		'index',
 		name='index'),
 )
+
+def append_middleware(urlhandler):
+	"Append TollgateMiddleware to the views."
+	urlhandler.add_prefix('tollgate.frontend.views')
+	urlhandler._callback = decorator_from_middleware(TollgateMiddleware)(urlhandler.callback)
+	
+	return urlhandler
+
+# wrap middleware on all of them.
+urlpatterns = patterns('',
+	*[append_middleware(x) for x in urlpatterns]
+)
+
