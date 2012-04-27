@@ -1,4 +1,4 @@
-{% extends "frontend/base.html" %}
+{% extends "frontend/base.html" %}{% load future %}
 {% comment %}
 tollgate base usage page
 Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
@@ -25,10 +25,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  -->
 
 <ul>
-	<li><a href="/usage/">{% trans "internet usage report" %}</a></li>
-	<li><a href="/usage/sort/heavy">{% trans "highest quota use" %}</a></li>
-	<li><a href="/usage/sort/morereset">{% trans "most resets" %}</a></li>
-	<li><a href="/usage/sort/speed">{% trans "highest speed" %}</a></li>
+	<li><a href="{% url "usage" %}">{% trans "internet usage report" %}</a></li>
+	<li><a href="{% url "usage-heavy" %}">{% trans "highest quota use" %}</a></li>
+	<li><a href="{% url "usage-morereaset" %}">{% trans "most resets" %}</a></li>
+	<li><a href="{% url "usage-speed" %}">{% trans "highest speed" %}</a></li>
 </ul>
 {% endblock %}
 

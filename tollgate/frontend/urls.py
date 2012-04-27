@@ -35,8 +35,8 @@ ip4portforward_qsd = dict(
 
 urlpatterns = (
 	# login system
-	url(r'^login/$', 'login'),
-	url(r'^logout/$', 'logout'),
+	url(r'^login/$', 'login', name='login'),
+	url(r'^logout/$', 'logout', name='logout'),
 	url(
 		r'^account/password_change/$',
 		password_change,
@@ -45,18 +45,18 @@ urlpatterns = (
 	),
 
 	# captive portal
-	url(r'^internet/login/here/$', 'internet_login_here'),
-	url(r'^internet/login/(?P<mac_address>[\dABCEDFabcdef]{12})/$', 'internet_login'),
+	url(r'^internet/login/here/$', 'internet_login_here', name='internet-login-here'),
+	url(r'^internet/login/(?P<mac_address>[\dA-Fa-f]{12})/$', name='internet-login'),
 	url(r'^internet/disown/(?P<host_id>\d+)/$', 'internet_disown', name='internet-disown'),
-	url(r'^internet/$', 'internet'),
-	url(r'^internet/refresh/$', 'host_refresh_quick'),
-	url(r'^internet/offline/$', 'internet_offline'),
+	url(r'^internet/$', 'internet', name='disown'),
+	url(r'^internet/refresh/$', 'host_refresh_quick', name='host-refres-quick'),
+	url(r'^internet/offline/$', 'internet_offline', name='internet-offline'),
 
-	url(r'^quota/on/$', 'quota_on'),
-	url(r'^quota/off/$', 'quota_off'),
-	url(r'^quota/user-reset/$', 'quota_user_reset'),
-	#(r'^quota/graph.png$', 'quota_graph'),
-	url(r'^quota/$', 'quota'),
+	url(r'^quota/on/$', 'quota_on', name='quota-on'),
+	url(r'^quota/off/$', 'quota_off', name='quota-off'),
+	url(r'^quota/user-reset/$', 'quota_user_reset', name='quota-user-reset'),
+	#(r'^quota/graph.png$', 'quota_graph', name='quota-graph'),
+	url(r'^quota/$', 'quota', name='quota'),
 
 	url(r'^usage/all/on/$', 'usage_all_on'),
 	url(r'^usage/all/really-on/$', 'usage_all_really_on'),
@@ -69,18 +69,18 @@ urlpatterns = (
 	url(r'^usage/(?P<aid>\d+)/coffee/$', 'usage_coffee', name='usage-coffee'),
 	#url(r'^usage/(?P<aid>\d+)/graph.png$', 'usage_graph', name='usage-graph'),
 	url(r'^usage/(?P<aid>\d+)/$', 'usage_info', name='usage-info'),
-	url(r'^usage/$', 'usage'),
-	url(r'^usage/sort/heavy$', 'usage_heavy'),
-	url(r'^usage/sort/speed$', 'usage_speed'),
-	url(r'^usage/sort/morereset$', 'usage_morereset'),
+	url(r'^usage/$', 'usage', name='usage'),
+	url(r'^usage/sort/heavy$', 'usage_heavy', name="usage-heavy"),
+	url(r'^usage/sort/speed$', 'usage_speed', name="usage-speed"),
+	url(r'^usage/sort/morereset$', 'usage_morereset', name='usage-morereset'),
 
-	url(r'^pclist/unowned/$', 'pclist_unowned'),
-	url(r'^pclist/$', 'pclist'),
+	url(r'^pclist/unowned/$', 'pclist_unowned', name='public-unowned'),
+	url(r'^pclist/$', 'pclist', name='pclist'),
 
-	url(r'^captive_landing/?$', 'captive_landing'),
+	url(r'^captive_landing/?$', 'captive_landing', name='captive-landing'),
 
-	url(r'^help/new/$', direct_to_template, dict(template='frontend/help/new.html', extra_context=dict(settings=settings))),
-	url(r'^help/api/$', direct_to_template, dict(template='frontend/help/api.html', extra_context=dict(settings=settings))),
+	url(r'^help/new/$', direct_to_template, dict(template='frontend/help/new.html', extra_context=dict(settings=settings)), name='help-new'),
+	url(r'^help/api/$', direct_to_template, dict(template='frontend/help/api.html', extra_context=dict(settings=settings)), name='help-api'),
 
 	# signin system
 	url(r'^signin/$', 'signin1', name='signin'),

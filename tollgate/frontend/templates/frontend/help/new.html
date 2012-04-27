@@ -96,7 +96,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <h2 id="2.6.6">Changes in 2.6.6 (November 2009)</h2>
 <ul>
 	<li>LANdit backend also grabs whether a user has ordered unlimited coffee.</li>
-	<li><code>coffee_ip</code> <a href="/help/api/">API call</a> added.</li>
+	<li><code>coffee_ip</code> <a href="{% url "help-api" %}">API call</a> added.</li>
 	<li>Added option to manually change whether a user is allowed to use the coffee notification system, and extra ACL added to determine whether an administrator is allowed to change that value.</li>
 	<li>Internet connectivity is no longer switched on on login <strong>if</strong> you have previously disabled internet connectivity and haven't selected to sign the current computer on in your name.</li>
 	<li>Backend not running will no longer cause EventAttendance migration failure on login.</li>
@@ -154,7 +154,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	<li>Resynced the two versions of v2.5 of the code in use.</li>
 	<li>When there is an external authentication failure (such as attendance not registered, or forum password change) on an already-migrated account, you are no longer kept logged in.</li>
 	<li>Offline hosts are now marked as being offline properly.</li>
-	<li>Added <a href="/help/api/">API</a> for interacting with tollgate.</li>
+	<li>Added <a href="{% url "help-api" %>API</a> for interacting with tollgate.</li>
 	<li>Version numbering changed</li>
 </ul>
 
