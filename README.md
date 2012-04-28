@@ -9,10 +9,6 @@ Welcome to tollgate.  This is a captive portal system for Linux, designed for op
 
 It was originally called 'portal2'.  It managed the StreetGeek and SAGA internet connection for about two years, before I discontinued my involvement with the event.  It was called 'portal2' as it we previously experimented with a modified version of WiFiDog before abandoning it at the event.  It's changed the name to avoid potential trademark issues.
 
-Currently this version is a little broken, as all StreetGeek and SAGA related components have been pulled out from under it.  There's also some policies for the event that were hard-coded into the software (such as one free quota reset).  I have however pulled out all copyrighted images from the source tree that may cause problems.
-
-It's undergoing porting to LanConnect's data models, but that software is not yet released, so the system is in a state of flux.  At that point, a lot of those policies that were specific to the event will also be pulled out and replaced with something that's more flexible and easier to configure.
-
 It consists of two parts, connected via dbus:
 
 - A frontend system, which does most of the heavy lifting, including managing users and quota.  It is a Django website.
