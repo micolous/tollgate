@@ -1,4 +1,4 @@
-{% extends "frontend/base.html" %}
+{% extends "frontend/base.html" %}{% load future %}
 {% comment %}
 tollgate base pc list page
 Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
@@ -24,8 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% block submenu %}
 <!-- $Id: base-pclist.html 109 2010-11-10 12:23:25Z michael $ -->
 <ul>
-	<li><a href="/pclist/">{% trans "owned pcs" %}</a></li>
-	<li><a href="/pclist/unowned/">{% trans "unowned pcs" %}</a></li>
+	<li><a href="{% url "pclist" %}">{% trans "owned pcs" %}</a></li>
+	<li><a href="{% url "pclist-unowned" %}">{% trans "unowned pcs" %}</a></li>
 </ul>
 {% endblock %}
 
