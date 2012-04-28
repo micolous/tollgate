@@ -32,3 +32,4 @@ tollgate/settings/local.py
 /build
 /dist
 *.egg-info
+docs/_build
