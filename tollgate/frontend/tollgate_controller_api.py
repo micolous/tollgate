@@ -83,4 +83,8 @@ class TollgateController:
 	def ip4pf_add(self, ip, protocol, port, external_port):
 		if not dbus: return
 		self.__interface.ip4pf_add(ip, protocol, port, external_port)
+		
+	def get_all_users_quota_remaining(self):
+		if not dbus: return []
+		return self.__interface.get_all_users_quota_remaining()
 

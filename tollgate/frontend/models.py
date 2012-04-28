@@ -457,6 +457,14 @@ def refresh_all_quota_usage(portal=None):
 	r = EventAttendance.objects.filter(event__exact=event)
 	for e in r:
 		refresh_quota_usage(e, portal)
+	
+	# now download all the quota counters back and check if there's any that shouldn't be here.
+	counters = portal.get_all_users_quota_remaining()
+	for uid, quota in counters:
+		# check to see if they are on the list of attendees
+		if not r.filter(user_profile__user__id=uid).exists():
+			# this user isn't signed on, disable their internet access.
+			portal.disable(uid)
 
 
 def refresh_networkhost(portal=None):
@@ -603,4 +611,4 @@ def apply_ip4portforwards():
 			external_port = 0
 
 		portal.ip4pf_add(pf.host.ip_address, pf.protocol_id, port, external_port)
-
+		
