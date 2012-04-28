@@ -16,8 +16,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from subprocess import call, Popen, PIPE
-from os import system
-from os.path import exists, join
+from os import system, listdir
+from os.path import exists, join, isfile
 from sys import exit
 from re import compile as re_compile
 import dbus, dbus.service, dbus.glib, gobject
@@ -62,6 +62,9 @@ def create_nat():
 	# enable tproxy captivity routing
 	system('ip rule add fwmark 0x1/0x1 lookup 100')
 	system('ip route add local 0.0.0.0/0 dev lo table 100')
+	
+	# load kernel modules that may not have loaded.
+	system('modprobe -v xt_quota2')
 	
 	if GC_THRESH != None:
 		write_file('/proc/sys/net/ipv4/neigh/default/gc_thresh1', GC_THRESH)
@@ -335,7 +338,36 @@ class PortalBackendAPI(dbus.service.Object):
 			return (True, reset_quota2_amount(user_rule(uid)))
 		except:
 			return (False, 0)
-
+	
+	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='', out_signature='a(si)')
+	def get_all_users_quota_remaining(self):
+		"""
+		Gets all user's remaining quota.
+		
+		Returns an array of a tuple formed as follows:
+		 0: The user ID.
+		 1: The amount of quota remaining.
+		"""
+		
+		o = []
+		# list all items in the quota2 counter directory
+		for f in listdir(QUOTA2_PATH):
+			if not f.startswith(LIMIT_RULE_PREFIX):
+				continue
+			
+			# add the counter
+			try:
+				quota = get_quota2_amount(f)
+			except:
+				# error reading, probably not a counter.
+				continue
+			
+			# shove in the result
+			
+			o.append((f[len(LIMIT_RULE_PREFIX):], quota))
+		
+		return o
+		
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def disable_user(self, uid):
 		"""Disables a user's internet access by removing all their quota."""

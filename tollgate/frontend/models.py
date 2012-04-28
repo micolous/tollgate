@@ -1,5 +1,5 @@
 """tollgate frontend models
-Copyright 2008-2011 Michael Farrell <http://micolous.id.au>
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -33,6 +33,7 @@ from django.utils.translation import ugettext as _
 from tollgate.frontend import *
 from django.core.exceptions import *
 from tollgate.frontend.platform import *
+import pytz
 
 BYTES_MULTIPLIER = 1024.0
 if CIDR:
@@ -52,6 +53,10 @@ def bytes_str(v):
 	else:
 		return u'%.0f.0  B' % v
 
+def utcnow():
+	"Returns the current time as a TZ-aware datetime object."
+	return datetime.utcnow().replace(tzinfo=pytz.utc)
+		
 class UserProfile(Model):
 	class Meta:
 		ordering = ['user__username']
@@ -70,8 +75,6 @@ class UserProfile(Model):
 
 	def __unicode__(self):
 		return u'%s' % (self.user,)
-
-
 
 class NetworkHost(Model):
 	class Meta:
@@ -115,7 +118,7 @@ class Event(Model):
 	start = DateTimeField()
 	end = DateTimeField()
 	def is_active(self):
-		current_time = datetime.now()
+		current_time = utcnow()
 		return self.start < current_time < self.end
 	is_active.boolean = True
 
@@ -340,7 +343,7 @@ class IP4PortForward(Model):
 
 
 def get_current_event():
-	now = datetime.now()
+	now = utcnow()
 	try:
 		return Event.objects.get(start__lte=now, end__gte=now)
 	except ObjectDoesNotExist:
@@ -454,6 +457,14 @@ def refresh_all_quota_usage(portal=None):
 	r = EventAttendance.objects.filter(event__exact=event)
 	for e in r:
 		refresh_quota_usage(e, portal)
+	
+	# now download all the quota counters back and check if there's any that shouldn't be here.
+	counters = portal.get_all_users_quota_remaining()
+	for uid, quota in counters:
+		# check to see if they are on the list of attendees
+		if not r.filter(user_profile__user__id=uid).exists():
+			# this user isn't signed on, disable their internet access.
+			portal.disable(uid)
 
 
 def refresh_networkhost(portal=None):
@@ -507,7 +518,7 @@ def refresh_networkhost(portal=None):
 				users_needing_refresh.append(hostinfo.user_profile)
 			hostinfo.save()
 		except ObjectDoesNotExist:
-			NetworkHost.objects.create(mac_address=mac, computer_name=name, first_connection=datetime.now(), online=True, ip_address=ip)
+			NetworkHost.objects.create(mac_address=mac, computer_name=name, first_connection=utcnow(), online=True, ip_address=ip)
 
 		try:
 			recycled_ip_hosts = NetworkHost.objects.filter(ip_address__exact=ip).exclude(mac_address__iexact=mac)
@@ -560,7 +571,7 @@ def refresh_networkhost_quick():
 				users_needing_refresh.append(hostinfo.user_profile)
 			hostinfo.save()
 		except ObjectDoesNotExist:
-			NetworkHost.objects.create(mac_address=mac, computer_name='', first_connection=datetime.now(), online=True, ip_address=ip)
+			NetworkHost.objects.create(mac_address=mac, computer_name='', first_connection=utcnow(), online=True, ip_address=ip)
 		try:
 			recycled_ip_hosts = NetworkHost.objects.filter(ip_address__exact=ip).exclude(mac_address__iexact=mac)
 			for hostinfo in recycled_ip_hosts:
@@ -600,4 +611,4 @@ def apply_ip4portforwards():
 			external_port = 0
 
 		portal.ip4pf_add(pf.host.ip_address, pf.protocol_id, port, external_port)
-
+		

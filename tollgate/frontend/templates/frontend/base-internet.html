@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% block submenu %}
 	<!-- $Id: base-internet.html 109 2010-11-10 12:23:25Z michael $ -->
 	<ul>
-		<li><a href="{{ url "internet-login-here" }}">{% trans "enable internet connectivity for this pc" %}</a></li>
+		<li><a href="{% url 'internet-login-here' %}">{% trans "enable internet connectivity for this pc" %}</a></li>
 	</ul>
 {% endblock %}
 
