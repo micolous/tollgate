@@ -11,6 +11,10 @@ Contents:
    tutorial
    hacking
    internals
+   credits
+   changelog-3
+   changelog-2
+   
 
 
 
