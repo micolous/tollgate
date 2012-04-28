@@ -19,6 +19,7 @@ setup(
 		'lxml',
 		'dbus',
 		'daemon',
+		'pytz'
 	),
 	
 	packages=find_packages(exclude=['tollgate.settings.local']),
