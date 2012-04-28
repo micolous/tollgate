@@ -46,6 +46,7 @@ mkdir -p $RPM_BUILD_ROOT%{_sbindir}
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/tollgate/
+mkdir -p $RPM_BUILD_ROOT%{_prefix}/share/doc/
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system/
 #mkdir -p $RPM_BUILD_ROOT/usr/lib/python2.7/site-packages/
 mkdir -p %{eggpath}
@@ -57,6 +58,7 @@ python setup.py install --prefix=$RPM_BUILD_ROOT/usr
 rm %{eggpath}/easy-install.pth
 rm %{eggpath}/site.py*
 
+cp -r ./doc $RPM_BUILD_ROOT%{_prefix}/share/doc/tollgate
 cp ./example/dbus/system.d/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
 cp ./example/tollgate/backend.ini $RPM_BUILD_ROOT%{_sysconfdir}/tollgate/
 #In the future, this will need to become /usr/lib Use %{_prefix}
@@ -78,11 +80,18 @@ rm -rf $RPM_BUILD_ROOT
 %files 
 %defattr(-,root,root,-)
 #%doc
-#%attr(0644,root,root) %{_prefix}/lib/python2.7/site-packages/tollgate*
-%attr(0644,root,root) %{_prefix}/lib/python2.7/site-packages/tollgate*/*
 %attr(0644,root,root) %{_sysconfdir}/dbus-1/system.d/tollgate.conf
 %attr(0644,root,root) %{_sysconfdir}/sysconfig/tollgate
 %attr(0644,root,root) %{_sysconfdir}/tollgate/
+%config %{_sysconfdir}/dbus-1/system.d/tollgate.conf
+%config(noreplace) %{_sysconfdir}/sysconfig/tollgate
+%config(noreplace) %{_sysconfdir}/tollgate/*
+
+%attr(0644,root,root) %{_prefix}/share/doc/tollgate
+%docdir %{_prefix}/share/doc/tollgate
+
+#%attr(0644,root,root) %{_prefix}/lib/python2.7/site-packages/tollgate*
+%attr(0644,root,root) %{_prefix}/lib/python2.7/site-packages/tollgate*/*
 %attr(0644,root,root) %{_prefix}/lib/systemd/system/tollgate.target
 %attr(0644,root,root) %{_prefix}/lib/systemd/system/tollgate.target.wants
 #%attr(0644,root,root) %{_prefix}/lib/systemd/system/tollgate.target.wants/*
