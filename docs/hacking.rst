@@ -6,7 +6,7 @@ Hacking on tollgate
 
 Tasks that I've got in mind at the moment:
 
-ipv6 support
+IPv6 support
 ============
 
 I've started implementing IPv6 support in the backend of tollgate in a seperate branch.  At the moment it's got some basic backend support but I haven't implemented the frontend code just yet (or the scanning module for ipv6).  There's some stuff to consider though:
