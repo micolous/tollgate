@@ -1,6 +1,3 @@
 
-BACKEND_DAEMON=/usr/lib/tollgate/backend/tollgate.py
-BACKEND_ARGS="/usr/lib/tollgate/backend/tollgate.ini"
+TOLLGATEURI=https://tollgate.example.com
 
-CAPTIVITY_DAEMON=""
-CAPTIVITY_ARGS=""

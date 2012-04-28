@@ -10,16 +10,18 @@ require {
 	type system_dbusd_t;
 	type system_dbusd_var_run_t;
 	type usr_t;
+	type urandom_device_t;
 	class sock_file write;
 	class dbus { acquire_svc send_msg };
 	class unix_dgram_socket { create connect sendto };
 	class file { getattr read open };
 	class dir { read search };
+	class chr_file { read open };
 }
 
 type tollgate_t;
 type tollgate_exec_t;
-type tollgate_conf_t;
+#type tollgate_conf_t;
 type tollgate_sqlite_t;
 
 init_daemon_domain(tollgate_t, tollgate_exec_t)
@@ -28,18 +30,18 @@ libs_use_shared_libs(tollgate_t)
 #For SELinux troubleshooter
 #============= setroubleshootd_t ==============
 allow setroubleshootd_t tollgate_exec_t:file getattr;
-allow setroubleshootd_t tollgate_conf_t:dir getattr;
-allow setroubleshootd_t tollgate_conf_t:file getattr;
+#allow setroubleshootd_t tollgate_conf_t:dir getattr;
+#allow setroubleshootd_t tollgate_conf_t:file getattr;
 allow setroubleshootd_t tollgate_t:file getattr;
 
 #So that users can actually stat our labeled contents.
 #============= unconfined_t ==============
 allow unconfined_t tollgate_exec_t:file getattr;
-allow unconfined_t tollgate_conf_t:dir { read getattr open };
-allow unconfined_t tollgate_conf_t:file getattr;
+#allow unconfined_t tollgate_conf_t:dir { read getattr open };
+#allow unconfined_t tollgate_conf_t:file getattr;
 allow unconfined_t tollgate_t:file getattr;
 
-# This is for the tollgate backend service.
+# This is for the tollgate backend and captivity service.
 #============= tollgate_t ==============
 allow tollgate_t bin_t:dir read;
 allow tollgate_t bin_t:file getattr;
@@ -49,6 +51,7 @@ allow tollgate_t self:unix_dgram_socket { create connect };
 allow tollgate_t syslogd_t:unix_dgram_socket sendto;
 allow tollgate_t system_dbusd_t:dbus { acquire_svc send_msg };
 allow tollgate_t system_dbusd_var_run_t:dir search;
-allow tollgate_t tollgate_conf_t:file { read getattr open };
+#allow tollgate_t tollgate_conf_t:file { read getattr open };
 allow tollgate_t usr_t:file { read getattr open };
+allow tollgate_t urandom_device_t:chr_file { read open };
 

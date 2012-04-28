@@ -1,5 +1,5 @@
 
-%global eggpath $RPM_BUILD_ROOT/usr/lib/python2.7/site-packages/
+%global eggpath $RPM_BUILD_ROOT%{_prefix}/lib/python2.7/site-packages/
 
 Name:		tollgate
 Version:	2.8.4
@@ -14,8 +14,8 @@ URL:		https://github.com/micolous/tollgate
 Source:		%{name}-%{version}.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
-BuildRequires:	httpd
-Requires:	python, Django, httpd, akmod-xtables-addons, python-daemon, dbus-python, python-IPy, python-lxml, python-progressbar, python-simplejson, Django-south, nmap, mod_wsgi, python-pip, tollgate-selinux
+BuildRequires:	httpd, python-setuptools
+Requires:	python, Django, httpd, akmod-xtables-addons, python-daemon, dbus-python, python-IPy, python-lxml, python-progressbar, python-simplejson, Django-south, nmap, mod_wsgi, python-pip, tollgate-selinux, configparser_plus
 
 %package selinux
 
@@ -53,7 +53,7 @@ mkdir -p %{eggpath}
 
 export PYTHONPATH=%{eggpath}
 
-python setup.py install --prefix=$RPM_BUILD_ROOT/usr
+python setup.py install --prefix=$RPM_BUILD_ROOT%{_prefix}
 #Setup.py leaves a bunch of shit left over. ... we need to clean it up.
 rm %{eggpath}/easy-install.pth
 rm %{eggpath}/site.py*
