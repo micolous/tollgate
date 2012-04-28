@@ -63,6 +63,9 @@ def create_nat():
 	system('ip rule add fwmark 0x1/0x1 lookup 100')
 	system('ip route add local 0.0.0.0/0 dev lo table 100')
 	
+	# load kernel modules that may not have loaded.
+	system('modprobe -v xt_quota2')
+	
 	if GC_THRESH != None:
 		write_file('/proc/sys/net/ipv4/neigh/default/gc_thresh1', GC_THRESH)
 		write_file('/proc/sys/net/ipv4/neigh/default/gc_thresh2', GC_THRESH * 4)
