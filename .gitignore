@@ -3,7 +3,6 @@
 *.svn-base
 *.sqlite3
 *.pyc
-*.ini
 *.swp
 *.orig
 .project
