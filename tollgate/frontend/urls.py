@@ -48,7 +48,7 @@ urlpatterns = (
 	url(r'^internet/login/here/$', 'internet_login_here', name='internet-login-here'),
 	url(r'^internet/login/(?P<mac_address>[\dA-Fa-f]{12})/$', 'internet_login', name='internet-login'),
 	url(r'^internet/disown/(?P<host_id>\d+)/$', 'internet_disown', name='internet-disown'),
-	url(r'^internet/$', 'internet', name='disown'),
+	url(r'^internet/$', 'internet', name='internet'),
 	url(r'^internet/refresh/$', 'host_refresh_quick', name='host-refres-quick'),
 	url(r'^internet/offline/$', 'internet_offline', name='internet-offline'),
 
@@ -74,7 +74,7 @@ urlpatterns = (
 	url(r'^usage/sort/speed$', 'usage_speed', name="usage-speed"),
 	url(r'^usage/sort/morereset$', 'usage_morereset', name='usage-morereset'),
 
-	url(r'^pclist/unowned/$', 'pclist_unowned', name='public-unowned'),
+	url(r'^pclist/unowned/$', 'pclist_unowned', name='pclist-unowned'),
 	url(r'^pclist/$', 'pclist', name='pclist'),
 
 	url(r'^captive_landing/?$', 'captive_landing', name='captive-landing'),

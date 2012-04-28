@@ -25,10 +25,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  -->
 
 <ul>
-	<li><a href="{% url "usage" %}">{% trans "internet usage report" %}</a></li>
-	<li><a href="{% url "usage-heavy" %}">{% trans "highest quota use" %}</a></li>
-	<li><a href="{% url "usage-morereaset" %}">{% trans "most resets" %}</a></li>
-	<li><a href="{% url "usage-speed" %}">{% trans "highest speed" %}</a></li>
+	<li><a href="{% url 'usage' %}">{% trans "internet usage report" %}</a></li>
+	<li><a href="{% url 'usage-heavy' %}">{% trans "highest quota use" %}</a></li>
+	<li><a href="{% url 'usage-morereset' %}">{% trans "most resets" %}</a></li>
+	<li><a href="{% url 'usage-speed' %}">{% trans "highest speed" %}</a></li>
 </ul>
 {% endblock %}
 

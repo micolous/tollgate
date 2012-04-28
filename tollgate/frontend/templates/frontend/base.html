@@ -60,36 +60,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 		<div id="menubar">
 			<ul>
-				<li><a href="{% url 'index" %}">tollgate</a></li>
-				<li><a href="{% url "quota" %}">{% trans "my devices and quota" %}</a></li>
-				<li><a href="{% url "internet" %}">{% trans "login other computers" %}</a></li>
+				<li><a href="{% url 'index' %}">tollgate</a></li>
+				<li><a href="{% url 'quota' %}">{% trans "my devices and quota" %}</a></li>
+				<li><a href="{% url 'internet' %}">{% trans "login other computers" %}</a></li>
 
 				{% if perms.frontend.can_view_quota %}
-					<li><a href="{% url "usage" %}">{% trans "quota management" %}</a></li>
+					<li><a href="{% url 'usage' %}">{% trans "quota management" %}</a></li>
 				{% endif %}
 
 				{% if perms.frontend.can_view_ownership %}
-					<li><a href="{% url "pclist" %}">{% trans "computer list" %}</a></li>
+					<li><a href="{% url 'pclist' %}">{% trans "computer list" %}</a></li>
 				{% endif %}
 
 				{% if perms.frontend.can_register_attendance %}
-					<li><a href="{% url signin %}">{% trans "sign in" %}</a></li>
+					<li><a href="{% url 'signin' %}">{% trans "sign in" %}</a></li>
 				{% endif %}
 
 				{% if perms.frontend.can_ip4portforward %}
-					<li><a href="{% url ip4portforward_list %}">{% trans "ipv4 port forwarding" %}</a></li>
+					<li><a href="{% url 'ip4portforward_list' %}">{% trans "ipv4 port forwarding" %}</a></li>
 				{% endif %}
 				
 				{% if user.is_staff %}
-					<li><a href="{% url "admin:index" %}">{% trans "system administration" %}</a></li>
+					<li><a href="{% url 'admin:index' %}">{% trans "system administration" %}</a></li>
 				{% endif %}
 				
 				{% if user.is_authenticated %}
 		 			<li>
 	 					{% trans "logged in as:" %} {{ user.username }} ({{ user.first_name }} {{ user.last_name }})
 		 			</li>
-					<li><a href="{% url "account_password_change" %}">{% trans "change password" %}</a></li>
-		 			<li><a href="{% url "logout" %}">{% trans "logout" %}</a></li>
+					<li><a href="{% url 'account_password_change' %}">{% trans "change password" %}</a></li>
+		 			<li><a href="{% url 'logout' %}">{% trans "logout" %}</a></li>
 		 		{% else %}
 		 			<li>{% trans "not logged in" %}</li>
 		 			<li><a href="/login/">{% trans "login" %}</a></li>
@@ -129,7 +129,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		</div>
 		
 		<div id="copyrights">
-			<p>tollgate <abbr title="date 2012-04-20">v2.8.4-dev</abbr> is <abbr title="copyright">&copy;</abbr> 2008-2012 Michael Farrell and contributors.  <a href="{% url source %}">Source code and licensing information</a>.</p>
+			<p>tollgate <abbr title="date 2012-04-20">v2.8.4-dev</abbr> is <abbr title="copyright">&copy;</abbr> 2008-2012 Michael Farrell and contributors.  <a href="{% url 'source' %}">Source code and licensing information</a>.</p>
 		</div>
 	</body>
 </html>
