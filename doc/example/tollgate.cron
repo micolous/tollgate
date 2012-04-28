@@ -1,1 +1,8 @@
+# This is an example crontab for tollgate.
+#
+# You should instead change the 'cd /opt/tollgate' path to point to where you
+# have deployed tollgate from (normally your own project).  This script needs
+# to do some database activities so will need to point to your project as 
+# opposed to your installation path for tollgate (unless you're running it in
+# the development mode where it is inside tollgate's project).
 */10 * * * * root cd /opt/tollgate; ./manage.py refresh_hosts
