@@ -59,9 +59,9 @@ rm %{eggpath}/easy-install.pth
 rm %{eggpath}/site.py*
 
 cp -r ./doc $RPM_BUILD_ROOT%{_prefix}/share/doc/tollgate
-cp ./example/dbus/system.d/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
-cp ./example/tollgate/backend.ini $RPM_BUILD_ROOT%{_sysconfdir}/tollgate/
-#In the future, this will need to become /usr/lib Use %{_prefix}
+cp ./doc/example/dbus/system.d/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
+cp ./doc/example/tollgate/backend.ini $RPM_BUILD_ROOT%{_sysconfdir}/tollgate/
+
 cp ./platform/fedora/systemd/tollgate.target $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system/
 cp ./platform/fedora/systemd/tollgate-backend.service $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system/
 cp ./platform/fedora/systemd/tollgate-captivity.service $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system/
