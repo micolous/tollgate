@@ -28,8 +28,13 @@ Next, we setup ISC-DHCP. This will provide DHCP addresses to your LAN network. M
 
 Before you can start DHCP, you must create the rndc key that will be shared with named. Run the command:
 
-rndc-confgen -a -b 256
+rndc-confgen -a -r keyboard -b 256
 
 Now ISC-DHCP can be started:
+
+systemctl enable dhcpd.service
+systemctl start dhcpd.service
+
+Check systemctl status dhcpd.service and /var/log/messages if you encounter issues.
 
 
