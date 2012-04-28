@@ -70,7 +70,7 @@ You should also setup a `STATIC_ROOT` for where all the static files should be s
 
 To your `MIDDLEWARE_CLASSES`, add `tollgate.frontend.common.TollgateMiddleware`, 
 
-To your `INSTALLED_APPS`, append `south`, `tollgate.api`, `tollgate.frontend`, and `tollgate.scripts`.
+To your `INSTALLED_APPS`, append `django.contrib.humanize`, `south`, `tollgate.api`, `tollgate.frontend`, and `tollgate.scripts`.
 
 You should also add the following extra settings for tollgate and configure appropriately:
 

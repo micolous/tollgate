@@ -25,8 +25,8 @@ except ImportError:
 	warnings.warn("The Python DBUS module is unavailable.  We cannot connect to the backend.  TOLLGATE WILL NOT WORK!  THIS IS FOR LOCAL DEVELOPMENT ONLY!", UserWarning)
 	dbus = None
 
-DBUS_INTERFACE = 'au.id.micolous.TollgateBackendInterface'
-DBUS_SERVICE = 'au.id.micolous.TollgateBackendService'
+DBUS_INTERFACE = 'au.org.tollgate.TollgateBackendInterface'
+DBUS_SERVICE = 'au.org.tollgate.TollgateBackendService'
 DBUS_PATH = '/TollgateBackendAPI'
 
 def convert_mac(i):
