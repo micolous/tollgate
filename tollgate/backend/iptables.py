@@ -364,7 +364,7 @@ class PortalBackendAPI(dbus.service.Object):
 			
 			# shove in the result
 			
-			o.append((f[len(LIMIT_RULE_PREFIX):], q))
+			o.append((f[len(LIMIT_RULE_PREFIX):], quota))
 		
 		return o
 		
