@@ -58,9 +58,9 @@ python setup.py install --prefix=$RPM_BUILD_ROOT%{_prefix}
 rm %{eggpath}/easy-install.pth
 rm %{eggpath}/site.py*
 
-cp -r ./doc $RPM_BUILD_ROOT%{_prefix}/share/doc/tollgate
-cp ./doc/example/dbus/system.d/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
-cp ./doc/example/tollgate/backend.ini $RPM_BUILD_ROOT%{_sysconfdir}/tollgate/
+cp -r ./docs $RPM_BUILD_ROOT%{_prefix}/share/doc/tollgate
+cp ./docs/example/dbus/system.d/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
+cp ./docs/example/tollgate/backend.ini $RPM_BUILD_ROOT%{_sysconfdir}/tollgate/
 
 cp ./platform/fedora/systemd/tollgate.target $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system/
 cp ./platform/fedora/systemd/tollgate-backend.service $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system/
