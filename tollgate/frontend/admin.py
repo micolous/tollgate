@@ -25,7 +25,7 @@ class EventAdmin(admin.ModelAdmin):
 	list_display = ("name", "start", "end", "is_active")
 
 class NetworkHostAdmin(admin.ModelAdmin):
-	list_display = ("mac_address", "ip_address", "computer_name", "user_profile")
+	list_display = ("mac_address", "ip_address", "computer_name", "user_profile", "online", "vendor")
 
 class UserProfileAdmin(admin.ModelAdmin):
 	list_display = ("user", "internet_on")

@@ -53,7 +53,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	{% for host in hosts %}
 		<tr class="{% cycle row1,row2 %}">
 			<td>{{ host.computer_name }}</td>
-			<td><a href="/internet/login/{{ host.mac_address }}/" title="Log in this host"><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.console_type }}.png" alt="{{ host.console_type }} " title="{{ host.console_type }}" class="cs"/><code>{{ host.mac_address }}</code></a></td>
+			<td><a href="/internet/login/{{ host.mac_address }}/" title="Log in this host"><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.vendor }}.png" alt="{{ host.vendor }} " title="{{ host.vendor }}" class="cs"/><code>{{ host.mac_address }}</code></a></td>
 			<td><code><a href="/internet/login/{{ host.mac_address }}/" title="Log in this host">{{ host.ip_address }}</a></code></td>
 			<td><abbr title="{{ host.first_connection|naturalday }} at {{ host.first_connection|time }}">{{ host.first_connection|timesince }} ago</abbr></td>
 		</tr>

@@ -72,6 +72,18 @@ class UserProfile(Model):
 		return NetworkHostOwnerChangeEvent.objects.filter(
 			Q(old_owner=self) | Q(new_owner=self)
 		)
+	
+	@property
+	def username(self):
+		return self.user.username
+	
+	@property
+	def first_name(self):
+		return self.user.first_name
+	
+	@property
+	def last_name(self):
+		return self.user.last_name
 
 	def __unicode__(self):
 		return u'%s' % (self.user,)
@@ -98,7 +110,7 @@ class NetworkHost(Model):
 			return oui
 	
 	@property
-	def console_type(self):
+	def vendor(self):
 		o = self.get_console_oui()
 		if o == None:
 			return 'pc'

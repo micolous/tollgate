@@ -23,6 +23,10 @@ from sys import exc_info
 import cPickle
 from datetime import datetime, timedelta
 from time import mktime
+from djangorestframework.views import ModelView
+from djangorestframework.mixins import ReadModelMixin
+from djangorestframework import status
+from djangorestframework.response import ErrorResponse
 
 try:
 	# python 2.6
@@ -30,6 +34,51 @@ try:
 except:
 	import simplejson as json
 
+
+class ReadOnlyInstanceModelView(ReadModelMixin, ModelView):
+	"""
+	A read-only InstanceModelView, that only allows GET requests.
+	"""
+	_suffix="ReadOnlyInstance"
+
+class MyUserProfileModelView(ModelView):
+	"""
+	Reads the current NetworkHost record for this user.
+	"""
+	
+	def get(self, request, *args, **kwargs):
+		model = self.resource.model
+		
+		try:
+			if request.user.is_authenticated():
+				# take the user data from the authentication.
+				return request.user.get_profile()
+			
+			# look up based on the NetworkHost of this request
+			profile = None
+			
+			ip = request.META['REMOTE_ADDR']
+			mac = get_mac_address(ip)
+			if mac == None:
+				# unknown MAC
+				raise ErrorResponse(status.HTTP_404_NOT_FOUND)
+
+			try:
+				h = NetworkHost.objects.get(mac_address__iexact=mac)
+				if h.user_profile == None:
+					# no user associated with this host
+					raise ErrorResponse(status.HTTP_404_NOT_FOUND)
+
+				return h.user_profile
+			except:
+				# networkhost record does not exist
+				raise ErrorResponse(status.HTTP_404_NOT_FOUND)
+		except:
+			pass
+			
+		# other error
+		raise ErrorResponse(status.HTTP_500_INTERNAL_SERVER_ERROR)
+	
 # Create a Dispatcher; this handles the calls and translates info to function maps
 dispatcher = SimpleXMLRPCDispatcher(allow_none=False, encoding=None) # Python 2.5
 
@@ -70,69 +119,6 @@ def xmlrpc_handler(request):
 	return response
 
 
-def whatis_ip(ip):
-	"""Returns the identity of the computer associated with that IPv4 address.
-	Takes one argument, the IP of the computer to look up, in dotted-quad format (XXX.XXX.XXX.XXX).
-	Returns False if the host is unknown or offline.
-	Raises an error if input is invalid."""
-
-	if not is_valid_ip(ip):
-		raise ValueError, 'Invalid IPv4 address specified'
-
-	# lookup the IP address
-	try:
-		h = NetworkHost.objects.filter(ip_address__exact=ip, online__exact=True)[0]
-		return marshal_NetworkHost(h)
-	except:
-		return False
-
-def whoami():
-	"""Returns the identity of the user who is currently logged in (via cookies),
-	or the one who is logged in this computer (via mac address).
-	Returns False if the user is unknown."""
-
-	request = steal_request()
-	if request.user.is_authenticated():
-		return marshal_UserProfile(request.user.get_profile(), hide_name=False)
-
-	profile = None
-	ip = request.META['REMOTE_ADDR']
-	mac = get_mac_address(ip)
-	if mac == None:
-		return False
-
-	try:
-		h = NetworkHost.objects.get(mac_address__iexact=mac)
-		if h.user_profile == None:
-			return False # no user association
-
-		return marshal_UserProfile(h.user_profile, hide_name=False)
-	except:
-		return False
-
-def whois_ip(ip):
-	"""Returns the identity of the user associated with a computer on an IPv4 address.
-	Takes one argument, the IP of the computer to look up, in dotted-quad format (XXX.XXX.XXX.XXX).
-	Returns False if the user is unknown or offline.
-	Raises an error if the input is invalid."""
-
-	if not is_valid_ip(ip):
-		raise ValueError, 'Invalid IPv4 address specified'
-
-	# lookup the IP address
-	try:
-		h = NetworkHost.objects.filter(ip_address__exact=ip, online__exact=True)[0]
-
-		if h.user_profile == None:
-			return False # no user association
-
-		return marshal_UserProfile(h.user_profile)
-	except:
-		return False
-
-def ping():
-	"""Always returns True."""
-	return True
 
 def usage():
 	"""Returns the usage data for the person logged in (via cookies), or the person
@@ -216,70 +202,9 @@ def usage_history():
 		return False
 
 
-def r_disown_mac(mac, authhash):
-	"""Attempts to remotely log out a specific computer by MAC.  Returns True on successful call, False otherwise.
-	This function requires that you send an authhash, which is an SHA512 hashed string (in BASE16 representation) in the following format:
-	  ${RESTRICTED_CALLS_KEY}:${UNIX_MINUTE}:${MAC}
-	The UNIX_MINUTE parameter must be in plus or minus 1 minute of server time.  It is =floor(unix_timestamp/60).
-	MAC Address should be in base-16 encoded format.
-	"""
-	# validate the MAC
-	if not is_valid_mac(mac):
-		return (False, 'invalmac')
-
-	# validate the authhash
-	if not verify_authhash(mac, authhash):
-		return (False,'invalauthhash')
-
-	# now see if the computer exists
-	try:
-		h = NetworkHost.objects.get(mac_address__iexact=mac)
-
-		if h.user_profile != None:
-			profile = h.user_profile
-			NetworkHostOwnerChangeEvent.objects.create(old_owner=profile, new_owner=None, network_host=h)
-			h.user_profile = None
-	                h.save()
-
-			# resync internet for user
-        	        sync_user_connections(profile)
-
-        	        # now we're done
-	                return True
-		else:
-			# already disowned, we'll say it was ok anyway
-			return True
-	except:
-		# host not found
-		return False
-
-def coffee_ip(ip):
-	"""Returns a bool indicating whether the user has paid for unlimited coffee or not and is allowed to use the coffee request system.
-    Returns False if the IP address is not assigned to a user, the user has been banned from using the coffee request system, or that user hasn't paid for unlimited coffee.
-    Returns True if the user has paid for unlimited coffee and is allowed to use the coffee request system. Also implies the user's coffee gland was lost in a tragic accident as a child.
-    There is currently no API call to indicate whether the user has paid for four cooked meals."""
-
-	if not is_valid_ip(ip):
-		raise ValueError, 'Invalid IPv4 address specified'
-
-	# lookup the IP address
-	try:
-		h = NetworkHost.objects.filter(ip_address__exact=ip, online__exact=True)[0]
-		attendance = get_attendance_currentevent(h.user_profile)
-		return attendance.coffee == 1
-	except:
-		return False
-
-
 registrations = {
-	'whatis_ip': whatis_ip,
-	'whois_ip': whois_ip,
-	'whoami': whoami,
-	'ping': ping,
 	'usage': usage,
 	'usage_history': usage_history,
-	'coffee_ip': coffee_ip,
-	'r_disown_mac': r_disown_mac,
 }
 
 for k in registrations:
