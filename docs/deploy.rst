@@ -88,6 +88,7 @@ To your ``INSTALLED_APPS``, append::
 
 You should also add the following extra settings for tollgate and configure appropriately::
 
+   AUTH_PROFILE_MODULE = 'frontend.userprofile'
    LAN_SUBNET='10.4.0.0/23'
    LAN_IFACE='eth1'
    DEFAULT_QUOTA_AMOUNT=150
