@@ -213,7 +213,7 @@ When you're planning for a LAN party, I generally do the math based on::
 
    hosts = (maximum_attendance * 2) + static_hosts
 
-You should only be using a ``/16`` if you're expecting in excess of 30,000 people attending your LAN.  And even then you should consider slicing it up into subnets, because most operating systems have an ARP cache limit of about 1024 hosts, and you'll have problems with broadcast packets.  Even something as simple as a `Master Browser Election`_ could knock out your network!
+You should only be using a ``/16`` if you're expecting in excess of 30,000 people attending your LAN.  And even then you should consider slicing it up into subnets, because most operating systems have an ARP cache limit of about 1024 hosts, and you'll have problems with broadcast packets.  Even something as simple as a `Master Browser Election`_ could knock out your network (though you should be :ref:`usingwins` at this point).
 
 With dynamic DNS assignments by DHCP and routing in place, you can even keep it so that hostnames across subnets can still talk to each other by name.  Without this, you'll end up with a lot of "noise" on your network from all sorts of multicast protocols.
 
@@ -344,6 +344,24 @@ See also:
 .. _WPAD detection in Internet Explorer: http://blogs.msdn.com/b/askie/archive/2008/12/18/wpad-detection-in-internet-explorer.aspx
 .. _Internet Explorer's Worst Feature: http://perimetergrid.com/wp/2008/01/11/wpad-internet-explorers-worst-feature/
 .. _Pwning hotel guests: http://www.skullsecurity.org/blog/2009/pwning-hotel-guests
+
+.. _usingwins:
+
+Using WINS
+----------
+
+In an effort to help reduce the master browser election traffic, and assist in NetBIOS name resolution, you should setup a WINS server.
+
+In ISC DHCPd, this is done with the following configuration option::
+
+   option netbios-name-servers 10.4.0.1;
+
+You'll also need to run an actual WINS server too.  Samba 3 provides a WINS server, but it is not enabled by default.  In the ``[global]`` section of ``/etc/samba/smb.conf``, you can enable this functionality with::
+
+   wins support = yes
+   dns proxy = yes
+
+After this, reload your samba and dhcp daemon.
 
 Nintendo Consoles / WFC
 =======================
