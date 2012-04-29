@@ -20,7 +20,6 @@ from django.http import HttpResponse
 from tollgate.frontend.models import *
 from tollgate.api.models import *
 from sys import exc_info
-import cPickle
 from datetime import datetime, timedelta
 from time import mktime
 from djangorestframework.views import ModelView
@@ -28,11 +27,6 @@ from djangorestframework.mixins import ReadModelMixin
 from djangorestframework import status
 from djangorestframework.response import ErrorResponse
 
-try:
-	# python 2.6
-	import json
-except:
-	import simplejson as json
 
 
 class ReadOnlyInstanceModelView(ReadModelMixin, ModelView):
@@ -79,44 +73,6 @@ class MyUserProfileModelView(ModelView):
 		# other error
 		raise ErrorResponse(status.HTTP_500_INTERNAL_SERVER_ERROR)
 	
-# Create a Dispatcher; this handles the calls and translates info to function maps
-dispatcher = SimpleXMLRPCDispatcher(allow_none=False, encoding=None) # Python 2.5
-
-def xmlrpc_handler(request):
-	"""
-	the actual handler:
-	if you setup your urls.py properly, all calls to the xml-rpc service
-	should be routed through here.
-	If post data is defined, it assumes it's XML-RPC and tries to process as such
-	Empty post assumes you're viewing from a browser and tells you about the service.
-	"""
-
-	response = HttpResponse()
-	if len(request.POST):
-		response.write(dispatcher._marshaled_dispatch(request.raw_post_data))
-	else:
-		response.write("<b>This is an XML-RPC Service.</b><br>")
-		response.write("You need to invoke it using an XML-RPC Client!<br>")
-		response.write("The following methods are available:<ul>")
-		methods = dispatcher.system_listMethods()
-
-		for method in methods:
-			# right now, my version of SimpleXMLRPCDispatcher always
-			# returns "signatures not supported"... :(
-			# but, in an ideal world it will tell users what args are expected
-			sig = dispatcher.system_methodSignature(method)
-
-			# this just reads your docblock, so fill it in!
-			help = dispatcher.system_methodHelp(method)
-
-			#response.write("<li><b>%s</b>: [%s] %s" % (method, sig, help))
-			response.write("<li><b>%s</b>: <pre>\n%s</pre></li>" % (method, help))
-
-		response.write("</ul>")
-		response.write('')
-
-	response['Content-length'] = str(len(response.content))
-	return response
 
 
 
@@ -200,83 +156,4 @@ def usage_history():
 		return o
 	except:
 		return False
-
-
-registrations = {
-	'usage': usage,
-	'usage_history': usage_history,
-}
-
-for k in registrations:
-	dispatcher.register_function(registrations[k], k)
-
-# converts a datetime object to an integer with seconds since the unix epoch
-class JSONDateTimeEncoder(json.JSONEncoder):
-	def default(self, o=datetime):
-		return mktime(o.timetuple())
-
-def httpget_handler(request, output_format, method):
-	# this handles requests through our "simple" api handler.
-	# this outputs in a few formats.
-	output_format = output_format.lower()
-	supported_formats = ['json', 'pickle', 'csv', 'python']
-
-	if output_format not in supported_formats:
-		raise Exception, "Unsupported output format"
-
-	if method not in registrations.keys():
-		raise Exception, "Unknown method"
-
-	# argument names and values mustn't be unicode
-	args = {}
-	for k in request.GET.keys():
-		args[str(k)] = str(request.GET[k])
-
-	output = registrations[method](**args)
-
-	response = HttpResponse()
-	if output_format == 'json':
-		response['Content-Type'] = 'text/javascript'
-		json.dump(output, response, cls=JSONDateTimeEncoder)
-	elif output_format == 'pickle':
-		response['Content-Type'] = 'text/plain'
-		cPickle.dump(output, response)
-	elif output_format == 'python':
-		response['Content-Type'] = 'text/plain'
-		response.write(repr(output))
-	elif output_format == 'csv':
-		response['Content-Type'] = 'text/plain'
-		if type(output) is list or type(output) is tuple:
-			for l in output:
-				if type(l) is list or type(l) is tuple:
-					for c in l:
-						response.write("%s, " % c)
-					response.write("\n")
-				else:
-					response.write(l)
-		elif type(output) is dict:
-			for k in output:
-				response.write("%s, %s\n" % (k, output[k]))
-		else:
-			response.write(output)
-
-
-
-	return response
-
-
-#def httpget_handler(request, method):
-#	"""HTTP GET API.  This needs to be after all the methods as we use a rather
-#	hackish way of dealing with stuff so we don't have to repeat ourselves."""
-#	if not registrations.has_key(method):
-#		return 'ERR:InvalidMethod:That method does not exist.'
-#
-#	m = registrations[method]
-#	try:
-#		v = m(**kwargs=request.REQUEST)
-#	except Exception:
-#		e = exc_info()
-#		return 'ERR:%s:%s' % )e[0], e[1])
-#
-#	return 'OK' # need to output the data in a crossplatform and easy to deal with way.
 

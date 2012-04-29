@@ -23,8 +23,6 @@ from tollgate.api.views import ReadOnlyInstanceModelView, MyUserProfileModelView
 
 
 urlpatterns = patterns('tollgate.api.views',
-#	(r'^xmlrpc/$', 'xmlrpc_handler'),
-#	(r'^httpget/(?P<output_format>\w+)/(?P<method>[\w\d_]+)/$', 'httpget_handler'),
 
 	# Gets information about a network host by IP.
 	# Equivalent to the old whatis_ip() API call.
