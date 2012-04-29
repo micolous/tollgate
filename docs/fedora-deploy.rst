@@ -131,12 +131,15 @@ Now you should start httpd.::
 Tollgate backends
 =================
 
+You should configure ``/etc/tollgate/backend.ini`` with your site details. Additionally, you should configure ``/etc/sysconfig/tollgate`` with the correct DNS name of your tollgate.
+
 You can now start the tollgate backends.::
 
         systemctl enable tollgate-backend.service
         systemctl enable tollgate-captivity.service
         systemctl start tollgate-backend.service
         systemctl start tollgate-captivity.service
+
 
 
 .. _rpmfusion-free: http://rpmfusion.org/Configuration

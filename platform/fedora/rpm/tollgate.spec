@@ -1,8 +1,8 @@
 
-%global eggpath $RPM_BUILD_ROOT%{_prefix}/lib/python2.7/site-packages/
+#%global eggpath $RPM_BUILD_ROOT%{_prefix}/lib/python2.7/site-packages/
 
 Name:		tollgate
-Version:	2.8.4
+Version:	2.8.4_dev
 Release:	4%{?dist}
 Summary:	Django based captive internet portal
 
@@ -14,7 +14,7 @@ URL:		https://github.com/micolous/tollgate
 Source:		%{name}-%{version}.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
-BuildRequires:	httpd, python-setuptools
+BuildRequires:	httpd, python-setuptools, python-setuptools-devel
 Requires:	python, Django, httpd, akmod-xtables-addons, python-daemon, dbus-python, python-IPy, python-lxml, python-progressbar, python-simplejson, Django-south, nmap, mod_wsgi, python-pip, tollgate-selinux, configparser_plus, pygobject2, pytz, mod_ssl
 
 %package selinux
@@ -35,7 +35,7 @@ SELinux policies for the Tollgate captive internet portal.
 %setup -q -n %{name}
 
 %build 
-python setup.py build
+#python setup.py build
 cd ./platform/fedora/selinux/
 make -f /usr/share/selinux/devel/Makefile 
 
@@ -53,18 +53,11 @@ mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/www/tollgate/wfc
 mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/www/tollgate/wpad
 mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/www/tollgate/static
 #mkdir -p $RPM_BUILD_ROOT/usr/lib/python2.7/site-packages/
-mkdir -p %{eggpath}
+#mkdir -p %{eggpath}
 
-export PYTHONPATH=%{eggpath}
+#export PYTHONPATH=%{eggpath}
 
-python setup.py install --prefix=$RPM_BUILD_ROOT%{_prefix}
-#Setup.py leaves a bunch of shit left over. ... we need to clean it up.
-rm %{eggpath}/easy-install.pth
-rm %{eggpath}/site.py*
-#Now for python to actually find this, we have to do some other dirty magic.
-rm -r %{eggpath}/tollgate-*/EGG-INFO
-mv %{eggpath}/tollgate-*/tollgate %{eggpath}/
-rmdir %{eggpath}/tollgate-*
+%{__python} setup.py install --skip-build --root $RPM_BUILD_ROOT
 
 cp -r ./docs $RPM_BUILD_ROOT%{_prefix}/share/doc/tollgate
 cp ./docs/example/dbus/system.d/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
@@ -107,8 +100,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0644,root,root) %{_prefix}/share/doc/tollgate
 %docdir %{_prefix}/share/doc/tollgate
 
-#%attr(0644,root,root) %{_prefix}/lib/python2.7/site-packages/tollgate*
-%attr(0755,root,root) %{_prefix}/lib/python2.7/site-packages/tollgate/
+%{python_sitelib}/*
 
 %attr(0644,root,root) %{_prefix}/lib/systemd/system/tollgate-backend.service
 %attr(0644,root,root) %{_prefix}/lib/systemd/system/tollgate-captivity.service
@@ -142,15 +134,11 @@ RESTRICTED_CALLS_KEY=''
 LOGIN_URL='/login/'
 LOGOUT_URL='/logout/'
 EOF
+	
 	sed -e "s/^os.environ\['DJANGO_SETTINGS_MODULE'\].*/os.environ['DJANGO_SETTINGS_MODULE'] = 'tollgate_site.settings'/" /usr/lib/python2.7/site-packages/tollgate/tollgate.wsgi > tollgate.wsgi
-chmod +x tollgate.wsgi
-
-	cat > urls.py << EOF
-from django.conf.urls.defaults import patterns, include, url
-urlpatterns = patterns('',
-      (r'^', include('tollgate.urls')),
-)
-EOF	
+	chmod +x tollgate.wsgi
+	mv urls.py urls.orig.py
+	sed -e "s/# url(r'\^admin\/', include(admin.site.urls)),/# url(r'^admin\/', include(admin.site.urls)),\n\t(r'^', include('tollgate.urls')),/" urls.orig.py > urls.py
 
 fi
 
