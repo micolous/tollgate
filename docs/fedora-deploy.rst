@@ -49,6 +49,8 @@ Next named.conf needs to be configured. There is an example of this in ``example
 
 Additionally, you must configure the forwards and reverse zones to match for ``ISC-DHCP``. There are example zones in ``example/fedora/named/``. These should go into ``/var/named/dynamic/``.
 
+Please note, we have provided a zone for ``conntest.nintendowifi.net``. This is also aided by a component in HTTPD (Documented later). This is to allow the Nintendo DS, Nintendo DSi and Nintendo Wii wireless connection test to complete, so that the Access point can be associated with. If this is not avaliable, Nintendo devices will be unable to join the wireless access point. 
+
 Now ``BIND9`` can be started::
         
         systemctl enable named.service
@@ -61,11 +63,13 @@ You can check that bind it working from the server, by running a query against l
         dig @127.0.0.1 dhcp.example.lan axfr
         dig @127.0.0.1 1.0.4.10.in-addr.arpa PTR
         dig @127.0.0.1 0.4.10.in-addr.arpa axfr
+        dig @127.0.0.1 conntest.nintendowifi.net A
 
 From a client connected to the LAN side, you should NOT be able to carry out a zone transfer, but you should see the A and PTR records returned::
 
         dig @10.4.0.1 1.0.4.10.in-addr.arpa PTR
         dig @10.4.0.1 tollgate.example.lan. A
+        dig @127.0.0.1 conntest.nintendowifi.net A
         dig @127.0.0.1 example.lan axfr
 
 When a client connects you should see messages in ``/var/log/messages`` like::
@@ -83,6 +87,14 @@ Then you have made a mistake somewhere. Check that the rndc-key permissions are 
 
 HTTPD
 =====
+
+Apache HTTPD is what provides the majority of ``Tollgate`` functionality. We highly recommend that you install ``mod_ssl``, ``mod_nss`` or ``mod_gnutls``, since tollgate requires user authentication's to be sent via the HTTP channels. Our examples below will cover the usage of ``mod_ssl``.
+
+We must install ``mod_ssl``.::
+
+        yum install mod_ssl
+
+
 
 .. _rpmfusion-free: http://rpmfusion.org/Configuration
 .. _tollgate repository: http://repo.tollgate.org.au/fedora/
