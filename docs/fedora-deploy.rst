@@ -27,15 +27,16 @@ We can setup the network either with ``DNSMASQ`` or ``ISC-DHCP`` and ``BIND9``. 
 
 Install the packages::
 
-        yum install dhcp bind
+        yum install dhcp bind bind-utils
 
 Setup your LAN facing network device with a static IP address. There is an example of this in ``example/fedora/ifcfg-lan``. 
 
-Next, we setup ``ISC-DHCP``. This will provide DHCP addresses to your LAN network. Make sure you get this right, else you will have a DHCP conflict on your Internet side. There is an example config in ``example/dhcpd.conf``.
+Next, we setup ``ISC-DHCP``. This will provide DHCP addresses to your LAN network. Make sure you get this right, else you will have a DHCP conflict on your Internet side. There is an example config in ``example/fedora/dhcpd.conf``.
 
 Before you can start DHCP, you must create the rndc key that will be shared with named. Run the command::
 
         rndc-confgen -a -r keyboard -b 256
+        chown named:named /etc/rndc.key 
 
 Now ``ISC-DHCP`` can be started::
 
@@ -50,11 +51,38 @@ Additionally, you must configure the forwards and reverse zones to match for ``I
 
 Now ``BIND9`` can be started::
         
-        systemctl enable 
-        systemctl start 
+        systemctl enable named.service
+        systemctl start named.service
 
+You can check that bind it working from the server, by running a query against localhost. In this case, we also try zone transfers (axfr)::
 
+        dig @127.0.0.1 example.lan A
+        dig @127.0.0.1 example.lan axfr
+        dig @127.0.0.1 dhcp.example.lan axfr
+        dig @127.0.0.1 1.0.4.10.in-addr.arpa PTR
+        dig @127.0.0.1 0.4.10.in-addr.arpa axfr
 
+From a client connected to the LAN side, you should NOT be able to carry out a zone transfer, but you should see the A and PTR records returned::
+
+        dig @10.4.0.1 1.0.4.10.in-addr.arpa PTR
+        dig @10.4.0.1 tollgate.example.lan. A
+        dig @127.0.0.1 example.lan axfr
+
+When a client connects you should see messages in ``/var/log/messages`` like::
+
+        tollgate dhcpd: DHCPREQUEST for 10.4.0.10 from 00:00:00:00:00:00 (Franky) via p1p1
+        tollgate dhcpd: DHCPACK on 10.4.0.10 to 00:00:00:00:00:00 (Franky) via p1p1
+        tollgate dhcpd: Added new forward map from Franky.dhcp.example.lan. to 10.4.0.10
+        tollgate dhcpd: Added reverse map from 10.0.4.10.in-addr.arpa. to Franky.dhcp.example.lan.
+
+If you see messages like::
+
+        tollgate dhcpd: Unable to add forward map from Franky.dhcp.example.lan. to 10.4.0.10: not found
+
+Then you have made a mistake somewhere. Check that the rndc-key permissions are set to named:named, that dhcpd and named have been reloaded, that you have the correct control statements in named.conf and that in dhcpd.conf you have the primary option either as an ip or a resolvable hostname - We recommend this be the same as the IP in the named.conf control statement.
+
+HTTPD
+=====
 
 .. _rpmfusion-free: http://rpmfusion.org/Configuration
 .. _tollgate repository: http://repo.tollgate.org.au/fedora/
