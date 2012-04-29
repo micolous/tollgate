@@ -65,6 +65,7 @@ def check_modules(*modules):
 	"""
 	Checks if modules have been loaded successfully.
 	"""
+	modules = list(modules)
 	d = read_all_file('/proc/modules')
 	for l in d.split('\n'):
 		module_name = l.split(' ')[0]
