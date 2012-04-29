@@ -62,10 +62,8 @@ cp -r ./docs $RPM_BUILD_ROOT%{_prefix}/share/doc/tollgate
 cp ./docs/example/dbus/system.d/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
 cp ./docs/example/tollgate/backend.ini $RPM_BUILD_ROOT%{_sysconfdir}/tollgate/
 
-cp ./platform/fedora/systemd/tollgate.target $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system/
 cp ./platform/fedora/systemd/tollgate-backend.service $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system/
 cp ./platform/fedora/systemd/tollgate-captivity.service $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system/
-cp -r ./platform/fedora/systemd/tollgate.target.wants $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system/
 cp ./platform/fedora/sysconfig/tollgate $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/
 
 mv $RPM_BUILD_ROOT%{_bindir}/tollgate_backend $RPM_BUILD_ROOT%{_sbindir}/
@@ -92,9 +90,7 @@ rm -rf $RPM_BUILD_ROOT
 
 #%attr(0644,root,root) %{_prefix}/lib/python2.7/site-packages/tollgate*
 %attr(0644,root,root) %{_prefix}/lib/python2.7/site-packages/tollgate*/*
-%attr(0644,root,root) %{_prefix}/lib/systemd/system/tollgate.target
-%attr(0644,root,root) %{_prefix}/lib/systemd/system/tollgate.target.wants
-#%attr(0644,root,root) %{_prefix}/lib/systemd/system/tollgate.target.wants/*
+
 %attr(0644,root,root) %{_prefix}/lib/systemd/system/tollgate-backend.service
 %attr(0644,root,root) %{_prefix}/lib/systemd/system/tollgate-captivity.service
 

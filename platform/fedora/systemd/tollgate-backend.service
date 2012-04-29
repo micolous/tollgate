@@ -8,5 +8,4 @@ EnvironmentFile=/etc/sysconfig/tollgate
 ExecStart=/usr/sbin/tollgate_backend 
 
 [Install]
-WantedBy=tollgate.target
-
+WantedBy=multi-user.target

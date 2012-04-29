@@ -15,6 +15,7 @@ Contents:
    
    introduction
    deploy-djp
+   fedora-deploy
    deploy-dev
    hacking
    credits

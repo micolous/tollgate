@@ -1,6 +1,6 @@
 [Unit]
 Description=Tollgate captivity service
-After=network.target dbus.service
+After=network.target dbus.service httpd.service
 
 [Service]
 PIDFile=/var/run/tollgate-captivity.pid
@@ -8,5 +8,4 @@ EnvironmentFile=/etc/sysconfig/tollgate
 ExecStart=/usr/sbin/tollgate_captivity -l $TOLLGATEURI
 
 [Install]
-WantedBy=tollgate.target
-
+WantedBy=multi-user.target

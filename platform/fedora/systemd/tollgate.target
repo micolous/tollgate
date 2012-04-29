@@ -1,6 +1,0 @@
-[Unit]
-Description=The Tollgate service control process
-After=multi-user.target httpd.service network.service tollgate-backend.service tollgate-captivity.service
-Conflicts=rescue.service rescue.target
-AllowIsolate=yes
-
