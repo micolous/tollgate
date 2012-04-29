@@ -72,88 +72,32 @@ class MyUserProfileModelView(ModelView):
 			
 		# other error
 		raise ErrorResponse(status.HTTP_500_INTERNAL_SERVER_ERROR)
-	
 
-
-
-def usage():
-	"""Returns the usage data for the person logged in (via cookies), or the person
-	logged in to this computer (by IP).
-	Returns a dict of Usage, or False if there are problems."""
-
-	request = steal_request()
-	if request.user.is_authenticated():
-		try:
-			return marshal_Usage(get_attendance_currentevent(request.user.get_profile()))
-		except:
-			# fallback to ip method
-			pass
-
-	ip = request.META['REMOTE_ADDR']
-	mac = get_mac_address(ip)
-	if mac == None:
-		return False
-
-	try:
-		h = NetworkHost.objects.get(mac_address__iexact=mac)
-		if h.user_profile == None:
-			return False # no user association
-
-		# now get the event information
-		attendance = get_attendance_currentevent(h.user_profile)
-
-		return marshal_Usage(attendance)
-	except:
-		return False
-
-def usage_history():
-	"""Returns a 2-list of usage history information attached to the account for
-	the last 36 hours.  Returns False if the user is not logged in.
-
-	This is determined first by cookies, then by mac address if that fails.
-
-	It is formatted as such:
-		[
-			[datetime, usageBytes],
-			[datetime, usageBytes],
-			...
-		]
+class MyEventAttendanceModelView(MyUserProfileModelView):
 	"""
-	request = steal_request()
-	attendance = None
-	if request.user.is_authenticated():
+	Reads the current EventAttendance for the user.
+	"""
+	def get(self, request, *args, **kwargs):
+		# gets the user_profile associated with the request.
+		user_profile = super(MyEventAttendanceModelView, self).get(request, *args, **kwargs)
+		
+		# now look up their attendance.
 		try:
-			attendance = get_attendance_currentevent(request.user.get_profile())
+			attendance = get_attendance_currentevent(user_profile)
 		except:
-			# fallback
-			pass
-
-	if attendance == None:
-		# try to get by other means
-		ip = request.META['REMOTE_ADDR']
-		mac = get_mac_address(ip)
-		if mac == None:
-			return False
-
-		try:
-			h = NetworkHost.objects.get(mac_address__iexact=mac)
-			if h.user_profile == None:
-				return False # no user association
-
-			# now get the event information
-			attendance = get_attendance_currentevent(h.user_profile)
-		except:
-			# couldn't get attendance object
-			return False
-
-	try:
-		# try to get usage
-		usage_points = NetworkUsageDataPoint.objects.filter(event_attendance=attendance, when__gte=datetime.now()-timedelta(hours=36))
-		o = []
-		for point in usage_points:
-			o.append(marshal_NetworkUsageDataPoint(point))
-
-		return o
-	except:
-		return False
-
+			# there is no attendance currently for the user.
+			raise ErrorResponse(status.HTTP_404_NOT_FOUND)
+		
+		# now return the attendance.
+		return attendance
+	
+class MyNetworkUsageDataPointsView(MyEventAttendanceModelView):
+	"""
+	Reads the NetworkUsageDataPoints associated with the user's attendance at the current event.
+	"""
+	def get(self, request, *args, **kwargs):
+		# gets the attendance associated with the request.
+		attendance = super(MyNetworkUsageDataPointsView, self).get(request, *args, **kwargs)
+		
+		# now lookup their usages in the last 36 hours
+		return attendance.networkusagedatapoint_set.filter(when__gte=datetime.now()-timedelta(hours=36)).order_by('when')

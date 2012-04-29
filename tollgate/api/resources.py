@@ -1,6 +1,5 @@
 from djangorestframework.resources import ModelResource
-from tollgate.frontend.models import NetworkHost, UserProfile
-
+from tollgate.frontend.models import NetworkHost, UserProfile, EventAttendance, NetworkUsageDataPoint
 
 class NetworkHostResource(ModelResource):
 	model = NetworkHost
@@ -20,3 +19,18 @@ class UserProfileResource(ModelResource):
 	"""
 	model = UserProfile
 	fields = ('internet_on', 'username', 'user_id')
+	
+class EventAttendanceResource(ModelResource):
+	"""
+	Event attendance object.
+	"""
+	model = EventAttendance
+	fields = ('quota_amount', 'reset_count', 'quota_unmetered', 'quota_used', 'quota_remaining')
+
+class NetworkUsageDataPointResource(ModelResource):
+	"""
+	NetworkUsageDataPoint object.
+	"""
+	model = NetworkUsageDataPoint
+	fields = ('when', 'bytes')
+	
