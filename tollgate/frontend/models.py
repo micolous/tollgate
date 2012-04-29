@@ -54,8 +54,12 @@ def bytes_str(v):
 		return u'%.0f.0  B' % v
 
 def utcnow():
-	"Returns the current time as a TZ-aware datetime object."
-	return datetime.utcnow().replace(tzinfo=pytz.utc)
+	"Returns the current time as a TZ-aware datetime object, if Django has it enabled.  If it is disabled, always return localtime."
+	if settings.USE_TZ:
+		return datetime.utcnow().replace(tzinfo=pytz.utc)
+	else:
+		# Timezone support is disabled, return localtime instead.
+		return datetime.now()
 		
 class UserProfile(Model):
 	class Meta:

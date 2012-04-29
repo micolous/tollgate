@@ -99,7 +99,7 @@ You should also add the following extra settings for tollgate and configure appr
    LOGIN_URL='/login/'
    LOGOUT_URL='/logout/'
 
-The final setting to add is a URL where you are hosting the tollgate sources with your modifications.  You should **never** link back to the official tollgate repository using this method (there is already a link to the official repo on the source page).
+The final setting to add is a URL where you are hosting the tollgate sources with your modifications, ``SOURCE_URL``.  You should **never** link back to the official tollgate repository using this method (there is already a link to the official repo on the source page).
 
 Not hosting the source code yourself may expose you to legal liability.
 
