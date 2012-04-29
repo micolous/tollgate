@@ -57,7 +57,7 @@ mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/www/tollgate/static
 
 #export PYTHONPATH=%{eggpath}
 
-%{__python} setup.py install --skip-build --root $RPM_BUILD_ROOT
+%{__python} setup.py install --root $RPM_BUILD_ROOT
 
 cp -r ./docs $RPM_BUILD_ROOT%{_prefix}/share/doc/tollgate
 cp ./docs/example/dbus/system.d/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
