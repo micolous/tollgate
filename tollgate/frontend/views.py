@@ -145,6 +145,9 @@ def internet_login_here(request):
 	if mac == None:
 		# failure
 		return render_to_response('frontend/internet_login_here-failure.html', context_instance=RequestContext(request))
+	if settings.ONLY_CONSOLE and not is_console(mac):
+		return render_to_response('frontend/not-a-console.html', context_instance=RequestContext(request))
+	
 	#mac = mac.replace(":", "")
 
 	return HttpResponseRedirect('/internet/login/' + mac + '/')
@@ -183,7 +186,11 @@ def internet_login(request, mac_address):
 	# register the computer's ownership permanently
 	try:
 		h = NetworkHost.objects.get(mac_address__iexact=mac_address)
-		ip = get_ip_address(mac_address)
+		# check that the client is a console
+		if (not settings.ONLY_CONSOLE) or h.is_console:
+			ip = get_ip_address(mac_address)
+		else:
+			return render_to_response('frontend/not-a-console.html', context_instance=RequestContext(request))
 
 
 		# check that the IP is infact in the subnet
@@ -642,6 +649,9 @@ def captive_landing(request):
 	if mac == None:
 		# The mac address doesn't exist
 		return render_to_response('frontend/internet_login_here-failure.html', context_instance=RequestContext(request))
+	if settings.ONLY_CONSOLE and not is_console(mac):
+		return render_to_response('frontend/not-a-console.html', context_instance=RequestContext(request))
+
 
 	reasons = {'reason_blacklist': False, 'reason_quota': False, 'reason_disabled': False, 'reason_sync': False, 'reason_login': False}
 	try:

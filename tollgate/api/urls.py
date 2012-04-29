@@ -17,10 +17,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from django.conf.urls.defaults import *
 from django.conf import settings
-from tollgate.frontend.forms import *
+#from tollgate.frontend.forms import *
+from tollgate.api.resources import NetworkHostResource
 
 
 urlpatterns = patterns('tollgate.api.views',
-	(r'^xmlrpc/$', 'xmlrpc_handler'),
-	(r'^httpget/(?P<output_format>\w+)/(?P<method>[\w\d_]+)/$', 'httpget_handler'),
+#	(r'^xmlrpc/$', 'xmlrpc_handler'),
+#	(r'^httpget/(?P<output_format>\w+)/(?P<method>[\w\d_]+)/$', 'httpget_handler'),
+	
 )

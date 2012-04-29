@@ -97,13 +97,15 @@ class NetworkHost(Model):
 		else:
 			return oui
 	
-	def get_console_type(self):
+	@property
+	def console_type(self):
 		o = self.get_console_oui()
 		if o == None:
 			return 'pc'
 		else:
 			return o.slug
-
+	
+	@property
 	def is_console(self):
 		o = self.get_console_oui()
 		return o != None and o.is_console
@@ -481,6 +483,8 @@ def refresh_networkhost(portal=None):
 
 	# updated to get information from DNS instead.
 	for ip in arp_cache:
+		if settings.ONLY_CONSOLE and not is_console(arp_cache[ip]):
+			continue
 		hn = ''
 		try: hn = gethostbyaddr(ip)[0]
 		except: pass
@@ -556,6 +560,8 @@ def refresh_networkhost_quick():
 	offline_hosts = NetworkHost.objects.all()
 	for ip in arp_cache:
 		mac = arp_cache[ip]
+		if settings.ONLY_CONSOLE and not is_console(mac):
+			continue
 
 		# find by mac
 		try:

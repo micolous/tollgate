@@ -45,21 +45,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <table class="internet">
 	<tr>
-		{% if settings.ONLY_CONSOLE %}
-		{% else %}
-			<th>Name</th>
-		{% endif %}
+		<th>Name</th>
 		<th>MAC Address</th>
 		<th>IP Address</th>
 		<th>First Seen</th>
 	</tr>
 	{% for host in hosts %}
 		<tr class="{% cycle row1,row2 %}">
-			{% if settings.ONLY_CONSOLE %}
-			{% else %}
-				<td>{{ host.computer_name }}</td>
-			{% endif %}
-			<td><a href="/internet/login/{{ host.mac_address }}/" title="Log in this host"><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.get_console_type }}.png" alt="{{ host.get_console_type }} " title="{{ host.get_console_type }}" class="cs"/><code>{{ host.mac_address }}</code></a></td>
+			<td>{{ host.computer_name }}</td>
+			<td><a href="/internet/login/{{ host.mac_address }}/" title="Log in this host"><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.console_type }}.png" alt="{{ host.console_type }} " title="{{ host.console_type }}" class="cs"/><code>{{ host.mac_address }}</code></a></td>
 			<td><code><a href="/internet/login/{{ host.mac_address }}/" title="Log in this host">{{ host.ip_address }}</a></code></td>
 			<td><abbr title="{{ host.first_connection|naturalday }} at {{ host.first_connection|time }}">{{ host.first_connection|timesince }} ago</abbr></td>
 		</tr>
