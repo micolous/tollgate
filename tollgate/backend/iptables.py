@@ -54,8 +54,43 @@ def run_capture_output(args):
 	p = Popen(args, stdout=PIPE)
 	stdout = p.communicate()[0]
 	return stdout
+	
+def read_all_file(filename):
+	fh = open('/proc/modules')
+	d = fh.read()
+	fh.close()
+	return d
+	
+def check_modules(*modules):
+	"""
+	Checks if modules have been loaded successfully.
+	"""
+	d = read_all_file('/proc/modules'):
+	for l in d.split('\n'):
+		module_name = l.split(' ')[0]
+		if module_name in modules:
+			modules.remove(module_name)
+		if not bool(modules):
+			# modules list is empty, pass!
+			return True
+	
+	# modules list has stuff in it still
+	return False
 
+def load_modules(*modules):
+	for module in modules:
+		run(('modprobe', '-v', module))
+	
 def create_nat():
+	# load kernel modules that may not have loaded.
+	modules = ['xt_quota2']
+	load_modules(*modules)
+	
+	if not check_modules(*modules):
+		print "Error: not all modules could be loaded successfully. Check that you have them all."
+		print modules
+		exit(1)
+
 	# enable forwarding
 	write_file('/proc/sys/net/ipv4/ip_forward', 1)
 	
@@ -63,15 +98,10 @@ def create_nat():
 	system('ip rule add fwmark 0x1/0x1 lookup 100')
 	system('ip route add local 0.0.0.0/0 dev lo table 100')
 	
-	# load kernel modules that may not have loaded.
-	system('modprobe -v xt_quota2')
-	
 	if GC_THRESH != None:
 		write_file('/proc/sys/net/ipv4/neigh/default/gc_thresh1', GC_THRESH)
 		write_file('/proc/sys/net/ipv4/neigh/default/gc_thresh2', GC_THRESH * 4)
 		write_file('/proc/sys/net/ipv4/neigh/default/gc_thresh3', GC_THRESH * 8)
-		
-		
 		
 	# define NAT rule
 	run((IPTABLES,'-t','nat','-F','POSTROUTING'))
