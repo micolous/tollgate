@@ -85,7 +85,7 @@ def load_modules(*modules):
 def create_nat():
 	# load kernel modules that may not have loaded.
 	# TODO: check if these are built into the kernel.
-	modules = ['x_tables', 'xt_quota2', 'ip_tables', 'xt_TPROXY', 'ip_tables', 'nf_conntrack', 'nf_conntrack_ipv4', 'iptable_nat', 'ipt_MASQUERADE', 'iptable_filter', 'xt_state', 'ipt_REJECT', 'iptable_mangle', 'xt_mark']
+	modules = set(('x_tables', 'xt_quota2', 'ip_tables', 'xt_TPROXY', 'nf_conntrack', 'nf_conntrack_ipv4', 'iptable_nat', 'ipt_MASQUERADE', 'iptable_filter', 'xt_state', 'ipt_REJECT', 'iptable_mangle', 'xt_mark'))
 	load_modules(*modules)
 	
 	if not check_modules(*modules):
