@@ -105,26 +105,32 @@ $(function () {
 	// use the tollgate api to get usage history
 	// consider this an example of how to use the tollgate httpget api in jquery.
 	$.getJSON(
-		'/api/httpget/json/usage_history/', // usage_history()
+		'/api/attendance/me/usage/?format=json', // we can't send Accept headers
 		null, // don't send any data
 		function(data, textStatus) {
 			// lets handle our data!
-			var clean_data = new Array();
-			for (var i in data) {
-				if (i == 0) {
+			var speed_data = new Array();
+			
+			// calculate the speed at each data point
+			_.each(data, function(v, k) {
+				v.when = new Date(v.when);
+				if (k == 0) {
+					// first element has no speed
 					var speed = 0;
 				} else {
-					// calculate average speed in kB/s
-					// bytes since last point / seconds since last point / 1024 == kB/s
-					speed = (((data[i][1]*1) - (data[i-1][1]*1)) / (data[i][0] - data[i-1][0])) / 1024;
+					var speed = (((v.bytes*1) - (data[k-1].bytes*1)) / (v.when - data[k-1].when)) / 1024;
 				}
-				clean_data.push([data[i][0]*1000, speed]);
-			}
+				
+				//if (k > 0)
+				//	console.log('when = ' + v.when + ', speed = ' + speed + ' delta = ' + (v.when - data[k-1].when));
+				speed_data.push([v.when, speed]);
+			
+			});
 			
 			// earliest point is 36 hours ago.
 			var start = new Date();
 			start.setHours(start.getHours()-36);
-			$.plot($("#usage_graph"), [{label:'Speed (kB/s)',data:clean_data},], {
+			$.plot($("#usage_graph"), [{label:'Speed (kB/s)',data:speed_data},], {
 				xaxis: {
 					mode: 'time',
 					min: start.getTime(),
@@ -170,7 +176,7 @@ $(function () {
 	{% for host in my_hosts %}
 		<tr class="{% cycle row1,row2 %}">
 			<td>{{ host.computer_name }}</td>
-			<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.get_console_type }}.png" alt="{{ host.get_console_type }} " title="{{ host.get_console_type }}" class="cs"/><code>{{ host.mac_address }}</code></td>
+			<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.vendor }}.png" alt="{{ host.vendor }} " title="{{ host.vendor }}" class="cs"/><code>{{ host.mac_address }}</code></td>
 			<td><code>{{ host.ip_address }}</code></td>
 			<td>
 				{% if host.online %}

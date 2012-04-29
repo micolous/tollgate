@@ -20,8 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from tollgate.frontend.platform.common import *
 
 def get_ip_address(mac):
-	if settings.ONLY_CONSOLE and not is_console(mac):
-		return None
 	fh = open('/proc/net/arp', 'r')
 	# skip header
 	fh.readline()
@@ -56,9 +54,6 @@ def get_arp_cache():
 		a = l.split()
 		if a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE and in_lan_subnet(a[0]) and a[2] == "0x0":
 			mac = a[3].replace(":","")
-			if settings.ONLY_CONSOLE and not is_console(mac):
-				# skip this one, it's not a console.
-				continue
 
 			o[a[0]] = mac
 
@@ -67,10 +62,6 @@ def get_arp_cache():
 		a = l.split()
 		if a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE and in_lan_subnet(a[0]) and a[2] == "0x2":
 			mac = a[3].replace(":","")
-			if settings.ONLY_CONSOLE and not is_console(mac):
-				# skip this one, it's not a console.
-				continue
-
 			o[a[0]] = mac
 	return o
 
@@ -90,19 +81,13 @@ def get_mac_address(ip):
 		a = l.split()
 		if a[0] == ip and a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE and a[2] == "0x2":
 			mac = a[3].replace(':','')
-			if settings.ONLY_CONSOLE and not is_console(mac):
-				return None
-			else:
-				return mac
+			return mac
 
 	# now expired ones.
 	for l in d:
 		a = l.split()
 		if a[0] == ip and a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE:
 			mac = a[3].replace(':','')
-			if settings.ONLY_CONSOLE and not is_console(mac):
-				return None
-			else:
-				return mac
+			return mac
 
 	return None

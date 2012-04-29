@@ -5,3 +5,4 @@ progressbar>=2.2
 pip>=1.0
 git+https://github.com/micolous/configparser_plus.git@v1.0#egg=configparser_plus>=1.0
 pytz
+djangorestframework

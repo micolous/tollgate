@@ -19,7 +19,8 @@ setup(
 		'lxml',
 		'dbus',
 		'daemon',
-		'pytz'
+		'pytz',
+		'djangorestframework',
 	),
 	
 	packages=find_packages(exclude=['tollgate.settings.local']),

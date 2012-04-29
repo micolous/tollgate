@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		{% for host in hosts %}
 				<tr class="{% cycle row1,row2 %}">
 				<td>{{ host.computer_name }}</td>
-				<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.get_console_type }}.png" alt="{{ host.get_console_type }} " title="{{ host.get_console_type }}" class="cs"/><code>{{ host.mac_address }}</code></td>
+				<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.vendor }}.png" alt="{{ host.vendor }} " title="{{ host.vendor }}" class="cs"/><code>{{ host.mac_address }}</code></td>
 				<td><code>{{ host.ip_address }}</code></td>
 				<td>
 					{% if host.online %}
@@ -57,7 +57,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 				<tr class="{% cycle row1,row2 %}">
 					<td></td>
 					<td>{{ host.computer_name }}</td>
-					<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.get_console_type }}.png" alt="{{ host.get_console_type }} " title="{{ host.get_console_type }}" class="cs"/><code>{{ host.mac_address }}</code></td>
+					<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.vendor }}.png" alt="{{ host.vendor }} " title="{{ host.vendor }}" class="cs"/><code>{{ host.mac_address }}</code></td>
 					<td><code>{{ host.ip_address }}</code></td>
 					<td>
 						{% if host.online %}
