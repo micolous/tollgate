@@ -15,7 +15,7 @@ Source:		%{name}-%{version}.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 BuildRequires:	httpd, python-setuptools
-Requires:	python, Django, httpd, akmod-xtables-addons, python-daemon, dbus-python, python-IPy, python-lxml, python-progressbar, python-simplejson, Django-south, nmap, mod_wsgi, python-pip, tollgate-selinux, configparser_plus, pygobject2
+Requires:	python, Django, httpd, akmod-xtables-addons, python-daemon, dbus-python, python-IPy, python-lxml, python-progressbar, python-simplejson, Django-south, nmap, mod_wsgi, python-pip, tollgate-selinux, configparser_plus, pygobject2, pytz, mod_ssl
 
 %package selinux
 
@@ -100,13 +100,15 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/tollgate/*
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/tollgate.conf
 
-%attr(0644,root,root) %{_localstatedir}/www/tollgate
+%attr(0644,root,root) %{_localstatedir}/www/tollgate/wpad/wpad.dat
+%attr(0755,root,root) %{_localstatedir}/www/tollgate/wpad/wpad.da
+%attr(0644,root,root) %{_localstatedir}/www/tollgate/wfc/index.html
 
 %attr(0644,root,root) %{_prefix}/share/doc/tollgate
 %docdir %{_prefix}/share/doc/tollgate
 
 #%attr(0644,root,root) %{_prefix}/lib/python2.7/site-packages/tollgate*
-%attr(0644,root,root) %{_prefix}/lib/python2.7/site-packages/tollgate/
+%attr(0755,root,root) %{_prefix}/lib/python2.7/site-packages/tollgate/
 
 %attr(0644,root,root) %{_prefix}/lib/systemd/system/tollgate-backend.service
 %attr(0644,root,root) %{_prefix}/lib/systemd/system/tollgate-captivity.service
@@ -121,12 +123,13 @@ rm -rf $RPM_BUILD_ROOT
 systemctl --system daemon-reload
 systemctl reload dbus.service
 #We need to create the django project for the site to use. 
-cd /var/www/tollgate
-django-admin startproject tollgate_site
-cd tollgate_site
-mv settings.py settings.orig.py
-sed -e "s/^DEBUG \= True/DEBUG \= False/" -e "s/^STATIC_ROOT \= '.*'/STATIC_ROOT \= '\/var\/www\/tollgate\/static\/'/" -e "s/# 'django\.contrib\.admin',/'django.contrib.admin',/" -e "s/# 'django\.contrib\.admindocs',/# 'django.contrib.admindocs',\n\t'django.contrib.humanize',\n\t'south',\n\t'tollgate.api',\n\t'tollgate.frontend',\n\t'tollgate.scripts',/" settings.orig.py > settings.py
-cat >> settings.py << EOF
+if [ ! -d /var/www/tollgate/tollgate_site ]; then
+	cd /var/www/tollgate
+	django-admin startproject tollgate_site
+	cd tollgate_site
+	mv settings.py settings.orig.py
+	sed -e "s/^DEBUG \= True/from os.path import *\nPROJECT_PATH = realpath(dirname(__file__))\n\nDEBUG \= False/" -e "s/^STATIC_ROOT \= '.*'/STATIC_ROOT \= '\/var\/www\/tollgate\/static\/'/" -e "s/# 'django\.contrib\.admin',/'django.contrib.admin',/" -e "s/# 'django\.contrib\.admindocs',/# 'django.contrib.admindocs',\n\t'django.contrib.humanize',\n\t'south',\n\t'tollgate.api',\n\t'tollgate.frontend',\n\t'tollgate.scripts',/" settings.orig.py > settings.py
+	cat >> settings.py << EOF
 
 LAN_SUBNET='10.4.0.0/24'
 LAN_IFACE='laniface'
@@ -139,7 +142,17 @@ RESTRICTED_CALLS_KEY=''
 LOGIN_URL='/login/'
 LOGOUT_URL='/logout/'
 EOF
+	sed -e "s/^os.environ\['DJANGO_SETTINGS_MODULE'\].*/os.environ['DJANGO_SETTINGS_MODULE'] = 'tollgate_site.settings'/" /usr/lib/python2.7/site-packages/tollgate/tollgate.wsgi > tollgate.wsgi
+chmod +x tollgate.wsgi
 
+	cat > urls.py << EOF
+from django.conf.urls.defaults import patterns, include, url
+urlpatterns = patterns('',
+      (r'^', include('tollgate.urls')),
+)
+EOF	
+
+fi
 
 
 

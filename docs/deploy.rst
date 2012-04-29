@@ -60,7 +60,7 @@ Configure the project
 
 Jump into the ``mylanportal/mylanportal/urls.py``.  Change it so it includes ``tollgate.urls``.  ``tollgate.urls`` will also give you the Django admin site, and the internationalisation configuration app.  It should look something like this::
 
-   from django.conf.urls import patterns, include, url
+   from django.conf.urls.defaults import patterns, include, url
    urlpatterns = patterns('',
 	 (r'^', include('tollgate.urls')),
    )

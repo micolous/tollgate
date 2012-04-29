@@ -85,6 +85,10 @@ If you see messages like::
 
 Then you have made a mistake somewhere. Check that the rndc-key permissions are set to named:named, that dhcpd and named have been reloaded, that you have the correct control statements in named.conf and that in dhcpd.conf you have the primary option either as an ip or a resolvable hostname - We recommend this be the same as the IP in the named.conf control statement.
 
+SQL
+===
+
+
 HTTPD
 =====
 
@@ -94,6 +98,45 @@ We must install ``mod_ssl``.::
 
         yum install mod_ssl
 
+Next we create self signed certificates for use with ``Tollgate``.::
+
+        cd /etc/pki/tls/private/
+        openssl genrsa -out tollgate.key 2048
+        openssl req -new -key tollgate.key -out tollgate.csr
+
+It is ``CRUCIAL`` at this step, that when asked, you put in your servers hostname in the Common Name field.::
+
+        Common Name (eg, your name or your server's hostname) []:tollgate.example.lan
+
+Either you can send this CSR to be signed by another CA, or you can self sign. Either way, your resultant certificate should be tollgate.crt. Below is how you self sign your certificate::
+
+        openssl x509 -req -in tollgate.csr -days 365 -signkey tollgate.key -out tollgate.crt
+
+Now you should reconfigure the ServerName and ServerAlias parameters in ``/etc/httpd/conf.d/tollgate.conf``.
+
+Next you must edit ``/var/www/tollgate/tollgate_site/settings.py``. Fill in the ``DATABASE`` section with your SQL server information. Additionally, you should configure the ``SOURCE_URL`` parameter to ensure that you uphoad your AGPL obligations.
+
+Finally, we need to sync the database, and collect the static components ready for deployment.::
+
+        cd /var/www/tollgate/tollgate_site
+        python manage.py syncdb
+        python manage.py migrate
+        python manage.py collectstatic
+
+Now you should start httpd.::
+
+        systemctl enable httpd.service
+        systemctl start httpd.service    
+
+Tollgate backends
+=================
+
+You can now start the tollgate backends.::
+
+        systemctl enable tollgate-backend.service
+        systemctl enable tollgate-captivity.service
+        systemctl start tollgate-backend.service
+        systemctl start tollgate-captivity.service
 
 
 .. _rpmfusion-free: http://rpmfusion.org/Configuration
