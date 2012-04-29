@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from django.conf.urls.defaults import *
 from django.conf import settings
 #from tollgate.frontend.forms import *
-from tollgate.api.resources import NetworkHostResource, PermissiveUserProfileResource, UserProfileResource, EventAttendanceResource, NetworkUsageDataPointResource
-from tollgate.api.views import ReadOnlyInstanceModelView, MyUserProfileModelView, MyEventAttendanceModelView, MyNetworkUsageDataPointsView
+from tollgate.api.resources import *
+from tollgate.api.views import *
 
 
 urlpatterns = patterns('tollgate.api.views',
@@ -27,42 +27,60 @@ urlpatterns = patterns('tollgate.api.views',
 	# Gets information about a network host by IP.
 	# Equivalent to the old whatis_ip() API call.
 	url(
-		r'networkhost/by-ip/(?P<ip_address>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$',
+		r'^networkhost/by-ip/(?P<ip_address>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$',
 		ReadOnlyInstanceModelView.as_view(resource=NetworkHostResource),
 		dict(online=True),
-		name='whatis_ip'
+		name='api_whatis_ip'
+	),
+	
+	url(
+		r'^networkhost/$',
+		NetworkHostRootView.as_view(),
+		name='api_networkhost_root'
+	),
+	
+	url(
+		r'^user/$',
+		UserProfileRootView.as_view(),
+		name='api_user_root'
 	),
 	
 	# Gets information about a user by IP.
 	# Equivalent to the old whois_ip() API call.
 	url(
-		u'user/by-ip/(?P<networkhost__ip_address>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$',
+		r'^user/by-ip/(?P<networkhost__ip_address>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$',
 		ReadOnlyInstanceModelView.as_view(resource=UserProfileResource),
 		dict(networkhost__online=True),
-		name='whois_ip'
+		name='api_whois_ip'
 	),
 	
 	# Gets information about the current user.
 	# Equivalent to the old whoami() API call.
 	url(
-		u'user/me/$',
+		r'^user/me/$',
 		MyUserProfileModelView.as_view(resource=PermissiveUserProfileResource),
-		name='whoami'
+		name='api_whoami'
 	),
 	
 	# Gets information about the user's quota usage.
 	# Equivalent to the old usage() API call.
 	url(
-		u'attendance/me/$',
+		r'^attendance/me/$',
 		MyEventAttendanceModelView.as_view(resource=EventAttendanceResource),
-		name='usage'
+		name='api_usage'
 	),
 	
 	# Gets a list of usage data points for the user in the current event.
 	# Equivalent to the old usage_history() API call.
 	url(
-		u'attendance/me/usage/$',
+		r'^attendance/me/usage/$',
 		MyNetworkUsageDataPointsView.as_view(resource=NetworkUsageDataPointResource),
-		name='usage_history'
+		name='api_usage_history'
+	),
+	
+	url(
+		r'^$',
+		TollgateAPIView.as_view(),
+		name='api_index'
 	),
 )

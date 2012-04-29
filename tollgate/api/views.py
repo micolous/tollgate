@@ -15,12 +15,14 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+import tollgate
 from tollgate.frontend.models import *
 from datetime import datetime, timedelta
-from djangorestframework.views import ModelView
+from djangorestframework.views import ModelView, View
 from djangorestframework.mixins import ReadModelMixin
 from djangorestframework import status
 from djangorestframework.response import ErrorResponse
+from django.core.urlresolvers import reverse
 
 class ReadOnlyInstanceModelView(ReadModelMixin, ModelView):
 	"""
@@ -28,6 +30,38 @@ class ReadOnlyInstanceModelView(ReadModelMixin, ModelView):
 	"""
 	_suffix="ReadOnlyInstance"
 
+class NetworkHostRootView(View):
+	"""
+	Root of NetworkHost API.
+	Allows the client to get a complete list of all online NetworkHosts.
+	"""
+	
+	def get(self, request):
+		"""
+		Returns a list of all NetworkHost urls.
+		"""
+		hosts = NetworkHost.objects.filter(online=True).only('ip_address')
+		
+		return [reverse('api_whatis_ip', kwargs={'ip_address': h.ip_address}) for h in hosts]
+
+
+class UserProfileRootView(View):
+	"""
+	Root of User API.
+	Allows the client to information about users with online NetworkHosts.
+	"""
+	
+	def get(self, request):
+		"""
+		Returns a list of all NetworkHost urls.
+		"""
+		hosts = NetworkHost.objects.filter(online=True).only('ip_address')
+		
+		return dict(
+			me=reverse('api_whoami'),
+			all_users=[reverse('api_whois_ip', kwargs={'networkhost__ip_address': h.ip_address}) for h in hosts]
+		)
+		
 class MyUserProfileModelView(ModelView):
 	"""
 	Reads the current NetworkHost record for this user.
@@ -94,3 +128,19 @@ class MyNetworkUsageDataPointsView(MyEventAttendanceModelView):
 		
 		# now lookup their usages in the last 36 hours
 		return attendance.networkusagedatapoint_set.filter(when__gte=utcnow()-timedelta(hours=36)).order_by('when')
+
+class TollgateAPIView(View):
+	"""
+	This is the API for tollgate.
+	"""
+	def get(self, request):
+		return dict(
+			tollgate_api_version=1,
+			tollgate_version=tollgate.__version__,
+			methods=[
+				dict(name='networkhost_root', description='Get information about a NetworkHost', url=reverse('api_networkhost_root')),
+				dict(name='user_root', description='Get owner and user information', url=reverse('api_user_root')),
+				dict(name='usage', description='Get your usage information', url=reverse('api_usage')),
+				dict(name='usage_history', description='Get your usage history', url=reverse('api_usage_history')),
+			]
+		)

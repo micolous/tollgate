@@ -1,5 +1,7 @@
 from djangorestframework.resources import ModelResource
 from tollgate.frontend.models import NetworkHost, UserProfile, EventAttendance, NetworkUsageDataPoint
+from django.core.urlresolvers import reverse
+
 
 class NetworkHostResource(ModelResource):
 	model = NetworkHost
@@ -12,6 +14,7 @@ class PermissiveUserProfileResource(ModelResource):
 	"""
 	model = UserProfile
 	fields = ('internet_on', 'username', 'user_id', 'first_name', 'last_name')
+	
 
 class UserProfileResource(ModelResource):
 	"""
@@ -25,7 +28,7 @@ class EventAttendanceResource(ModelResource):
 	Event attendance object.
 	"""
 	model = EventAttendance
-	fields = ('quota_amount', 'reset_count', 'quota_unmetered', 'quota_used', 'quota_remaining')
+	fields = ('quota_amount', 'reset_count', 'quota_unmetered', 'quota_used', 'quota_remaining', )
 
 class NetworkUsageDataPointResource(ModelResource):
 	"""
