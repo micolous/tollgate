@@ -93,4 +93,4 @@ class MyNetworkUsageDataPointsView(MyEventAttendanceModelView):
 		attendance = super(MyNetworkUsageDataPointsView, self).get(request, *args, **kwargs)
 		
 		# now lookup their usages in the last 36 hours
-		return attendance.networkusagedatapoint_set.filter(when__gte=datetime.now()-timedelta(hours=36)).order_by('when')
+		return attendance.networkusagedatapoint_set.filter(when__gte=utcnow()-timedelta(hours=36)).order_by('when')
