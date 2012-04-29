@@ -15,19 +15,12 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from SimpleXMLRPCServer import SimpleXMLRPCDispatcher
-from django.http import HttpResponse
 from tollgate.frontend.models import *
-from tollgate.api.models import *
-from sys import exc_info
 from datetime import datetime, timedelta
-from time import mktime
 from djangorestframework.views import ModelView
 from djangorestframework.mixins import ReadModelMixin
 from djangorestframework import status
 from djangorestframework.response import ErrorResponse
-
-
 
 class ReadOnlyInstanceModelView(ReadModelMixin, ModelView):
 	"""
