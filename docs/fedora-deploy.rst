@@ -69,8 +69,8 @@ From a client connected to the LAN side, you should NOT be able to carry out a z
 
         dig @10.4.0.1 1.0.4.10.in-addr.arpa PTR
         dig @10.4.0.1 tollgate.example.lan. A
-        dig @127.0.0.1 conntest.nintendowifi.net A
-        dig @127.0.0.1 example.lan axfr
+        dig @10.4.0.1 conntest.nintendowifi.net A
+        dig @10.4.0.1 example.lan axfr
 
 When a client connects you should see messages in ``/var/log/messages`` like::
 
@@ -87,6 +87,39 @@ Then you have made a mistake somewhere. Check that the rndc-key permissions are 
 
 SQL
 ===
+
+Django supports a number of SQL servers for it's operation. We have extensively tested MariaDB (Formerly MySQL) with Tollgate. However, PostgreSQL and SQLite are also valid options. 
+
+MySQL / MariaDB
+---------------
+
+We have extensively tested Tollgate with MySQL and MariaDB. Additionally, they support replication features which allows for retrospective conversion to a clustered setup.
+
+First install the mysql packages.::
+
+        yum install MySQL-python mysql-server mysql
+
+Now you need to setup the database. We advise you to remove the anonymous users and test tables, as well as setting a strong root password.::
+        
+        systemctl start mysqld.service
+        mysql_secure_installation
+
+Now we need to login to mysql, to create the database and tollgate user.::
+
+        mysql -u root -p
+        mysql> create database tollgate;
+        mysql> create user 'tollgate'@'localhost' identified by 'password';
+        mysql> grant all privileges on tollgate.* to 'tollgate'@'localhost';
+        mysql> flush privileges;
+
+Keep these details for when you configure the settings.py - You will need to remember the ``USER``, ``NAME`` and ``PASSWORD``. The ``HOST`` setting will be ``localhost``.
+
+
+PostgreSQL
+----------
+
+
+
 
 
 HTTPD
@@ -112,9 +145,9 @@ Either you can send this CSR to be signed by another CA, or you can self sign. E
 
         openssl x509 -req -in tollgate.csr -days 365 -signkey tollgate.key -out tollgate.crt
 
-Now you should reconfigure the ServerName and ServerAlias parameters in ``/etc/httpd/conf.d/tollgate.conf``.
+Now you should reconfigure the ServerName and ServerAlias parameters in ``/etc/httpd/conf.d/tollgate.conf``. Please note the VirtualHost for ``conntest.nintendo.net``. Do not modify this VirtualHost. 
 
-Next you must edit ``/var/www/tollgate/tollgate_site/settings.py``. Fill in the ``DATABASE`` section with your SQL server information. Additionally, you should configure the ``SOURCE_URL`` parameter to ensure that you uphoad your AGPL obligations.
+Next you must edit ``/var/www/tollgate/tollgate_site/settings.py``. Fill in the ``DATABASE`` section with your SQL server information. Additionally, you should configure the ``SOURCE_URL`` parameter to ensure that you uphoad your AGPL obligations. Finally, at the bottom of the ``settings.py`` fill in your LAN details as needed. Check to make sure all values seem sane for your environment.
 
 Finally, we need to sync the database, and collect the static components ready for deployment.::
 
