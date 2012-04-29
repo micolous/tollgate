@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from django import forms
+import tollgate
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from tollgate.frontend.models import *
 from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
@@ -44,6 +45,7 @@ class RequestContext(RequestContextOriginal):
 	"Our version of the RequestContext that includes additional stuff."
 	settings = settings
 	themes = THEME_CHOICES
+	tollgate_version = tollgate.__version__
 
 def controller_error(request):
 	return render_to_response('frontend/controller-error.html', {'excinfo': "%s: %s" % (sys.exc_type, sys.exc_value), 'traceback': extract_tb(sys.exc_traceback)}, context_instance=RequestContext(request))
