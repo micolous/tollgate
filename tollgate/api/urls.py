@@ -27,7 +27,7 @@ urlpatterns = patterns('tollgate.api.views',
 	# Gets information about a network host by IP.
 	# Equivalent to the old whatis_ip() API call.
 	url(
-		r'^networkhost/by-ip/(?P<ip_address>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$',
+		r'^networkhost/by-ip/(?P<ip_address>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/$',
 		ReadOnlyInstanceModelView.as_view(resource=NetworkHostResource),
 		dict(online=True),
 		name='api_whatis_ip'
@@ -48,7 +48,7 @@ urlpatterns = patterns('tollgate.api.views',
 	# Gets information about a user by IP.
 	# Equivalent to the old whois_ip() API call.
 	url(
-		r'^user/by-ip/(?P<networkhost__ip_address>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$',
+		r'^user/by-ip/(?P<networkhost__ip_address>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/$',
 		ReadOnlyInstanceModelView.as_view(resource=UserProfileResource),
 		dict(networkhost__online=True),
 		name='api_whois_ip'
