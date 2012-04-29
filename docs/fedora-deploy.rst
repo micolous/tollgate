@@ -43,9 +43,14 @@ Now ``ISC-DHCP`` can be started::
 
 Check ``systemctl status dhcpd.service`` and ``/var/log/messages`` if you encounter issues. 
 
-Next named.conf needs to be configured. There is an example of this in ``example/fedora/named.conf``
+Next named.conf needs to be configured. There is an example of this in ``example/fedora/named.conf``. This is a modification of the default named.conf.
 
+Additionally, you must configure the forwards and reverse zones to match for ``ISC-DHCP``. There are example zones in ``example/fedora/named/``. These should go into ``/var/named/dynamic/``.
 
+Now ``BIND9`` can be started::
+        
+        systemctl enable 
+        systemctl start 
 
 
 

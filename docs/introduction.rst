@@ -15,14 +15,37 @@ It's important to note that tollgate only manages routing on your network.  A ty
 
 tollgate is a little bit different to most captive portal solutions because it doesn't use RADIUS at all.  It is entirely managed within your database, which can run on anything Django can such MySQL or SQLite.
 
-Server Platform Support
-=======================
+Requirements
+============
 
 tollgate will only run on Linux.  You do not need to have your DHCP or DNS servers on the same machine (though is it recommended).
 
 tollgate has some limited support for running the frontend, for development purposes, on Mac OS X and Windows.  However, the backend **will not work** on these systems.
 
 At the time of writing, your author is not aware of any other operating system that supports the needed functionality to make the system work.  See :ref:`porting`.
+
+The following packages must be installed:
+
+- Python 2.5 or later
+- Django 1.2 or later, as well as a supported database (such as MySQL or SQLite3).
+- WSGI-compliant web server, such as apache2.
+  - It is strongly recommended that you run the site using HTTPS only.
+- Linux 2.6.28 or later with netfilter (most distributions ship with this).
+- iptables 1.4.3 or later.
+- xtables-addons 1.22 or later.
+- DBUS
+- django-south
+- nmap
+- python-daemon
+- python-dbus
+- python-iplib or python-ipy
+- python-lxml
+- python-simplejson (if using Python 2.5)
+
+
+Optional dependencies:
+
+- mrab-regex-hg
 
 
 Client Platform Support

@@ -14,13 +14,12 @@ Contents:
    :maxdepth: 2
    
    introduction
-   deploy-djp
+   deploy
    fedora-deploy
-   deploy-dev
    hacking
    credits
-   changelog-3
-   changelog-2
+   changelog
+   licensing
    
 
 

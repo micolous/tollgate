@@ -64,3 +64,11 @@ TODO: Finish writing this.
 This is how a packet is handled inside tollgate when running on Linux.
 
 1. If it's a new connection, it hits the NAT table rules.
+
+Known Issues
+============
+
+* ``xt_quota2`` doesn't always show current quota data in iptables command.  It should not be relied on for accurate display of quota information via `iptables` command, use ``/proc/net/xt_quota/`` instead because that is accurate.  This effects all SMP systems.  The actual accounting process is accurate however.
+   * Why the in-kernel quota system doesn't work for us: http://bugzilla.netfilter.org/show_bug.cgi?id=541
+* Port forwarding doesn't work correctly when the internal and external ports are different.
+* There's no way to deregister a console from an account that hasn't signed in to the current event.  (ie: Previous event the console is marked as being owned by user X, next event user Y can't sign it in because user X hasn't attended)
