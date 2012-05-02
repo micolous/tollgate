@@ -53,7 +53,7 @@ def controller_error(request):
 def login(request):
 	if request.user.is_authenticated():
 		# already logged in
-		return HttpResponseRedirect('/')
+		return redirect('index')
 
 	if request.method == 'POST':
 		f = LoginForm(request.POST)
@@ -100,7 +100,7 @@ def login(request):
 					messages.warning(request, 'Your account does not have attendance registered.  Login was allowed so that you can do this.')
 
 					# return them to homepage
-					return HttpResponseRedirect('/')
+					return redirect('index')
 
 				else:
 					# failure
@@ -126,11 +126,11 @@ def login(request):
 			if f.cleaned_data['internet']:
 				# we need to do an internet login as well for the user.
 				# lets send them across
-				return HttpResponseRedirect('/internet/login/here/')
+				return redirect('internet_login_here')
 
 			# no internet login requested
 			# send to homepage
-			return HttpResponseRedirect('/')
+			return redirect('index')
 	else:
 		f = LoginForm()
 		return render_to_response('frontend/login.html', {'f': f, 'fail': False}, context_instance=RequestContext(request))
@@ -152,7 +152,7 @@ def internet_login_here(request):
 	
 	#mac = mac.replace(":", "")
 
-	return HttpResponseRedirect('/internet/login/' + mac + '/')
+	return redirect('internet-login', mac)
 
 @login_required
 def internet_login(request, mac_address):
@@ -260,7 +260,7 @@ def internet_disown(request, host_id):
 		if request.META.has_key('HTTP_REFERER'):
 			return HttpResponseRedirect(request.META['HTTP_REFERER'])
 		else:
-			return HttpResponseRedirect('/internet/')
+			return redirect('internet')
 	else:
 		# not allowed.
 		return HttpResponseForbidden()
@@ -268,7 +268,7 @@ def internet_disown(request, host_id):
 @login_required
 def host_refresh_quick(request):
 	refresh_networkhost_quick()
-	return HttpResponseRedirect('/internet/')
+	return redirect('internet')
 
 
 @login_required
@@ -331,7 +331,7 @@ def quota_on(request):
 	except:
 		return controller_error(request)
 
-	return HttpResponseRedirect('/quota/')
+	return redirect('quota')
 
 @login_required
 def quota_user_reset(request):
@@ -371,7 +371,7 @@ def quota_user_reset(request):
 			except:
 				return controller_error(request)
 
-			return HttpResponseRedirect('/quota/')
+			return redirect('quota')
 		else:
 			# some answers were incorrect
 			return render_to_response('frontend/reset-lecture.html', {'reset_form': reset_form, 'incorrect': True}, context_instance=RequestContext(request))
@@ -392,7 +392,7 @@ def quota_off(request):
 		disable_user_quota(attendance)
 	except:
 		return controller_error(request)
-	return HttpResponseRedirect('/quota/')
+	return redirect('quota')
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_view_quota'))
 def usage(request):
@@ -498,7 +498,7 @@ def usage_reset(request, aid):
 	a = get_object_or_404(EventAttendance, id=aid)
 
 	if request.method != 'POST':
-		return HttpResponseRedirect('/usage/' + str(aid) + '/')
+		return redirect('usage-info', a.id)
 
 	reset_form = ResetExcuseForm(request.POST)
 	if not reset_form.is_valid():
@@ -524,7 +524,7 @@ def usage_reset(request, aid):
 		except:
 			return controller_error(request)
 
-	return HttpResponseRedirect('/usage/' + str(aid) + '/')
+	return redirect('usage-info', a.id)
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_view_quota'))
 def usage_all_on(request):
@@ -537,7 +537,7 @@ def usage_all_on(request):
 	for attendance in attendances:
 		if attendance.user_profile.internet_on:
 			enable_user_quota(attendance)
-	return HttpResponseRedirect('/usage/')
+	return redirect('usage')
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_view_quota'))
 def usage_all_really_on(request):
@@ -555,7 +555,7 @@ def usage_all_really_on(request):
 		attendance.save()
 	transaction.savepoint_commit(sid)
 
-	return HttpResponseRedirect('/usage/')
+	return redirect('usage')
 
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_view_quota'))
@@ -574,19 +574,19 @@ def usage_all_off(request):
 		disable_user_quota(attendance)
 	transaction.savepoint_commit(sid)
 
-	return HttpResponseRedirect('/usage/')
+	return redirect('usage')
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_view_quota'))
 def usage_on(request, aid):
 	a = get_object_or_404(EventAttendance, id=aid)
 	enable_user_quota(a)
-	return HttpResponseRedirect('/usage/' + str(aid) + '/')
+	return redirect('usage-info', a.id)
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_view_quota'))
 def usage_off(request, aid):
 	a = get_object_or_404(EventAttendance, id=aid)
 	disable_user_quota(a)
-	return HttpResponseRedirect('/usage/' + str(aid) + '/')
+	return redirect('usage-info', a.id)
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_reset_quota'))
 def usage_disable(request, aid):
@@ -595,7 +595,7 @@ def usage_disable(request, aid):
 	a.quota_unmetered = False
 	a.save()
 	disable_user_quota(a)
-	return HttpResponseRedirect('/usage/' + str(aid) + '/')
+	return redirect('usage-info', a.id)
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_change_coffee'))
 def usage_coffee(request, aid):
@@ -607,7 +607,7 @@ def usage_coffee(request, aid):
 			a.save()
 
 	# we're done now, redirect back.
-	return HttpResponseRedirect('/usage/' + str(aid) + '/')
+	return redirect('usage-info', a.id)
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_view_ownership'))
 def pclist(request):
@@ -628,7 +628,7 @@ def index(request):
 @login_required
 def theme_change(request):
 	if request.method != 'POST':
-		return HttpResponseRedirect('/')
+		return redirect('index')
 
 	theme_change_form = ThemeChangeForm(request.POST)
 
@@ -637,7 +637,7 @@ def theme_change(request):
 		profile.theme = theme_change_form.cleaned_data['theme']
 		profile.save()
 
-	return HttpResponseRedirect('/')
+	return redirect('index')
 
 def captive_landing(request):
 	dest = ""
