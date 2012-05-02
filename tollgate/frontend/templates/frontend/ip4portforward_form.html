@@ -22,12 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% block title %}ipv4 port forwarding editing{% endblock %}
 
 {% block content %}
-	<p>Make sure the internal and external port are the same.  It's kinda broken right now.</p>
+	<p><strong>Known issue:</strong> Internal and external port must be the same.  This will be fixed in a future release.</p>
 	<form method="post">
 		{% csrf_token %}
-		{{ form.as_p }}
+		<table>{{ form }}</table>
 		<p><input type="submit" value="{% if object %}Save Changes{% else %}Add Entry{% endif %}" /> <a href="{% url ip4portforward_list %}">Cancel</a></p>
 	</form>
-
 {% endblock %}
-
