@@ -1,4 +1,4 @@
-{% extends "frontend/base.html" %}{% load future %}
+{% extends "frontend/base.html" %}
 {% comment %}
 tollgate base usage page
 Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
@@ -16,14 +16,11 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
-
+{% load url from future %}
 {% load i18n %}
 {% block windowtitle %}{% trans "usage" %}{% endblock %}
 {% block title %}{% trans "usage" %}{% endblock %}
 {% block submenu %}
-<!-- $Id: base-usage.html 112 2010-11-10 12:42:16Z michael $
- -->
-
 <ul>
 	<li><a href="{% url 'usage' %}">{% trans "internet usage report" %}</a></li>
 	<li><a href="{% url 'usage-heavy' %}">{% trans "highest quota use" %}</a></li>
