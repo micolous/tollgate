@@ -16,29 +16,25 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
-
-{% block windowtitle %}system error{% endblock %}
-{% block title %}system error{% endblock %}
+{% load url from future %}
+{% load i18n %}
+{% block windowtitle %}{% trans 'system error' %}{% endblock %}
+{% block title %}{% trans 'system error' %}{% endblock %}
 
 {% block content %}
-<!-- $Id: error.html 112 2010-11-10 12:42:16Z michael $
- -->
-
 <p>{{ error_message }}</p>
 
-<h2>You should report this to a network administrator.</h2>
-<p>Because it's probably their fault, or there's a bug in the portal somewhere that needs squashing.</p>
+<h2>{% trans "You should report this to a network administrator." %}</h2>
+<p>{% trans "Because it's probably their fault, or there's a bug in the portal somewhere that needs squashing." %}</p>
 
-<h2>Traceback</h2>
+<h2>{% trans "Traceback" %}</h2>
 <pre>{{ excinfo }}</pre>
 <ul>
 {% for file, line, method, code in traceback %}
 	<li>
-		<p>in <code>{{ file }}</code>, line <code>{{ line }}</code>, in method <code>{{	method }}</code></p>
+		<p>{% blocktrans %}in <code>{{ file }}</code>, line <code>{{ line }}</code>, in method <code>{{	method }}</code>{% endblocktrans %}</p>
 		<p><code>{{ code }}</code></p>
 	</li>
-	
-	
 {% endfor %}
 </ul>
 

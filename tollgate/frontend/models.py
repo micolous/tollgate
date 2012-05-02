@@ -361,6 +361,11 @@ class IP4PortForward(Model):
 
 
 def get_current_event():
+	"""
+	Gets the current event.
+	
+	Returns None if there is no current event.
+	"""
 	now = utcnow()
 	try:
 		return Event.objects.get(start__lte=now, end__gte=now)
@@ -386,10 +391,28 @@ def has_userprofile_attended(event, userprofile):
 	return EventAttendance.objects.filter(event__exact=event, user_profile__exact=userprofile).exists()
 
 def get_userprofile_attendance(event, userprofile):
-	return EventAttendance.objects.get(event__exact=event, user_profile__exact=userprofile)
+	"""
+	Gets the EventAttendance associated with that userprofile at this event.
+	
+	Returns None if the user is not signed in.
+	"""
+	try:
+		return EventAttendance.objects.get(event__exact=event, user_profile__exact=userprofile)
+	except ObjectDoesNotExist:
+		return None
 
 def get_attendance_currentevent(userprofile):
-	return get_userprofile_attendance(get_current_event(), userprofile)
+	"""
+	Gets the user's attendance at the current event.
+	
+	Returns None if there is no current event, or the user is not registered as attendending this event.
+	"""
+	e = get_current_event()
+	
+	if e != None:
+		return get_userprofile_attendance(e, userprofile)
+	else:
+		return None
 
 def has_attended_currentevent(userprofile):
 	return has_userprofile_attended(get_current_event(), userprofile)

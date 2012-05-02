@@ -178,12 +178,14 @@ def internet_login(request, mac_address):
 
 	# find the user's attendance
 	current_event = get_current_event()
-	if current_event is None and not user.is_staff:
+	if current_event == None and not user.is_staff:
 		return render_to_response('frontend/event-not-active.html', context_instance=RequestContext(request))
 
-	if not has_userprofile_attended(current_event, profile):
-		return render_to_response('frontend/not-signed-in.html', {'event': current_event}, context_instance=RequestContext(request))
 	attendance = get_userprofile_attendance(current_event, profile)
+	if attendance == None:
+		return render_to_response('frontend/not-signed-in.html', {'event': current_event}, context_instance=RequestContext(request))
+	
+	
 
 	# register the computer's ownership permanently
 	try:
@@ -287,11 +289,11 @@ def quota(request):
 	user = request.user
 	profile = get_userprofile(user)
 	current_event = get_current_event()
-	if current_event is None:
+	if current_event == None:
 		return render_to_response('frontend/event-not-active.html', context_instance=RequestContext(request))
-	try:
-		attendance = get_userprofile_attendance(current_event, profile)
-	except ObjectDoesNotExist:
+	
+	attendance = get_userprofile_attendance(current_event, profile)
+	if attendance == None:
 		return render_to_response('frontend/not-signed-in.html', {'event': current_event}, context_instance=RequestContext(request))
 
 	quota_update_fail = False
@@ -317,9 +319,11 @@ def quota_on(request):
 	user = request.user
 	profile = get_userprofile(user)
 	current_event = get_current_event()
-	if current_event is None:
+	if current_event == None:
 		return render_to_response('frontend/event-not-active.html', context_instance=RequestContext(request))
 	attendance = get_userprofile_attendance(current_event, profile)
+	if attendance == None:
+		return render_to_response('frontend/not-signed-in.html', dict(event=current_event), context_instance=RequestContext(request))
 
 	try:
 		enable_user_quota(attendance)
@@ -334,9 +338,11 @@ def quota_user_reset(request):
 	user = request.user
 	profile = get_userprofile(user)
 	current_event = get_current_event()
-	if current_event is None:
+	if current_event == None:
 		return render_to_response('frontend/event-not-active.html', context_instance=RequestContext(request))
 	attendance = get_userprofile_attendance(current_event, profile)
+	if attendance == None:
+		return render_to_response('frontend/not-signed-in.html', dict(event=current_event), context_instance=RequestContext(request))
 
 	#TODO: Make it check you have used at least 70% of your quota before continuing.
 
@@ -377,9 +383,11 @@ def quota_off(request):
 	user = request.user
 	profile = get_userprofile(user)
 	current_event = get_current_event()
-	if current_event is None:
+	if current_event == None:
 		return render_to_response('frontend/event-not-active.html', context_instance=RequestContext(request))
 	attendance = get_userprofile_attendance(current_event, profile)
+	if attendance == None:
+		return render_to_response('frontend/not-signed-in.html', dict(event=current_event), context_instance=RequestContext(request))
 	try:
 		disable_user_quota(attendance)
 	except:
@@ -395,7 +403,7 @@ def usage(request):
 		quota_update_fail = True
 
 	current_event = get_current_event()
-	if current_event is None:
+	if current_event == None:
 		return render_to_response('frontend/event-not-active.html', context_instance=RequestContext(request))
 
 	attendances = EventAttendance.objects.filter(event__exact=current_event).order_by('user_profile')
@@ -404,7 +412,6 @@ def usage(request):
 		total += a.quota_used
 
 	return render_to_response('frontend/usage.html', {'attendances': attendances, 'total': bytes_str(total), 'mode': _('alphabetical'), 'quota_update_fail': quota_update_fail}, context_instance=RequestContext(request))
-
 
 #todo: replace with generic view and roll into one function
 @user_passes_test(lambda u: u.has_perm('frontend.can_view_quota'))
@@ -416,7 +423,7 @@ def usage_heavy(request):
 		quota_update_fail = True
 
 	current_event = get_current_event()
-	if current_event is None:
+	if current_event == None:
 		return render_to_response('frontend/event-not-active.html', context_instance=RequestContext(request))
 
 	attendances = EventAttendance.objects.filter(event__exact=current_event).order_by('-quota_used')
@@ -435,7 +442,7 @@ def usage_speed(request):
 		quota_update_fail = True
 
 	current_event = get_current_event()
-	if current_event is None:
+	if current_event == None:
 		return render_to_response('frontend/event-not-active.html', context_instance=RequestContext(request))
 
 	attendances = list(EventAttendance.objects.filter(event__exact=current_event))
@@ -455,7 +462,7 @@ def usage_morereset(request):
 		quota_update_fail = True
 
 	current_event = get_current_event()
-	if current_event is None:
+	if current_event == None:
 		return render_to_response('frontend/event-not-active.html', context_instance=RequestContext(request))
 
 	attendances = EventAttendance.objects.filter(event__exact=current_event).order_by('-quota_multiplier')
@@ -523,7 +530,7 @@ def usage_reset(request, aid):
 def usage_all_on(request):
 	# find all users that are in attendance this lan
 	current_event = get_current_event()
-	if current_event is None:
+	if current_event == None:
 		return render_to_response('frontend/event-not-active.html', context_instance=RequestContext(request))
 
 	attendances = EventAttendance.objects.filter(event__exact=current_event)
@@ -536,7 +543,7 @@ def usage_all_on(request):
 def usage_all_really_on(request):
 	# find all users that are in attendance this lan
 	current_event = get_current_event()
-	if current_event is None:
+	if current_event == None:
 		return render_to_response('frontend/event-not-active.html', context_instance=RequestContext(request))
 
 	attendances = EventAttendance.objects.filter(event__exact=current_event)
@@ -555,7 +562,7 @@ def usage_all_really_on(request):
 def usage_all_off(request):
 	# find all users that are in attendance this lan
 	current_event = get_current_event()
-	if current_event is None:
+	if current_event == None:
 		return render_to_response('frontend/event-not-active.html', context_instance=RequestContext(request))
 
 	attendances = EventAttendance.objects.filter(event__exact=current_event)
