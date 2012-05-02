@@ -1,7 +1,7 @@
 {% extends "frontend/base.html" %}
 {% comment %}
 tollgate login page
-Copyright 2008-2011 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -16,15 +16,13 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
+{% load url from future %}
+{% load i18n %}
 
-
-{% block windowtitle %}log in{% endblock %}
-{% block title %}log in{% endblock %}
+{% block windowtitle %}{% trans 'log in' %}{% endblock %}
+{% block title %}{% trans 'log in' %}{% endblock %}
 
 {% block content %}
-<!-- $Id: login.html 112 2010-11-10 12:42:16Z michael $
- -->
-
 {% if fail %}
 	{% if fail_credentials %}
 		<p>Invalid username / password!!</p>
@@ -37,18 +35,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	{% if fail_disabled %}
 		<p>Sorry, but your account has been disabled, so you may not log in.</p>
 	{% endif %}
-	
-	{% if fail_noapi %}
-		<p>Sorry, the external API was disabled, so I couldn't log you in because either those login credentials aren't in the local database, there is no active event, or your attendance has not been registered.  Please use the <a href="/admin/">admin panel</a> to login and fix this.</p>
-	{% endif %}
-	
 {% endif %}
 
 <p><strong>Please log in.</strong></p>
 
-<form method="post" action="/login/">{% csrf_token %}
+<form method="post" action="{% url 'login' %}">{% csrf_token %}
 	{{ f.as_p }}
-	<p><input type="submit" value="Login"> <a href="/">Cancel</a></p>
+	<p><input type="submit" value="Login"> <a href="{% url 'index' %}">Cancel</a></p>
 </form>
 {% endblock %}
 

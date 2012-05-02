@@ -94,7 +94,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		 			<li><a href="{% url 'logout' %}">{% trans "logout" %}</a></li>
 		 		{% else %}
 		 			<li>{% trans "not logged in" %}</li>
-		 			<li><a href="/login/">{% trans "login" %}</a></li>
+		 			<li><a href="{% url 'login' %}">{% trans "login" %}</a></li>
 		 		{% endif %}
 		 		
 				<!--

@@ -58,9 +58,9 @@ urlpatterns = (
 	#(r'^quota/graph.png$', 'quota_graph', name='quota-graph'),
 	url(r'^quota/$', 'quota', name='quota'),
 
-	url(r'^usage/all/on/$', 'usage_all_on'),
-	url(r'^usage/all/really-on/$', 'usage_all_really_on'),
-	url(r'^usage/all/off/$', 'usage_all_off'),
+	url(r'^usage/all/on/$', 'usage_all_on', name='usage-all-on'),
+	url(r'^usage/all/really-on/$', 'usage_all_really_on', name='usage-all-really-on'),
+	url(r'^usage/all/off/$', 'usage_all_off', name='usage-all-off'),
 
 	url(r'^usage/(?P<aid>\d+)/on/$', 'usage_on', name='usage-on'),
 	url(r'^usage/(?P<aid>\d+)/off/$', 'usage_off', name='usage-off'),
@@ -131,7 +131,7 @@ urlpatterns = (
 
 
 
-	url(r'^preferences/theme-change/$', 'theme_change'),
+	url(r'^preferences/theme-change/$', 'theme_change', name='theme-change'),
 	url(
 		r'^help/source/$',
 		direct_to_template,

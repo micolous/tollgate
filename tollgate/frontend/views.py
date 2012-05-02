@@ -446,7 +446,7 @@ def usage_speed(request):
 		return render_to_response('frontend/event-not-active.html', context_instance=RequestContext(request))
 
 	attendances = list(EventAttendance.objects.filter(event__exact=current_event))
-	attendances.sort(key=(lambda o: o.last_datapoint().average_speed()), reverse=True)
+	attendances.sort(key=(lambda o: o.last_datapoint().average_speed() if o.last_datapoint() else 0), reverse=True)
 	total = 0L
 	for a in attendances:
 		total += a.quota_used

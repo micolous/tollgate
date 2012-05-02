@@ -1,7 +1,7 @@
 {% extends "frontend/base-usage.html" %}
 {% comment %}
 tollgate admin usage report page
-Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -16,14 +16,12 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
-
+{% load url from future %}
+{% load i18n %}
 {% load humanize %}
 {% block title %}internet usage report ({{ mode }}){% endblock %}
 
 {% block content %}
-<!-- $Id: usage.html 112 2010-11-10 12:42:16Z michael $
- -->
-
 {% if quota_update_fail %}
 <p><strong>Warning:</strong> The firewall controller system is currently down, so this data hasn't been updated.  Go start it up again so I can get current usage data.</p>
 {% endif %}
@@ -31,9 +29,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <p>A total of {{ total }} was used.</p>
 
 <ul>
-	<li><a href="/usage/all/on/">Turn on everyone's internet access that has opted to switch it on</a></li>
-	<li><a href="/usage/all/really-on/">Turn on everyone's internet access, even if they have disabled it</a></li>
-	<li><a href="/usage/all/off/">Turn off everyone's internet access.</a></li>
+	<li><a href="{% url 'usage-all-on' %}">Turn on everyone's internet access that has opted to switch it on</a></li>
+	<li><a href="{% url 'usage-all-really-on' %}">Turn on everyone's internet access, even if they have disabled it</a></li>
+	<li><a href="{% url 'usage-all-off' %}">Turn off everyone's internet access.</a></li>
 </ul>
 
 <table class="internet">
@@ -65,7 +63,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 					<span class="no">No</span>
 				{% endif %}
 			</td>
-			<td><a href="/usage/{{ a.id }}/">More...</a></td>
+			<td><a href="{% url 'usage-info' a.id %}">More...</a></td>
 		</tr>		
 	{% endfor %}
 </table>

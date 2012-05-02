@@ -16,15 +16,13 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
-
+{% load url from future %}
+{% load i18n %}
 {% load humanize %}
 {% block windowtitle %}quota usage{% endblock %}
 {% block title %}quota usage{% endblock %}
 
 {% block content %}
-<!-- $Id: quota.html 112 2010-11-10 12:42:16Z michael $
- -->
-
 {% if quota_update_fail %}
 <p><strong>Warning:</strong> Updated data could not be retrieved.  This information is not current.</p>
 {% endif %}
@@ -78,7 +76,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		
 					{% if has_free_reset %}
 						<td>
-								<a href="/quota/user-reset/">You have one free reset available.</a>  No more free resets will be available after you have used it.
+								<a href="{% url 'quota-usage-reset' %}">You have one free reset available.</a>  No more free resets will be available after you have used it.
 						</td>
 					{% endif %}
 					
@@ -158,8 +156,8 @@ $(function () {
 	<p>Internet access is currently <span class="no">disabled</span>.</p>
 {% endif %}
 <ul>
-	<li><a href="/quota/on/">Switch on internet connectivity.</a>  If you have quota available, internet access will be granted to all of your online computers and devices.</li>
-	<li><a href="/quota/off/">Switch off internet connectivity.</a>  All computers listed here will lose internet access <em>immediately</em>, and all unfinished downloads will be terminated.  Internet access will resume when you opt to, or when you try to connect another computer to the internet in your name.</li>
+	<li><a href="{% url 'quota-on' %}">Switch on internet connectivity.</a>  If you have quota available, internet access will be granted to all of your online computers and devices.</li>
+	<li><a href="{% url 'quota-off' %}">Switch off internet connectivity.</a>  All computers listed here will lose internet access <em>immediately</em>, and all unfinished downloads will be terminated.  Internet access will resume when you opt to, or when you try to connect another computer to the internet in your name.</li>
 </ul>
 
 <h2>Your Computers and Devices</h2>
@@ -185,7 +183,7 @@ $(function () {
 					<span class="no">No</span>
 				{% endif %}
 			</td>
-			<td><a href="/internet/disown/{{ host.id }}/" title="This will make it so the computer is no longer marked as owned by you, disconnecting it from the internet">Disown Computer</a></td>
+			<td><a href="{% url 'internet-disown' host.id %}" title="This will make it so the computer is no longer marked as owned by you, disconnecting it from the internet">Disown Computer</a></td>
 		</tr>
 	{% endfor %}
 </table>
