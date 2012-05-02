@@ -361,7 +361,21 @@ You'll also need to run an actual WINS server too.  Samba 3 provides a WINS serv
    wins support = yes
    dns proxy = yes
 
-After this, reload your samba and dhcp daemon.
+After this, reload your Samba and DHCP daemon.
+
+Mass-mailing Worms
+------------------
+
+It's pretty much a given you will have problems with infected Windows hosts.  One major thing you will want to consider is blocking external SMTP traffic to at least prevent your network from becoming a spam hub, and angering your ISP (as well as other internet users).  You can do this with an entry in ``backend.ini``, under the section ``blacklist``::
+
+   externaldns = 0.0.0.0/25
+   
+Normally you only have to block port 25 traffic.  SMTP over SSL is generally never used by such worms, and mail servers running on SSL generally also require authentication (which the spam bots won't have).
+
+It will also allow legitimate senders of mail on your network to be able to continue sending mail.
+
+Unfortunately, there isn't a simple way at this time to exempt blocking of SMTP over TLS (which uses port 25 and ``STARTTLS`` command).  Additionally, many ISPs do not offer encrypted SMTP servers -- until they are lobbied by users. ;)
+
 
 Nintendo Consoles / WFC
 =======================
@@ -407,3 +421,30 @@ The general process for logging a system into tollgate when the device does not 
 #. Reattempt the connection test (this should succeed).
 
 After this, the device will be registered with that user's account.  Whenever they are signed into the event they will automatically grant access to the internet for all of their devices.
+
+Rogue DHCP / DNS Servers
+========================
+
+There have been several instances at events your author has administed where Windows worms propegating on the network will send out rogue DHCP server responses, attempting to either route traffic through the infected machine, or replace DNS with a third-party server that will redirect traffic to popular websites through an attacker's server.
+
+There are two major mitigation steps you should take:
+
+Block external DNS servers
+--------------------------
+
+This can be done in ``backend.ini``, by adding a blacklist line like::
+
+   externaldns = 0.0.0.0/53
+
+This will only allow your DNS server, and any whitelisted / unmetered servers to have DNS traffic passed through to them.
+
+Use layer 3 managed switches with DHCP filtering
+------------------------------------------------
+
+Layer 3 managed switches offer various filtering options.  You can limit the spread of a rogue DHCP server by:
+
+1. Only allowing DHCP to be served from the tollgate server(s) port(s) on the backbone switch.
+2. Only allowing DHCP to be served from the port(s) connecting to the backbone switch for leaf switches.
+
+If you are low on budget, there's a good chance that you will not be able to afford all Layer 3 managed switches.  In this case, save the money for at least one on your backbone, so any rogue DHCP server issues will be limited to one leaf switch, and you'll be able to quickly determine which host is compromised.
+
