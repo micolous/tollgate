@@ -1,7 +1,7 @@
 {% extends "frontend/base-internet.html" %}
 {% comment %}
 tollgate sign in page
-Copyright 2008-2011 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -16,12 +16,13 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
+{% load url from future %}
 
 {% block title %}signin system (page 1 of 3){% endblock %}
 
 {% block content %}
 	<p>Please enter the username to sign in.  If it doesn't exist, you'll be prompted to create it.</p>
-	<form method="post" action="{% url signin %}">
+	<form method="post" action="{% url 'signin' %}">
 		{% csrf_token %}
 		{{ form.as_p }}
 		<p><input type="submit" value="Continue"></p>
