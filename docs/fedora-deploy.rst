@@ -159,9 +159,10 @@ NOTE: If you are using mysql, you must add to your settings.py ``USE_TZ = False`
 Finally, we need to sync the database, and collect the static components ready for deployment.::
 
         cd /var/www/tollgate/tollgate_site
-        python manage.py syncdb
-        python manage.py migrate
-        python manage.py collectstatic
+        python manage.py syncdb --noinput
+        python manage.py migrate --noinput
+        python manage.py collectstatic --noinput
+        python manage.py createsuperuser
 
 Now you should start httpd.::
 
