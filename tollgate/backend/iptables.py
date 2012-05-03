@@ -92,7 +92,7 @@ def create_nat():
 	
 	if missing_modules:
 		print "Error: not all modules could be loaded successfully.  The following are missing:"
-		print modules
+		print missing_modules
 		print ""
 		print "This may mean that you have not built all dependancies."
 		exit(1)
