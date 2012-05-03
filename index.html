@@ -4,27 +4,40 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>tollgate by micolous</title>
-    
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
     <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
   </head>
   <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/micolous/tollgate">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/micolous/tollgate/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/micolous/tollgate/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
     <div class="wrapper">
-      <header>
-        <h1>tollgate</h1>
-        <p>A Python/Django-based captive portal system for Linux.</p>
-        <p class="view"><a href="https://github.com/micolous/tollgate">View the Project on GitHub <small>micolous/tollgate</small></a></p>
-        <ul>
-          <li><a href="https://github.com/micolous/tollgate/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/micolous/tollgate/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/micolous/tollgate">Fork On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
+
       <section>
+        <div id="title">
+          <h1>tollgate</h1>
+          <p>A Python/Django-based captive portal system for Linux.</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/micolous">micolous</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+        </div>
+
         <h1>Introduction</h1>
 
 <p><code>tollgate</code> is a Python/Django-based captive portal system for Linux.  It is primarily for <a href="http://en.wikipedia.org/wiki/LAN_party">LAN parties</a>, but can run in other (primarily non-commercial) environments as well.  It's licensed under the terms of the Affero GNU General Public License, version 3.</p>
@@ -35,14 +48,13 @@
 
 <p>At the moment, we're prepping tollgate for it's first public stable release, which will become <code>3.0.0</code>.  The <code>master</code> branch is a bit volatile at the moment, however the software itself is reasonably stable.</p>
 
-<p>You may want to check out the git repository to get started.</p>
+<h2>Getting Started</h2>
+
+<p>There is some <a href="http://tollgate.rtfd.org/">online documentation</a> which describes how to deploy tollgate, and it's innards.</p>
       </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/micolous">micolous</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
+
     </div>
-    <script src="javascripts/scale.fix.js"></script>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
     
   </body>
 </html>
