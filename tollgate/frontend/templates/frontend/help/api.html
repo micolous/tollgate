@@ -1,5 +1,4 @@
-{% extends "frontend/base.html" %}
-{% load url from future %}
+{% extends 'frontend/base-help.html' %}
 {% comment %}
 tollgate api docs page
 Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
@@ -17,7 +16,8 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
-
+{% load url from future %}
+{% load i18n %}
 {% block windowtitle %}help :: api{% endblock %}
 {% block title %}api{% endblock %}
 

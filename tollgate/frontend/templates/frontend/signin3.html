@@ -16,12 +16,12 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
-
+{% load url from future %}
 {% block title %}signin system (page 3 of 3){% endblock %}
 
 {% block content %}
 	<p>You're signing in <strong>{{ u.username }}</strong>.</p>
-	<form method="post" action="{% url signin3 u.id %}">
+	<form method="post" action="{% url 'signin3' u.id %}">
 		{% csrf_token %}
 		{{ form.as_p }}
 		<p><input type="submit" value="Continue" /></p>

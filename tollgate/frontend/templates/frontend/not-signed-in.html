@@ -1,7 +1,7 @@
 {% extends "frontend/base.html" %}
 {% comment %}
 tollgate no attendance error page
-Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -16,18 +16,16 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
+{% load url from future %}
+{% load i18n %}
+{% block title %}{% trans "not signed in" %}{% endblock %}
 
-
-{% block title %}not signed in{% endblock %}
 {% block submenu %}
 {% endblock %}
 {% block content %}
-<!-- $Id: not-signed-in.html 112 2010-11-10 12:42:16Z michael $
- -->
+<p>{% blocktrans %}Sorry, you haven't been signed in as attending {{ event.name }}.  If you have already paid your entry fee, please see an admin as they did not sign you in correctly.{% endblocktrans %}</p>
 
-<p>Sorry, you haven't been signed in as attending {{ event.name }}.  If you have already paid your entry fee, please see an admin as they did not sign you in correctly.</p>
+<p>{% blocktrans %}Once this is completed, please logout of tollgate and login again, and then you will be able to access the internet.{% endblocktrans %}</p>
 
-<p>Once this is completed, please logout of tollgate and login again, and then you will be able to access the internet and register for competitions.</p>
-
-<p><a href="/">Okay</a></p>
+<p><a href="{% url 'index' %}">{% trans 'OK' %}</a></p>
 {% endblock %}

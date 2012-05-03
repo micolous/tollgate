@@ -16,8 +16,8 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
-
-
+{% load url from future %}
+{% load i18n %}
 {% load humanize %}
 {% block windowtitle %}internet hosts {% if offline %}(offline){% endif %}{% endblock %}
 {% block title %}internet hosts {% if offline %}(offline){% endif %}{% endblock %}
@@ -27,16 +27,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% if settings.ONLY_CONSOLE %}
 	<p class="information">Only gaming consoles can be logged in to this instance of portal.</p>
 {% else %}
-	<p>Please select a host to login to the internet for.  Alternatively, you can <a href="/internet/login/here/">log this computer into the internet</a>.</p>
+	<p>Please select a host to login to the internet for.  Alternatively, you can <a href="{% url 'internet-login-here' %}">log this computer into the internet</a>.</p>
 {% endif %}
 
 <p>Try accessing the internet from the host you want to login before looking here.  This will record it in the portal's MAC address cache, which is shown here.</p>
 
 <p>If the host does not appear here, try 
 	{% if offline %}
-		<a href="/internet/">searching for online hosts</a>.
+		<a href="{% url 'internet' %}">searching for online hosts</a>.
 	{% else %}
-		<a href="/internet/offline/">searching for offline hosts</a>.
+		<a href="{% url 'internet-offline' %}">searching for offline hosts</a>.
 	{% endif %}
 
   Computer names may take up to ten minutes to appear on this page.</p>
@@ -53,8 +53,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	{% for host in hosts %}
 		<tr class="{% cycle row1,row2 %}">
 			<td>{{ host.computer_name }}</td>
-			<td><a href="/internet/login/{{ host.mac_address }}/" title="Log in this host"><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.vendor }}.png" alt="{{ host.vendor }} " title="{{ host.vendor }}" class="cs"/><code>{{ host.mac_address }}</code></a></td>
-			<td><code><a href="/internet/login/{{ host.mac_address }}/" title="Log in this host">{{ host.ip_address }}</a></code></td>
+			<td><a href="{% url 'internet-login' host.mac_address %}" title="Log in this host"><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.vendor }}.png" alt="{{ host.vendor }} " title="{{ host.vendor }}" class="cs"/><code>{{ host.mac_address }}</code></a></td>
+			<td><code><a href="{% url 'internet-login' host.mac_address %}" title="Log in this host">{{ host.ip_address }}</a></code></td>
 			<td><abbr title="{{ host.first_connection|naturalday }} at {{ host.first_connection|time }}">{{ host.first_connection|timesince }} ago</abbr></td>
 		</tr>
 	{% endfor %}
