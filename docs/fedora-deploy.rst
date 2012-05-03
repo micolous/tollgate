@@ -29,7 +29,11 @@ Install the packages::
 
         yum install dhcp bind bind-utils
 
-Setup your LAN facing network device with a static IP address. There is an example of this in ``example/fedora/ifcfg-lan``. 
+Setup your LAN facing network device with a static IP address. There is an example of this in ``example/fedora/ifcfg-lan``, and the file you want to edit will be ``/etc/sysconfig/network-scripts/ifcfg-DEVICENAME``. 
+
+Once configured run.::
+
+        ifup DEVICENAME
 
 Next, we setup ``ISC-DHCP``. This will provide DHCP addresses to your LAN network. Make sure you get this right, else you will have a DHCP conflict on your Internet side. There is an example config in ``example/fedora/dhcpd.conf``.
 
@@ -51,8 +55,10 @@ Additionally, you must configure the forwards and reverse zones to match for ``I
 
 Please note, we have provided a zone for ``conntest.nintendowifi.net``. This is also aided by a component in HTTPD (Documented later). This is to allow the Nintendo DS, Nintendo DSi and Nintendo Wii wireless connection test to complete, so that the Access point can be associated with. If this is not avaliable, Nintendo devices will be unable to join the wireless access point. 
 
-Now ``BIND9`` can be started::
+Now ``BIND9`` is picky about permissions, but afterwards, can be started::
         
+        chown named:named /etc/named.conf
+        chown named:named /var/named/dynamic/*
         systemctl enable named.service
         systemctl start named.service
 
@@ -69,8 +75,8 @@ From a client connected to the LAN side, you should NOT be able to carry out a z
 
         dig @10.4.0.1 1.0.4.10.in-addr.arpa PTR
         dig @10.4.0.1 tollgate.example.lan. A
-        dig @127.0.0.1 conntest.nintendowifi.net A
-        dig @127.0.0.1 example.lan axfr
+        dig @10.4.0.1 conntest.nintendowifi.net A
+        dig @10.4.0.1 example.lan axfr
 
 When a client connects you should see messages in ``/var/log/messages`` like::
 
@@ -87,6 +93,38 @@ Then you have made a mistake somewhere. Check that the rndc-key permissions are 
 
 SQL
 ===
+
+Django supports a number of SQL servers for it's operation. We have extensively tested MariaDB (Formerly MySQL) with Tollgate. However, PostgreSQL and SQLite are also valid options. 
+
+MySQL / MariaDB
+---------------
+
+We have extensively tested Tollgate with MySQL and MariaDB. Additionally, they support replication features which allows for retrospective conversion to a clustered setup.
+
+First install the mysql packages.::
+
+        yum install MySQL-python mysql-server mysql
+
+Now you need to setup the database. We advise you to remove the anonymous users and test tables, as well as setting a strong root password.::
+        
+        systemctl start mysqld.service
+        mysql_secure_installation
+
+Now we need to login to mysql, to create the database and tollgate user.::
+
+        mysql -u root -p
+        mysql> create database tollgate;
+        mysql> create user 'tollgate'@'localhost' identified by 'password';
+        mysql> grant all privileges on tollgate.* to 'tollgate'@'localhost';
+        mysql> flush privileges;
+
+Keep these details for when you configure the settings.py - You will need to remember the ``USER``, ``NAME`` and ``PASSWORD``. The ``HOST`` setting will be ``localhost``.
+
+PostgreSQL
+----------
+
+
+
 
 
 HTTPD
@@ -112,16 +150,19 @@ Either you can send this CSR to be signed by another CA, or you can self sign. E
 
         openssl x509 -req -in tollgate.csr -days 365 -signkey tollgate.key -out tollgate.crt
 
-Now you should reconfigure the ServerName and ServerAlias parameters in ``/etc/httpd/conf.d/tollgate.conf``.
+Now you should reconfigure the ServerName and ServerAlias parameters in ``/etc/httpd/conf.d/tollgate.conf``. Please note the VirtualHost for ``conntest.nintendo.net``. Do not modify this VirtualHost. 
 
-Next you must edit ``/var/www/tollgate/tollgate_site/settings.py``. Fill in the ``DATABASE`` section with your SQL server information. Additionally, you should configure the ``SOURCE_URL`` parameter to ensure that you uphoad your AGPL obligations.
+Next you must edit ``/var/www/tollgate/tollgate_site/settings.py``. Fill in the ``DATABASE`` section with your SQL server information. Additionally, you should configure the ``SOURCE_URL`` parameter to ensure that you uphoad your AGPL obligations. Finally, at the bottom of the ``settings.py`` fill in your LAN details as needed. Check to make sure all values seem sane for your environment. 
+
+NOTE: If you are using mysql, you must add to your settings.py ``USE_TZ = False``
 
 Finally, we need to sync the database, and collect the static components ready for deployment.::
 
         cd /var/www/tollgate/tollgate_site
-        python manage.py syncdb
-        python manage.py migrate
-        python manage.py collectstatic
+        python manage.py syncdb --noinput
+        python manage.py migrate --noinput
+        python manage.py collectstatic --noinput
+        python manage.py createsuperuser
 
 Now you should start httpd.::
 

@@ -8,3 +8,6 @@ ONBOOT="yes"
 IPADDR=10.4.0.1
 USERCTL=no
 NETMASK=255.255.255.0
+DNS1=127.0.0.1
+#ONlY use this if you cluster your portals.
+#DNS2=10.4.0.2

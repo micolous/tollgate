@@ -15,7 +15,7 @@ Source:		%{name}-%{version}.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 BuildRequires:	httpd, python-setuptools, python-setuptools-devel
-Requires:	python, Django, httpd, akmod-xtables-addons, python-daemon, dbus-python, python-IPy, python-lxml, python-progressbar, python-simplejson, Django-south, nmap, mod_wsgi, python-pip, tollgate-selinux, configparser_plus, pygobject2, pytz, mod_ssl
+Requires:	python, Django, httpd, kmod-xtables-addons, python-daemon, dbus-python, python-IPy, python-lxml, python-progressbar, python-simplejson, Django-south, nmap, mod_wsgi, python-pip, tollgate-selinux, configparser_plus, pygobject2, pytz, mod_ssl
 
 %package selinux
 
@@ -60,7 +60,8 @@ mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/www/tollgate/static
 %{__python} setup.py install --root $RPM_BUILD_ROOT
 
 cp -r ./docs $RPM_BUILD_ROOT%{_prefix}/share/doc/tollgate
-cp ./docs/example/dbus/system.d/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
+#cp ./docs/example/dbus/system.d/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
+cp ./docs/example/fedora/dbus/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
 cp ./docs/example/tollgate/backend.ini $RPM_BUILD_ROOT%{_sysconfdir}/tollgate/
 cp ./docs/example/fedora/httpd/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d/
 
@@ -123,6 +124,7 @@ if [ ! -d /var/www/tollgate/tollgate_site ]; then
 	sed -e "s/^DEBUG \= True/from os.path import *\nPROJECT_PATH = realpath(dirname(__file__))\n\nDEBUG \= False/" -e "s/^STATIC_ROOT \= '.*'/STATIC_ROOT \= '\/var\/www\/tollgate\/static\/'/" -e "s/# 'django\.contrib\.admin',/'django.contrib.admin',/" -e "s/# 'django\.contrib\.admindocs',/# 'django.contrib.admindocs',\n\t'django.contrib.humanize',\n\t'south',\n\t'tollgate.api',\n\t'tollgate.frontend',\n\t'tollgate.scripts',/" settings.orig.py > settings.py
 	cat >> settings.py << EOF
 
+AUTH_PROFILE_MODULE = 'frontend.userprofile'
 LAN_SUBNET='10.4.0.0/24'
 LAN_IFACE='laniface'
 #In MB
