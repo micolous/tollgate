@@ -29,7 +29,11 @@ Install the packages::
 
         yum install dhcp bind bind-utils
 
-Setup your LAN facing network device with a static IP address. There is an example of this in ``example/fedora/ifcfg-lan``. 
+Setup your LAN facing network device with a static IP address. There is an example of this in ``example/fedora/ifcfg-lan``, and the file you want to edit will be ``/etc/sysconfig/network-scripts/ifcfg-DEVICENAME``. 
+
+Once configured run.::
+
+        ifup DEVICENAME
 
 Next, we setup ``ISC-DHCP``. This will provide DHCP addresses to your LAN network. Make sure you get this right, else you will have a DHCP conflict on your Internet side. There is an example config in ``example/fedora/dhcpd.conf``.
 
@@ -51,8 +55,10 @@ Additionally, you must configure the forwards and reverse zones to match for ``I
 
 Please note, we have provided a zone for ``conntest.nintendowifi.net``. This is also aided by a component in HTTPD (Documented later). This is to allow the Nintendo DS, Nintendo DSi and Nintendo Wii wireless connection test to complete, so that the Access point can be associated with. If this is not avaliable, Nintendo devices will be unable to join the wireless access point. 
 
-Now ``BIND9`` can be started::
+Now ``BIND9`` is picky about permissions, but afterwards, can be started::
         
+        chown named:named /etc/named.conf
+        chown named:named /var/named/dynamic/*
         systemctl enable named.service
         systemctl start named.service
 
@@ -114,7 +120,6 @@ Now we need to login to mysql, to create the database and tollgate user.::
 
 Keep these details for when you configure the settings.py - You will need to remember the ``USER``, ``NAME`` and ``PASSWORD``. The ``HOST`` setting will be ``localhost``.
 
-
 PostgreSQL
 ----------
 
@@ -147,7 +152,9 @@ Either you can send this CSR to be signed by another CA, or you can self sign. E
 
 Now you should reconfigure the ServerName and ServerAlias parameters in ``/etc/httpd/conf.d/tollgate.conf``. Please note the VirtualHost for ``conntest.nintendo.net``. Do not modify this VirtualHost. 
 
-Next you must edit ``/var/www/tollgate/tollgate_site/settings.py``. Fill in the ``DATABASE`` section with your SQL server information. Additionally, you should configure the ``SOURCE_URL`` parameter to ensure that you uphoad your AGPL obligations. Finally, at the bottom of the ``settings.py`` fill in your LAN details as needed. Check to make sure all values seem sane for your environment.
+Next you must edit ``/var/www/tollgate/tollgate_site/settings.py``. Fill in the ``DATABASE`` section with your SQL server information. Additionally, you should configure the ``SOURCE_URL`` parameter to ensure that you uphoad your AGPL obligations. Finally, at the bottom of the ``settings.py`` fill in your LAN details as needed. Check to make sure all values seem sane for your environment. 
+
+NOTE: If you are using mysql, you must add to your settings.py ``USE_TZ = False``
 
 Finally, we need to sync the database, and collect the static components ready for deployment.::
 
