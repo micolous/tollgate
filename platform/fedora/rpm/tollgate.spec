@@ -123,6 +123,7 @@ if [ ! -d /var/www/tollgate/tollgate_site ]; then
 	sed -e "s/^DEBUG \= True/from os.path import *\nPROJECT_PATH = realpath(dirname(__file__))\n\nDEBUG \= False/" -e "s/^STATIC_ROOT \= '.*'/STATIC_ROOT \= '\/var\/www\/tollgate\/static\/'/" -e "s/# 'django\.contrib\.admin',/'django.contrib.admin',/" -e "s/# 'django\.contrib\.admindocs',/# 'django.contrib.admindocs',\n\t'django.contrib.humanize',\n\t'south',\n\t'tollgate.api',\n\t'tollgate.frontend',\n\t'tollgate.scripts',/" settings.orig.py > settings.py
 	cat >> settings.py << EOF
 
+AUTH_PROFILE_MODULE = 'frontend.userprofile'
 LAN_SUBNET='10.4.0.0/24'
 LAN_IFACE='laniface'
 #In MB
