@@ -73,10 +73,10 @@ def check_modules(*modules):
 			modules.remove(module_name)
 		if not bool(modules):
 			# modules list is empty, pass!
-			return True
+			return None
 	
 	# modules list has stuff in it still
-	return False
+	return modules
 
 def load_modules(*modules):
 	for module in modules:
@@ -85,12 +85,16 @@ def load_modules(*modules):
 def create_nat():
 	# load kernel modules that may not have loaded.
 	# TODO: check if these are built into the kernel.
-	modules = set(('x_tables', 'xt_quota2', 'ip_tables', 'xt_TPROXY', 'nf_conntrack', 'nf_conntrack_ipv4', 'iptable_nat', 'ipt_MASQUERADE', 'iptable_filter', 'xt_state', 'ipt_REJECT', 'iptable_mangle', 'xt_mark'))
+	modules = set(('x_tables', 'xt_quota2', 'xt_TPROXY', 'nf_conntrack', 'nf_conntrack_ipv4', 'iptable_nat', 'ipt_MASQUERADE', 'iptable_filter', 'xt_state', 'ipt_REJECT', 'iptable_mangle', 'xt_mark'))
 	load_modules(*modules)
 	
-	if not check_modules(*modules):
-		print "Error: not all modules could be loaded successfully. Check that you have them all."
+	missing_modules = check_modules(*modules)
+	
+	if missing_modules:
+		print "Error: not all modules could be loaded successfully.  The following are missing:"
 		print modules
+		print ""
+		print "This may mean that you have not built all dependancies."
 		exit(1)
 
 	# enable forwarding
