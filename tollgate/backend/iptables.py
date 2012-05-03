@@ -54,8 +54,95 @@ def run_capture_output(args):
 	p = Popen(args, stdout=PIPE)
 	stdout = p.communicate()[0]
 	return stdout
+	
+def read_all_file(filename):
+	fh = open(filename)
+	d = fh.read()
+	fh.close()
+	return d
+	
+def check_modules(*modules):
+	"""
+	Checks if modules have been loaded successfully.
 
+	Returns None if they are all there, otherwise a list of modules missing.
+	"""
+	modules = list(modules)
+	d = read_all_file('/proc/modules')
+	for l in d.split('\n'):
+		module_name = l.split(' ')[0]
+		if module_name in modules:
+			modules.remove(module_name)
+		if not bool(modules):
+			# modules list is empty, pass!
+			return None
+	
+	# modules list has stuff in it still
+	return modules
+
+def check_symbols(*symbols):
+	"""
+	Checks if symbols are in the kernel.
+
+	Returns None if they are all there, otherwise a list of symbols missing.
+	"""
+	symbols = list(symbols)
+	d = read_all_file('/proc/kallsyms')
+	for l in d.split('\n'):
+		symbol_name = l.split(' ')[2].split("\t")[0]
+		if symbol_name in symbols:
+			symbols.remove(symbol_name)
+		if not bool(symbols):
+			# symbols list is empty, pass!
+			return None
+	
+	# symbols list has stuff in it still
+	return symbols
+
+def load_modules(*modules):
+	for module in modules:
+		run(('modprobe', '-v', module))
+	
 def create_nat():
+	# load kernel modules that may not have loaded.
+	modules = set(('x_tables', 'xt_quota2', 'xt_TPROXY', 'nf_conntrack', 'nf_conntrack_ipv4', 'iptable_nat', 'ipt_MASQUERADE', 'iptable_filter', 'xt_state', 'ipt_REJECT', 'iptable_mangle', 'xt_mark'))
+
+	symbols = set((
+		'xt_table_open', # x_tables
+		'quota_mt2', # xt_quota2
+		'tproxy_tg4', # xt_TPROXY
+		'nf_conntrack_net_init', # nf_conntrack
+		'ipv4_conntrack_in', # nf_conntrack_ipv4
+		'nf_nat_in', # iptable_nat
+		'masquerade_tg', # ipt_MASQUERADE
+		'iptable_filter_net_init', # iptable_filter
+		'state_mt', # xt_state
+		'reject_tg', # ipt_REJECT
+		'iptable_mangle_net_init', # iptable_mangle
+		'mark_tg', # xt_mark
+	))
+	
+	load_modules(*modules)
+	
+	missing_modules = check_modules(*modules)
+	
+	if missing_modules:
+		# check for symbols too, in case it is built into the kernel.
+		missing_symbols = check_symbols(*symbols)
+		if missing_symbols:
+			print "Error: not all modules could be loaded successfully.  The following are missing:"
+			print missing_modules
+			print ""
+			print "Though some of those modules may be in-kernel.  These symbols are missing:"
+			print missing_symbols
+			print ""
+			print "This may mean that you have not built all dependancies."
+			exit(1)
+		else:
+			# all symbols are there, continue onward.
+			# probably using fedora where some of this is in-kernel
+			pass
+
 	# enable forwarding
 	write_file('/proc/sys/net/ipv4/ip_forward', 1)
 	
@@ -63,15 +150,10 @@ def create_nat():
 	system('ip rule add fwmark 0x1/0x1 lookup 100')
 	system('ip route add local 0.0.0.0/0 dev lo table 100')
 	
-	# load kernel modules that may not have loaded.
-	system('modprobe -v xt_quota2')
-	
 	if GC_THRESH != None:
 		write_file('/proc/sys/net/ipv4/neigh/default/gc_thresh1', GC_THRESH)
 		write_file('/proc/sys/net/ipv4/neigh/default/gc_thresh2', GC_THRESH * 4)
 		write_file('/proc/sys/net/ipv4/neigh/default/gc_thresh3', GC_THRESH * 8)
-		
-		
 		
 	# define NAT rule
 	run((IPTABLES,'-t','nat','-F','POSTROUTING'))

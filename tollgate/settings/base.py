@@ -112,6 +112,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.messages',
 	'django.contrib.staticfiles',
+	'djangorestframework',
     'south',
     'tollgate.frontend',
     'tollgate.api',

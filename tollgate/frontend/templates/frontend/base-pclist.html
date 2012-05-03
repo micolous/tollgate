@@ -1,4 +1,4 @@
-{% extends "frontend/base.html" %}{% load future %}
+{% extends "frontend/base.html" %}
 {% comment %}
 tollgate base pc list page
 Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
@@ -16,13 +16,11 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
-
-
+{% load url from future %}
 {% load i18n %}
 {% block windowtitle %}{% trans "pc list" %}{% endblock %}
 {% block title %}{% trans "pc list" %}{% endblock %}
 {% block submenu %}
-<!-- $Id: base-pclist.html 109 2010-11-10 12:23:25Z michael $ -->
 <ul>
 	<li><a href="{% url 'pclist' %}">{% trans "owned pcs" %}</a></li>
 	<li><a href="{% url 'pclist-unowned' %}">{% trans "unowned pcs" %}</a></li>

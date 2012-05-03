@@ -16,8 +16,8 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
-
-
+{% load url from future %}
+{% load i18n %}
 {% block windowtitle %}welcome to tollgate{% endblock %}
 {% block title %}welcome!{% endblock %}
 
@@ -26,19 +26,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <ul>
 	{% if user.is_authenticated %}
-		<li><a href="/quota/on/">Connect all my computers to the internet</a></li>
+		<li><a href="{% url 'quota-on' %}">Connect all my computers to the internet</a></li>
 	{% else %}
-		<li><a href="/login/">Login</a></li>
+		<li><a href="{% url 'login' %}">Login</a></li>
 	{% endif %}
-	<br/>
-
 </ul>
 
 <h2 id="help">About tollgate</h2>
 <ul>
- 	<li><a href="/help/new/">What's new?</a></li>
- 	<li><a href="/help/api/">API</a> for building your own applications that use tollgate as a backend</li>
-</ul>	
+ 	<li><a href="{% url 'help-new' %}">What's new?</a></li>
+ 	<li><a href="{% url 'help-api' %}">API</a> for building your own applications that use tollgate as a backend</li>
+</ul>
 
 <h2 id="external">External Links</h2>
 <ul>
@@ -49,7 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% if user.is_authenticated %}
 	<h2 id="prefs">Preferences</h2>
 	<ul>
-		<form method="post" action="/preferences/theme-change/">{% csrf_token %}
+		<form method="post" action="{% url 'theme-change' %}">{% csrf_token %}
 			<li>Change Theme: {{ theme_change_form.theme }} <input type="submit" value="Okay" /></li>
 		</form>
 	</ul>

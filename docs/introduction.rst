@@ -26,21 +26,22 @@ At the time of writing, your author is not aware of any other operating system t
 
 The following packages must be installed:
 
-- Python 2.5 or later
-- Django 1.2 or later, as well as a supported database (such as MySQL or SQLite3).
-- WSGI-compliant web server, such as apache2.
-  - It is strongly recommended that you run the site using HTTPS only.
-- Linux 2.6.28 or later with netfilter (most distributions ship with this).
-- iptables 1.4.3 or later.
-- xtables-addons 1.22 or later.
-- DBUS
-- django-south
-- nmap
-- python-daemon
-- python-dbus
-- python-iplib or python-ipy
-- python-lxml
-- python-simplejson (if using Python 2.5)
+* Python 2.5 or later
+* Django 1.2 or later, as well as a supported database (such as MySQL or SQLite3).
+* WSGI-compliant web server, such as apache2.  It is strongly recommended that you run the site using HTTPS only, so you will also need ``mod_ssl``.
+* Linux 2.6.28 or later with netfilter (most distributions ship with this).
+* iptables 1.4.3 or later.
+* xtables-addons 1.22 or later.
+* dbus
+* django-south
+* djangorestframework
+* nmap
+* python-daemon
+* python-dbus
+* python-iplib or python-ipy
+* python-lxml
+* python-simplejson (if using Python 2.5)
+* python-tz
 
 
 Optional dependencies:
@@ -70,6 +71,7 @@ Because the software is designed for running LAN Parties, it also has support fo
 - Sega Dreamcast [#f1]_ [#f3]_ [#f4]_
 - Sony Playstation 2 [#f3]_ [#f4]_
 - Sony Playstation 3
+- Sony Playstation Portable [#f1]_
 
 tollgate allows you to claim ownership of another device remotely, so if the device does not have a web browser, you can use this to login the device from something else.
 

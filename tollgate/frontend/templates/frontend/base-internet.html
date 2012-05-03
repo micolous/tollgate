@@ -1,4 +1,4 @@
-{% extends "frontend/base.html" %}{% load future %}
+{% extends "frontend/base.html" %}
 {% comment %}
 tollgate base internet page
 Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
@@ -16,12 +16,11 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
-
+{% load url from future %}
 {% load i18n %}
 {% block windowtitle %}{% trans "login other computers" %}{% endblock %}
 {% block title %}{% trans "login other computers" %}{% endblock %}
 {% block submenu %}
-	<!-- $Id: base-internet.html 109 2010-11-10 12:23:25Z michael $ -->
 	<ul>
 		<li><a href="{% url 'internet-login-here' %}">{% trans "enable internet connectivity for this pc" %}</a></li>
 	</ul>

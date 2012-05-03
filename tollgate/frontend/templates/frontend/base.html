@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">{% load future %}
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 {% comment %}
 tollgate base template page
 Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
@@ -17,13 +17,15 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
+{% load url from future %}
 {% load i18n %}
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{{ LANGUAGE_CODE }}" lang="{{ LANGUAGE_CODE }}">
 	<head>
 		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/flot/jquery.min.js"></script>
 		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/flot/jquery.flot.min.js"></script>
+		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/underscore.min.js"></script>
 
-		{% if user.is_authenticated %}
+		{% if user.is_authenticated and user.get_profile.theme %}
 			<link rel="stylesheet" href="{{ STATIC_URL }}tollgate/{{ user.get_profile.theme }}.css" media="screen" type="text/css" />
 		{% else %}
 			<link rel="stylesheet" href="{{ STATIC_URL }}tollgate/cake.css" media="screen" type="text/css" />
@@ -92,7 +94,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		 			<li><a href="{% url 'logout' %}">{% trans "logout" %}</a></li>
 		 		{% else %}
 		 			<li>{% trans "not logged in" %}</li>
-		 			<li><a href="/login/">{% trans "login" %}</a></li>
+		 			<li><a href="{% url 'login' %}">{% trans "login" %}</a></li>
 		 		{% endif %}
 		 		
 				<!--
@@ -129,7 +131,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		</div>
 		
 		<div id="copyrights">
-			<p>tollgate <abbr title="date 2012-04-20">v2.8.4-dev</abbr> is <abbr title="copyright">&copy;</abbr> 2008-2012 Michael Farrell and contributors.  <a href="{% url 'source' %}">Source code and licensing information</a>.</p>
+			<p>tollgate {{ tollgate_version }} is <abbr title="copyright">&copy;</abbr> 2008-2012 Michael Farrell and contributors.  <a href="{% url 'source' %}">Source code and licensing information</a>.</p>
 		</div>
 	</body>
 </html>

@@ -54,8 +54,12 @@ def bytes_str(v):
 		return u'%.0f.0  B' % v
 
 def utcnow():
-	"Returns the current time as a TZ-aware datetime object."
-	return datetime.utcnow().replace(tzinfo=pytz.utc)
+	"Returns the current time as a TZ-aware datetime object, if Django has it enabled.  If it is disabled, always return localtime."
+	if settings.USE_TZ:
+		return datetime.utcnow().replace(tzinfo=pytz.utc)
+	else:
+		# Timezone support is disabled, return localtime instead.
+		return datetime.now()
 		
 class UserProfile(Model):
 	class Meta:
@@ -72,6 +76,18 @@ class UserProfile(Model):
 		return NetworkHostOwnerChangeEvent.objects.filter(
 			Q(old_owner=self) | Q(new_owner=self)
 		)
+	
+	@property
+	def username(self):
+		return self.user.username
+	
+	@property
+	def first_name(self):
+		return self.user.first_name
+	
+	@property
+	def last_name(self):
+		return self.user.last_name
 
 	def __unicode__(self):
 		return u'%s' % (self.user,)
@@ -97,13 +113,15 @@ class NetworkHost(Model):
 		else:
 			return oui
 	
-	def get_console_type(self):
+	@property
+	def vendor(self):
 		o = self.get_console_oui()
 		if o == None:
 			return 'pc'
 		else:
 			return o.slug
-
+	
+	@property
 	def is_console(self):
 		o = self.get_console_oui()
 		return o != None and o.is_console
@@ -343,6 +361,11 @@ class IP4PortForward(Model):
 
 
 def get_current_event():
+	"""
+	Gets the current event.
+	
+	Returns None if there is no current event.
+	"""
 	now = utcnow()
 	try:
 		return Event.objects.get(start__lte=now, end__gte=now)
@@ -368,10 +391,28 @@ def has_userprofile_attended(event, userprofile):
 	return EventAttendance.objects.filter(event__exact=event, user_profile__exact=userprofile).exists()
 
 def get_userprofile_attendance(event, userprofile):
-	return EventAttendance.objects.get(event__exact=event, user_profile__exact=userprofile)
+	"""
+	Gets the EventAttendance associated with that userprofile at this event.
+	
+	Returns None if the user is not signed in.
+	"""
+	try:
+		return EventAttendance.objects.get(event__exact=event, user_profile__exact=userprofile)
+	except ObjectDoesNotExist:
+		return None
 
 def get_attendance_currentevent(userprofile):
-	return get_userprofile_attendance(get_current_event(), userprofile)
+	"""
+	Gets the user's attendance at the current event.
+	
+	Returns None if there is no current event, or the user is not registered as attendending this event.
+	"""
+	e = get_current_event()
+	
+	if e != None:
+		return get_userprofile_attendance(e, userprofile)
+	else:
+		return None
 
 def has_attended_currentevent(userprofile):
 	return has_userprofile_attended(get_current_event(), userprofile)
@@ -481,6 +522,8 @@ def refresh_networkhost(portal=None):
 
 	# updated to get information from DNS instead.
 	for ip in arp_cache:
+		if settings.ONLY_CONSOLE and not is_console(arp_cache[ip]):
+			continue
 		hn = ''
 		try: hn = gethostbyaddr(ip)[0]
 		except: pass
@@ -556,6 +599,8 @@ def refresh_networkhost_quick():
 	offline_hosts = NetworkHost.objects.all()
 	for ip in arp_cache:
 		mac = arp_cache[ip]
+		if settings.ONLY_CONSOLE and not is_console(mac):
+			continue
 
 		# find by mac
 		try:
