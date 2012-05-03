@@ -60,7 +60,8 @@ mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/www/tollgate/static
 %{__python} setup.py install --root $RPM_BUILD_ROOT
 
 cp -r ./docs $RPM_BUILD_ROOT%{_prefix}/share/doc/tollgate
-cp ./docs/example/dbus/system.d/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
+#cp ./docs/example/dbus/system.d/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
+cp ./docs/example/fedora/dbus/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
 cp ./docs/example/tollgate/backend.ini $RPM_BUILD_ROOT%{_sysconfdir}/tollgate/
 cp ./docs/example/fedora/httpd/tollgate.conf $RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d/
 
