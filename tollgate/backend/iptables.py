@@ -56,7 +56,7 @@ def run_capture_output(args):
 	return stdout
 	
 def read_all_file(filename):
-	fh = open('/proc/modules')
+	fh = open(filename)
 	d = fh.read()
 	fh.close()
 	return d
@@ -64,6 +64,8 @@ def read_all_file(filename):
 def check_modules(*modules):
 	"""
 	Checks if modules have been loaded successfully.
+
+	Returns None if they are all there, otherwise a list of modules missing.
 	"""
 	modules = list(modules)
 	d = read_all_file('/proc/modules')
@@ -78,24 +80,68 @@ def check_modules(*modules):
 	# modules list has stuff in it still
 	return modules
 
+def check_symbols(*symbols):
+	"""
+	Checks if symbols are in the kernel.
+
+	Returns None if they are all there, otherwise a list of symbols missing.
+	"""
+	symbols = list(symbols)
+	d = read_all_file('/proc/kallsyms')
+	for l in d.split('\n'):
+		symbol_name = l.split(' ')[2].split("\t")[0]
+		if symbol_name in symbols:
+			symbols.remove(symbol_name)
+		if not bool(symbols):
+			# symbols list is empty, pass!
+			return None
+	
+	# symbols list has stuff in it still
+	return symbols
+
 def load_modules(*modules):
 	for module in modules:
 		run(('modprobe', '-v', module))
 	
 def create_nat():
 	# load kernel modules that may not have loaded.
-	# TODO: check if these are built into the kernel.
 	modules = set(('x_tables', 'xt_quota2', 'xt_TPROXY', 'nf_conntrack', 'nf_conntrack_ipv4', 'iptable_nat', 'ipt_MASQUERADE', 'iptable_filter', 'xt_state', 'ipt_REJECT', 'iptable_mangle', 'xt_mark'))
+
+	symbols = set((
+		'xt_table_open', # x_tables
+		'quota_mt2', # xt_quota2
+		'tproxy_tg4', # xt_TPROXY
+		'nf_conntrack_net_init', # nf_conntrack
+		'ipv4_conntrack_in', # nf_conntrack_ipv4
+		'nf_nat_in', # iptable_nat
+		'masquerade_tg', # ipt_MASQUERADE
+		'iptable_filter_net_init', # iptable_filter
+		'state_mt', # xt_state
+		'reject_tg', # ipt_REJECT
+		'iptable_mangle_net_init', # iptable_mangle
+		'mark_tg', # xt_mark
+	))
+	
 	load_modules(*modules)
 	
 	missing_modules = check_modules(*modules)
 	
 	if missing_modules:
-		print "Error: not all modules could be loaded successfully.  The following are missing:"
-		print missing_modules
-		print ""
-		print "This may mean that you have not built all dependancies."
-		exit(1)
+		# check for symbols too, in case it is built into the kernel.
+		missing_symbols = check_symbols(*symbols)
+		if missing_symbols:
+			print "Error: not all modules could be loaded successfully.  The following are missing:"
+			print missing_modules
+			print ""
+			print "Though some of those modules may be in-kernel.  These symbols are missing:"
+			print missing_symbols
+			print ""
+			print "This may mean that you have not built all dependancies."
+			exit(1)
+		else:
+			# all symbols are there, continue onward.
+			# probably using fedora where some of this is in-kernel
+			pass
 
 	# enable forwarding
 	write_file('/proc/sys/net/ipv4/ip_forward', 1)
