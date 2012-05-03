@@ -126,7 +126,7 @@ def login(request):
 			if f.cleaned_data['internet']:
 				# we need to do an internet login as well for the user.
 				# lets send them across
-				return redirect('internet_login_here')
+				return redirect('internet-login-here')
 
 			# no internet login requested
 			# send to homepage
