@@ -14,6 +14,7 @@ Installing the software
 =======================
 
 Add the `tollgate repository`_, or grab the rpms manually.
+
 Install tollgate by running::
 
         yum install tollgate
@@ -23,13 +24,27 @@ Install tollgate by running::
 Core network
 ============
 
+.. WARNING::
+   Network interfaces in Fedora are set to be managed by NetworkManager by default.
+   
+   If there is no user logged in to a graphical session, then network interfaces will not automatically start.
+
+   In a "basic" installation of Fedora, NetworkManager is not installed, so networking will never automatically start.
+   
+   Set ``NM_CONTROLLED="no"`` in ``/etc/sysconfig/network-scripts/ifcfg-*`` to put the devices back under the control of Fedora's init system.
+   
+   You should then run ``chkconfig network on`` to enable starting the devices at boot.
+
 We can setup the network either with ``DNSMASQ`` or ``ISC-DHCP`` and ``BIND9``. This will document how to install ``ISC-DHCP`` and ``BIND9``. 
 
 Install the packages::
 
         yum install dhcp bind bind-utils
 
-Setup your LAN facing network device with a static IP address. There is an example of this in ``example/fedora/ifcfg-lan``, and the file you want to edit will be ``/etc/sysconfig/network-scripts/ifcfg-DEVICENAME``. 
+		
+Setup your LAN facing network device with a static IP address. There is an example of this in ``example/fedora/ifcfg-lan``, and the file you want to edit will be ``/etc/sysconfig/network-scripts/ifcfg-DEVICENAME``.
+
+
 
 Once configured run.::
 
