@@ -539,9 +539,10 @@ def setup_dbus():
 	return name	
 
 def boot_dbus(daemonise, name):
-	o = PortalBackendAPI(name)
+	PortalBackendAPI(name)
+	loop = glib.MainLoop()
 	if daemonise:
 		from daemon import basic_daemonize
 		basic_daemonize()
-	o.loop = glib.MainLoop()
-
+	loop.run()
+	
