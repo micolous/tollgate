@@ -1,0 +1,6 @@
+#This is applied because F16 does not contain this as a default label yet
+/usr/lib/systemd/system/tollgate(.*)? 	system_u:object_r:systemd_unit_file_t:s0
+#/etc/sysconfig/tollgate			system_u:object_r:tollgate_conf_t:s0
+#/etc/tollgate(.*)?			system_u:object_r:tollgate_conf_t:s0
+/usr/sbin/tollgate(.*)			system_u:object_r:tollgate_exec_t:s0
+

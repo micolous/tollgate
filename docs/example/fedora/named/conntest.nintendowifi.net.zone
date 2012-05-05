@@ -1,0 +1,12 @@
+$ORIGIN .
+$TTL 604800
+conntest.nintendowifi.net. IN SOA tollgate.example.lan. root.tollgate.example.lan. (
+	201204291 ; serial (yyyymmddc - c is a counter for this day)
+	172800 ; refresh
+	14400 ; retry
+	3628800 ; expire
+	604800 ; minimum
+)
+
+	NS tollgate.example.lan.
+	A  10.4.0.1

@@ -1,0 +1,11 @@
+[Unit]
+Description=Tollgate backend service
+After=network.target dbus.service
+
+[Service]
+PIDFile=/var/run/tollgate-backend.pid
+EnvironmentFile=/etc/sysconfig/tollgate
+ExecStart=/usr/sbin/tollgate_backend 
+
+[Install]
+WantedBy=multi-user.target

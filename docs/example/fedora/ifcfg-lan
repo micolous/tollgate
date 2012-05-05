@@ -1,0 +1,13 @@
+# You must change this to match your ethernet device name!
+# You must name this script as ifcfg-${DEVICE} in /etc/sysconfig/network-scripts/
+DEVICE="p1p1"
+#IPV6INIT=yes
+BOOTPROTO="none"
+NM_CONTROLLED="no"
+ONBOOT="yes"
+IPADDR=10.4.0.1
+USERCTL=no
+NETMASK=255.255.255.0
+DNS1=127.0.0.1
+#ONlY use this if you cluster your portals.
+#DNS2=10.4.0.2

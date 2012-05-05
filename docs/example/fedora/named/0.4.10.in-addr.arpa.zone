@@ -1,0 +1,13 @@
+$ORIGIN .
+$TTL 604800	; 1 week
+0.4.10.in-addr.arpa	IN SOA	tollgate.example.lan. root.tollgate.example.lan. (
+				201204292 ; serial (yyyymmddc - c is a counter for this day)
+				14400      ; refresh (4 hours)
+				3600       ; retry (1 hour)
+				604800     ; expire (1 week)
+				10800      ; minimum (3 hours)
+				)
+			NS	tollgate.example.lan.
+$ORIGIN 0.4.10.in-addr.arpa.
+$TTL 3600	; 1 hour
+1	PTR	tollgate.example.lan.
