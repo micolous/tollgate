@@ -117,7 +117,7 @@ def main(daemon_enable=True, settings_file=SETTINGS_FILE):
 		blacklist_hosts = config.items('blacklist')
 
 	print "Creating DBUS API..."
-	iptables.setup_dbus()
+	b = iptables.setup_dbus()
 
 	print "Creating NAT..."
 	iptables.create_nat()
@@ -132,7 +132,7 @@ def main(daemon_enable=True, settings_file=SETTINGS_FILE):
 
 	print "Starting DBUS Server (only debug messages will appear now)"
 	try:
-		iptables.boot_dbus(daemon_enable)
+		iptables.boot_dbus(daemon_enable, b)
 	except KeyboardInterrupt:
 		print "Got Control-C!"
 		exit(0)
