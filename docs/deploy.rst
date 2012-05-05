@@ -80,7 +80,9 @@ You should also setup a ``STATIC_ROOT`` for where all the static files should be
 
 To your ``INSTALLED_APPS``, append::
 
-   'django.contrib.humanize', 
+   'django.contrib.humanize',
+   'django.contrib.admin',
+   'djangorestframework',
    'south', 
    'tollgate.api', 
    'tollgate.frontend',
