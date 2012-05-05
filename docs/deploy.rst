@@ -40,7 +40,7 @@ Configure DBUS
 
 We need to add some configuration files for tollgate to DBUS' configuration in order to allow the web server process to use tollgate's backend.
 
-In ``example/dbus/system.d/tollgate.conf`` are some example configuration you can use with tollgate.  Copy this to ``/etc/dbus-1/system.d/``, and modify with the appropriate username that the webserver uses (if it is not ``www-data``).
+In ``docs/example/dbus/system.d/tollgate.conf`` are some example configuration you can use with tollgate.  Copy this to ``/etc/dbus-1/system.d/``, and modify with the appropriate username that the webserver uses (if it is not ``www-data``).
 
 Then reload the DBUS configuration with ``/etc/init.d/dbus reload``.
 
@@ -131,14 +131,18 @@ Configure cron
 
 tollgate requires a periodic cronjob to refresh the list of hosts in it's database.
 
-An example configuration is given in ``examples/tollgate.cron``.  You will need to adapt it to point to the path of your Django project.
+An example configuration is given in ``docs/example/tollgate.cron``.  You will need to adapt it to point to the path of your Django project.
 
 Configure webserver
 -------------------
 
-You'll need to now configure your web server.  You may wish to copy ``tollgate/tollgate.wsgi`` and use it in your own project folder.
+You'll need to now configure your web server.
 
-There is an example apache2 configuration, including all vhosts, in ``example/apache2/tollgate-vhost``.
+If you are using Django 1.3 or earlier, you may wish to copy ``tollgate/tollgate.wsgi`` and use it in your own project folder.  However, be sure to change the ``DJANGO_SETTINGS_MODULE`` to the name of your project (eg: ``mylanportal.settings``), as tollgate itself includes a ``tollgate.settings`` for use in development deployment.
+
+In Django 1.4 or later, it will create a file named like ``mylanportal/wsgi.py`` with settings that you should use instead.
+
+There is an example apache2 configuration, including all vhosts, in ``docs/example/apache2/tollgate-vhost``.
 
 You will need to modify the path of static items (like the WPAD and WFC vhosts, and aliases for static files) to the appropriate locations, and URLs.
 
