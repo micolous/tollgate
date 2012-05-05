@@ -75,10 +75,7 @@ def parse_hostlist(hostlist, action):
 def main(daemon_enable=True, settings_file=SETTINGS_FILE):
 	# begin!
 	config = ConfigParserPlus(DEFAULT_SETTINGS)
-	
-	if daemon_enable:
-		import daemon
-		
+
 	print "Loading configuration: %s" % settings_file
 	
 	if not config.read(settings_file):
@@ -135,11 +132,7 @@ def main(daemon_enable=True, settings_file=SETTINGS_FILE):
 
 	print "Starting DBUS Server (only debug messages will appear now)"
 	try:
-		if daemon_enable:
-			with daemon.DaemonContext():
-				iptables.boot_dbus()
-		else:
-			iptables.boot_dbus()
+		iptables.boot_dbus(daemon_enable)
 	except KeyboardInterrupt:
 		print "Got Control-C!"
 		exit(0)

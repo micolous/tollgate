@@ -536,9 +536,12 @@ def setup_dbus():
 	DBusGMainLoop(set_as_default=True)
 	system_bus = dbus.SystemBus()
 	name = dbus.service.BusName(DBUS_SERVICE, bus=system_bus)
-	object = PortalBackendAPI(name)
-	return object
 
-def boot_dbus():
-	glib.MainLoop().run()
+
+def boot_dbus(daemonise=False):
+	o = PortalBackendAPI(name)
+	if daemonise:
+		from daemon import basic_daemonize
+		basic_daemonize()
+	o.loop = glib.MainLoop()
 
