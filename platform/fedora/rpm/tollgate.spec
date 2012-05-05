@@ -24,11 +24,19 @@ BuildRequires:	selinux-policy
 Requires:	selinux-policy, policycoreutils
 Summary:	SELinux policies for tollgate captive internet portal
 
+%package repo
+BuildArch: noarch
+#Requires:
+Summary:	Tollgate repository information.
+
 %description 
 This is a captive portal system for Linux, designed for operating LAN parties.  A lot of the concepts in the software are specific to how a LAN party operates, however you could use it for a sharehouse if you wanted, or something else.
 
 %description selinux
 SELinux policies for the Tollgate captive internet portal.
+
+%description repo
+Tollgate repository information and verification keys.
 
 %prep 
 #Alternately, it will be micolous-tollgate-*.zip
@@ -40,13 +48,15 @@ cd ./platform/fedora/selinux/
 make -f /usr/share/selinux/devel/Makefile 
 
 %install
-#Do I use _libdir?
+#PREP the build root.
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{_sbindir}
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/dbus-1/system.d/
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/tollgate/
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d/
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/yum.repos.d/
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/pki/rpm-gpg/
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/share/doc/
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system/
 mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/www/tollgate/wfc
@@ -55,7 +65,7 @@ mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/www/tollgate/static
 #mkdir -p $RPM_BUILD_ROOT/usr/lib/python2.7/site-packages/
 #mkdir -p %{eggpath}
 
-#export PYTHONPATH=%{eggpath}
+#Main package
 
 %{__python} setup.py install --root $RPM_BUILD_ROOT
 
@@ -75,8 +85,14 @@ cp ./platform/fedora/sysconfig/tollgate $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/
 
 mv $RPM_BUILD_ROOT%{_bindir}/tollgate_backend $RPM_BUILD_ROOT%{_sbindir}/
 mv $RPM_BUILD_ROOT%{_bindir}/tollgate_captivity $RPM_BUILD_ROOT%{_sbindir}/
+
+#SELinux
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/share/selinux/targeted/
 cp ./platform/fedora/selinux/tollgate.pp $RPM_BUILD_ROOT%{_prefix}/share/selinux/targeted/
+
+#Repo
+cp ./platform/fedora/rpm/tollgate.repo $RPM_BUILD_ROOT%{_sysconfdir}/yum.repos.d/
+cp ./platform/fedora/rpm/RPM-GPG-KEY-tollgate-repository $RPM_BUILD_ROOT%{_sysconfdir}/pki/rpm-gpg/
 
 %clean 
 rm -rf $RPM_BUILD_ROOT
@@ -111,6 +127,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %files selinux
 %attr(0644,root,root) %{_prefix}/share/selinux/targeted/tollgate.pp
+
+%files repo
+%config %{_sysconfdir}/yum.repos.d/tollgate.repo
+%config %{_sysconfdir}/pki/rpm-gpg/RPM-GPG-KEY-tollgate-repository
 
 %post
 systemctl --system daemon-reload
