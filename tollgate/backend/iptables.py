@@ -20,7 +20,8 @@ from os import system, listdir
 from os.path import exists, join, isfile
 from sys import exit
 from re import compile as re_compile
-import dbus, dbus.service, dbus.glib, gobject
+import dbus, dbus.service, dbus.glib, glib
+from dbus.mainloop.glib import DBusGMainLoop
 
 DEBUG = False
 
@@ -532,12 +533,12 @@ class PortalBackendAPI(dbus.service.Object):
 
 
 def setup_dbus():
+	DBusGMainLoop(set_as_default=True)
 	system_bus = dbus.SystemBus()
 	name = dbus.service.BusName(DBUS_SERVICE, bus=system_bus)
 	object = PortalBackendAPI(name)
 	return object
 
 def boot_dbus():
-	mainloop = gobject.MainLoop()
-	mainloop.run()
+	glib.MainLoop().run()
 
