@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% comment %}
+tollgate base template page
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+{% load url from future %}
+{% load i18n %}
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{{ LANGUAGE_CODE }}" lang="{{ LANGUAGE_CODE }}">
+	<head>
+		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/flot/jquery.min.js"></script>
+		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/flot/jquery.flot.min.js"></script>
+		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/underscore.min.js"></script>
+
+		{% if user.is_authenticated and user.get_profile.theme %}
+			<link rel="stylesheet" href="{{ STATIC_URL }}tollgate/{{ user.get_profile.theme }}.css" media="screen" type="text/css" />
+		{% else %}
+			<link rel="stylesheet" href="{{ STATIC_URL }}tollgate/cake.css" media="screen" type="text/css" />
+		{% endif %}
+
+		{% for f,n in themes %}
+			<link rel="alternate stylesheet" href="{{ STATIC_URL }}tollgate/{{ f }}.css" media="screen" title="{{ n }}" type="text/css" />
+		{% endfor %}
+		<title>tollgate :: {% block windowtitle %}(default){% endblock %}</title>
+		<!--
+			tollgate, a captive portal system for lan parties.
+			Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+
+			This program is free software: you can redistribute it and/or modify
+			it under the terms of the GNU Affero General Public License as published by
+			the Free Software Foundation, either version 3 of the License, or
+			(at your option) any later version.
+
+			This program is distributed in the hope that it will be useful,
+			but WITHOUT ANY WARRANTY; without even the implied warranty of
+			MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+			GNU Affero General Public License for more details.
+
+			You should have received a copy of the GNU Affero General Public License
+			along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+			Source Code URL: {{ settings.SOURCE_URL }}
+		-->
+	</head>
+
+	<body>
+		<!-- hack for background to allow border-image -->
+		<div id="bghack"></div>
+
+		<div id="menubar">
+			<ul>
+				<li><a href="{% url 'index' %}">tollgate</a></li>
+				<li><a href="{% url 'quota' %}">{% trans "my devices and quota" %}</a></li>
+				<li><a href="{% url 'internet' %}">{% trans "login other computers" %}</a></li>
+
+				{% if perms.frontend.can_view_quota %}
+					<li><a href="{% url 'usage' %}">{% trans "quota management" %}</a></li>
+				{% endif %}
+
+				{% if perms.frontend.can_view_ownership %}
+					<li><a href="{% url 'pclist' %}">{% trans "computer list" %}</a></li>
+				{% endif %}
+
+				{% if perms.frontend.can_register_attendance %}
+					<li><a href="{% url 'signin' %}">{% trans "sign in" %}</a></li>
+				{% endif %}
+
+				{% if perms.frontend.can_ip4portforward %}
+					<li><a href="{% url 'ip4portforward_list' %}">{% trans "ipv4 port forwarding" %}</a></li>
+				{% endif %}
+				
+				{% if user.is_staff %}
+					<li><a href="{% url 'admin:index' %}">{% trans "system administration" %}</a></li>
+				{% endif %}
+				
+				{% if user.is_authenticated %}
+		 			<li>
+	 					{% trans "logged in as:" %} {{ user.username }} ({{ user.first_name }} {{ user.last_name }})
+		 			</li>
+					<li><a href="{% url 'account_password_change' %}">{% trans "change password" %}</a></li>
+		 			<li><a href="{% url 'logout' %}">{% trans "logout" %}</a></li>
+		 		{% else %}
+		 			<li>{% trans "not logged in" %}</li>
+		 			<li><a href="{% url 'login' %}">{% trans "login" %}</a></li>
+		 		{% endif %}
+		 		
+				<!--
+		 		<li>
+					<form action="/i18n/setlang/" method="post">{% csrf_token %}
+						<select name="language">
+							{% for lang in LANGUAGES %}
+								<option value="{{ lang.0 }}">{{ lang.1 }}</option>
+							{% endfor %}
+						</select>
+						<input type="submit" value="{% trans "change language" %}" />
+					</form>
+		 		</li>
+		 		-->
+			</ul>
+		</div>
+		<div id="submenubar">
+	    {% block submenu %}
+	    {% endblock %}
+		</div>
+		
+		<h1>{% block title %}(default){% endblock %}</h1>
+		
+		{% if messages %}
+		<ul class="messages">
+		    {% for message in messages %}
+		    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+		    {% endfor %}
+		</ul>
+		{% endif %}
+		
+		<div id="content">
+	    {% block content %}{% endblock %}
+		</div>
+		
+		<div id="copyrights">
+			<p>tollgate {{ tollgate_version }} is <abbr title="copyright">&copy;</abbr> 2008-2012 Michael Farrell and contributors.  <a href="{% url 'source' %}">Source code and licensing information</a>.</p>
+		</div>
+	</body>
+</html>

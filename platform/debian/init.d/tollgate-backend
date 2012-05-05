@@ -1,8 +1,8 @@
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          tollgate-backend
-# Required-Start:    $remote_fs $syslog $network
-# Required-Stop:     $remote_fs $syslog $network
+# Required-Start:    $remote_fs $syslog $network dbus
+# Required-Stop:     $remote_fs $syslog $network dbus
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: tollgate backend
@@ -18,8 +18,8 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="tollgate backend service"
 NAME=tollgate-backend
-DAEMON=/opt/tollgate/backend/tollgate.py
-DAEMON_ARGS="/opt/tollgate/backend/tollgate.ini"
+DAEMON=/usr/local/bin/tollgate_backend
+DAEMON_ARGS=""
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
@@ -48,7 +48,7 @@ do_start()
         #   2 if daemon could not be started
         #start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
         #        || return 1
-        start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- -D \
+        start-stop-daemon --start --quiet --exec $DAEMON -- -D \
                 $DAEMON_ARGS \
                 || return 2
         # Add code here, if necessary, that waits for the process to be ready
@@ -66,7 +66,7 @@ do_stop()
         #   1 if daemon was already stopped
         #   2 if daemon could not be stopped
         #   other if a failure occurred
-        start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE --name $NAME
+        start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --exec $DAEMON
         RETVAL="$?"
         [ "$RETVAL" = 2 ] && return 2
         # Wait for children to finish too if this is a daemon that forks

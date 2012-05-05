@@ -1,0 +1,47 @@
+{% extends "frontend/base.html" %}
+{% comment %}
+tollgate login page
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+{% load url from future %}
+{% load i18n %}
+
+{% block windowtitle %}{% trans 'log in' %}{% endblock %}
+{% block title %}{% trans 'log in' %}{% endblock %}
+
+{% block content %}
+{% if fail %}
+	{% if fail_credentials %}
+		<p>Invalid username / password!!</p>
+	{% endif %}	
+		
+	{% if fail_attendance %}
+		<p>Sorry, but your attendance has not been registered for the LAN.  If you have already paid, please see an admin and present your ticket for the LAN to get marked as attending.  Otherwise, please pay your entry fee!!</p>
+	{% endif %}
+	
+	{% if fail_disabled %}
+		<p>Sorry, but your account has been disabled, so you may not log in.</p>
+	{% endif %}
+{% endif %}
+
+<p><strong>Please log in.</strong></p>
+
+<form method="post" action="{% url 'login' %}">{% csrf_token %}
+	{{ f.as_p }}
+	<p><input type="submit" value="Login"> <a href="{% url 'index' %}">Cancel</a></p>
+</form>
+{% endblock %}
+

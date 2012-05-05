@@ -3,7 +3,6 @@
 *.svn-base
 *.sqlite3
 *.pyc
-*.ini
 *.swp
 *.orig
 .project
@@ -28,6 +27,8 @@ oui.txt
 oui.txt.etag
 protocol-numbers.xml
 protocol-numbers.xml.etag
-/settings/local.py
-
+tollgate/settings/local.py
 /build
+/dist
+*.egg-info
+docs/_build

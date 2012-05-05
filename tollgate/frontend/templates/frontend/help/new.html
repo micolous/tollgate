@@ -1,0 +1,27 @@
+{% extends 'frontend/base-help.html' %}
+{% comment %}
+tollgate changelog page
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+{% load url from future %}
+{% load i18n %}
+{% block windowtitle %}{% trans "help :: what's new in tollgate" %}{% endblock %}
+{% block title %}{% trans "what's new in tollgate" %}{% endblock %}
+
+{% block content %}
+	<!-- TODO: Shove generated HTML from RST into this -->
+	<p>{% blocktrans %}The current changelog is available in <a href="http://tollgate.readthedocs.org/en/latest/changelog.html">the online documentation</a>.{% endblocktrans %}</p>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "frontend/base-usage.html" %}
+{% comment %}
+tollgate admin usage report page
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+{% endcomment %}
+{% load url from future %}
+{% load i18n %}
+{% load humanize %}
+{% block title %}internet usage report ({{ mode }}){% endblock %}
+
+{% block content %}
+{% if quota_update_fail %}
+<p><strong>Warning:</strong> The firewall controller system is currently down, so this data hasn't been updated.  Go start it up again so I can get current usage data.</p>
+{% endif %}
+
+<p>A total of {{ total }} was used.</p>
+
+<ul>
+	<li><a href="{% url 'usage-all-on' %}">Turn on everyone's internet access that has opted to switch it on</a></li>
+	<li><a href="{% url 'usage-all-really-on' %}">Turn on everyone's internet access, even if they have disabled it</a></li>
+	<li><a href="{% url 'usage-all-off' %}">Turn off everyone's internet access.</a></li>
+</ul>
+
+<table class="internet">
+	<tr>
+		<th>Forum ID</th>
+		<th>Username</th>
+		<th>Full Name</th>
+		<th>Quota Used</th>
+		<th>Quota Remaining</th>
+		<th>Quota Class</th>
+		<th>Resets</th>
+		<th title="Average data transfer over last 10 minutes">Speed</td>
+		<th>Internet On?</th>
+	</tr>
+	{% for a in attendances %}
+		<tr class="{% cycle row1,row2 %}">
+			<td>{{ a.user_profile.user.id }}</td>
+			<td>{{ a.user_profile.user.username }}</td>
+			<td>{{ a.user_profile.user.first_name }} {{ a.user_profile.user.last_name }}</td>
+			<td>{{ a.quota_used_str }}</td>
+			<td>{{ a.quota_remaining_str }}</td>
+			<td>{{ a.quota_amount_str }}</td>
+			<td>{{ a.reset_count }}</td>
+			<td>{{ a.last_datapoint_speed }}</td>
+			<td>
+				{% if a.user_profile.internet_on %}
+					<span class="yes">Yes</span>
+				{% else %}
+					<span class="no">No</span>
+				{% endif %}
+			</td>
+			<td><a href="{% url 'usage-info' a.id %}">More...</a></td>
+		</tr>		
+	{% endfor %}
+</table>
+
+
+{% endblock %}
