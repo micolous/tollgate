@@ -12,7 +12,7 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 
 BuildRequires:	python, python-setuptools
-Requires:	python, Django
+Requires:	python, Django, URLObject
 
 %description
 A lightweight REST framework for Django.

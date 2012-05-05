@@ -34,6 +34,10 @@ Make sure your networking is set to start on boot.::
         systemctl enable network.service
         systemctl start network.service
 
+We need to allow certain traffic into our system. This should be configured by iptables. An example set of rules can be found in ``example/fedora/iptables`` and should be placed into ``/etc/sysconfig/iptables``. Once you have configured these rules, reload iptables with::
+
+        systemctl restart iptables.service
+
 We can setup the network either with ``DNSMASQ`` or ``ISC-DHCP`` and ``BIND9``. This will document how to install ``ISC-DHCP`` and ``BIND9``. 
 
 Install the packages::
@@ -138,11 +142,7 @@ HTTPD
 
 Apache HTTPD is what provides the majority of ``Tollgate`` functionality. We highly recommend that you install ``mod_ssl``, ``mod_nss`` or ``mod_gnutls``, since tollgate requires user authentication's to be sent via the HTTP channels. Our examples below will cover the usage of ``mod_ssl``.
 
-We must install ``mod_ssl``.::
-
-        yum install mod_ssl
-
-Next we create self signed certificates for use with ``Tollgate``.::
+We create certificates for use with ``Tollgate``.::
 
         cd /etc/pki/tls/private/
         openssl genrsa -out tollgate.key 2048
@@ -158,7 +158,12 @@ Either you can send this CSR to be signed by another CA, or you can self sign. E
 
 Now you should reconfigure the ServerName and ServerAlias parameters in ``/etc/httpd/conf.d/tollgate.conf``. Please note the VirtualHost for ``conntest.nintendo.net``. Do not modify this VirtualHost. 
 
-Next you must edit ``/var/www/tollgate/tollgate_site/settings.py``. Fill in the ``DATABASE`` section with your SQL server information. Additionally, you should configure the ``SOURCE_URL`` parameter to ensure that you uphoad your AGPL obligations. Finally, at the bottom of the ``settings.py`` fill in your LAN details as needed. Check to make sure all values seem sane for your environment. 
+Next you must edit ``/var/www/tollgate/tollgate_site/settings.py``. Fill in the ``DATABASE`` section with your SQL server information. Finally, at the bottom of the ``settings.py`` fill in your LAN details as needed. Check to make sure all values seem sane for your environment. 
+
+Additionally, you should configure the ``SOURCE_URL`` parameter to ensure that you uphoad your AGPL obligations. If you ``DO NOT`` modify the tollgate source code (With the sole exception of the configuration files) this obligation can be met by sharing the source RPMs to the package. The source url parameter you can use is ``SOURCE_URL='https://tollgate.example.lan/source/'``  To retrieve these, run the following commands. The HTTPD configuration doesn't need alteration to support this configuration.::
+
+        yum install yum-utils
+        yumdownloader --source tollgate --destdir /var/www/tollgate/source
 
 NOTE: If you are using mysql, you must add to your settings.py ``USE_TZ = False``
 
