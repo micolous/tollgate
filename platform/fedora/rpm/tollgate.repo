@@ -1,0 +1,13 @@
+[tollgate]
+name=Tollgate $releasever
+baseurl=http://repo.tollgate.org.au/pub/fedora/f$releasever/rpms/
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-tollgate-repository
+
+[tollgate-source]
+name=Tollgate Source $releasever
+baseurl=http://repo.tollgate.org.au/pub/fedora/f$releasever/srpms/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-tollgate-repository

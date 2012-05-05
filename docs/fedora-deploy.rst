@@ -23,13 +23,20 @@ Install tollgate by running::
 Core network
 ============
 
+Make sure your networking is set to start on boot.::
+
+        systemctl enable network.service
+        systemctl start network.service
+
 We can setup the network either with ``DNSMASQ`` or ``ISC-DHCP`` and ``BIND9``. This will document how to install ``ISC-DHCP`` and ``BIND9``. 
 
 Install the packages::
 
         yum install dhcp bind bind-utils
 
-Setup your LAN facing network device with a static IP address. There is an example of this in ``example/fedora/ifcfg-lan``, and the file you want to edit will be ``/etc/sysconfig/network-scripts/ifcfg-DEVICENAME``. 
+Setup your LAN facing network device with a static IP address. There is an example of this in ``example/fedora/ifcfg-lan``, and the file you want to edit will be ``/etc/sysconfig/network-scripts/ifcfg-DEVICENAME``.
+
+Additionally, ensure that your internet facing device is set to ``ONBOOT="yes"`` 
 
 Once configured run.::
 
@@ -119,13 +126,6 @@ Now we need to login to mysql, to create the database and tollgate user.::
         mysql> flush privileges;
 
 Keep these details for when you configure the settings.py - You will need to remember the ``USER``, ``NAME`` and ``PASSWORD``. The ``HOST`` setting will be ``localhost``.
-
-PostgreSQL
-----------
-
-
-
-
 
 HTTPD
 =====
