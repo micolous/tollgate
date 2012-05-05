@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/flot/jquery.flot.min.js"></script>
 		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/underscore.min.js"></script>
 
-		{% if user.is_authenticated %}
+		{% if user.is_authenticated and user.get_profile.theme %}
 			<link rel="stylesheet" href="{{ STATIC_URL }}tollgate/{{ user.get_profile.theme }}.css" media="screen" type="text/css" />
 		{% else %}
 			<link rel="stylesheet" href="{{ STATIC_URL }}tollgate/cake.css" media="screen" type="text/css" />

@@ -14,6 +14,7 @@ Installing the software
 =======================
 
 Add the `tollgate repository`_, or grab the rpms manually.
+
 Install tollgate by running::
 
         yum install tollgate
@@ -37,7 +38,7 @@ Install the packages::
 Setup your LAN facing network device with a static IP address. There is an example of this in ``example/fedora/ifcfg-lan``, and the file you want to edit will be ``/etc/sysconfig/network-scripts/ifcfg-DEVICENAME``.
 
 Additionally, ensure that your internet facing device is set to ``ONBOOT="yes"`` 
-
+		
 Once configured run.::
 
         ifup DEVICENAME
