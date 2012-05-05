@@ -10,8 +10,6 @@ All releases in the 3.x series are named after types of toothpaste.
 3.0.0 "Cavity Protection" (May 2012)
 ------------------------------------
 
-**NOTE: IS UNRELEASED AT PRESENT, UPDATE WHEN STABLE VERSION**
-
 This represents the first public stable release of tollgate (formerly portal2).  Changes from 2.8.3 (September 2010):
 
 * Added basic IPv4 port/protocol forwarding ability.
