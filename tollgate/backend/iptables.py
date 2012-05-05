@@ -182,10 +182,10 @@ def create_nat():
 	run((IPTABLES,'-D','FORWARD','-j','REJECT','--reject-with',REJECT_MODE))
 	
 	# handle captivity properly with tproxy
-	run((IPTABLES,'-D','FORWARD','--mark','0x1','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','ACCEPT'))
-	run((IPTABLES,'-D','FORWARD','--mark','0x1','-o',INTERN_IFACE,'-p','tcp','--sport','80','-j','ACCEPT'))
-	run((IPTABLES,'-A','FORWARD','--mark','0x1','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','ACCEPT'))
-	run((IPTABLES,'-A','FORWARD','--mark','0x1','-o',INTERN_IFACE,'-p','tcp','--sport','80','-j','ACCEPT'))
+	run((IPTABLES,'-D','FORWARD','-m','mark','--mark','0x1','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','ACCEPT'))
+	run((IPTABLES,'-D','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-p','tcp','--sport','80','-j','ACCEPT'))
+	run((IPTABLES,'-A','FORWARD','-m','mark','--mark','0x1','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','ACCEPT'))
+	run((IPTABLES,'-A','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-p','tcp','--sport','80','-j','ACCEPT'))
 	
 	if REJECT_TCP_RESET:
 		run((IPTABLES,'-A','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset'))
