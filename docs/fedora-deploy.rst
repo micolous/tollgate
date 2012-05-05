@@ -7,7 +7,8 @@ Before you start
 
 * You must have a computer with two network interfaces - One to the internet, the other to your LAN. 
 * You must have `rpmfusion-free`_ enabled.
-* You must be running Fedora 16 or higher.
+* You must be running Fedora 16 or higher. 
+* You must have updated your system (``yum update``)
 * You should run SELinux in permissive mode (``/etc/selinux/config``). While we have an SELinux policy package, at this time, it is not 100% guaranteed to work on a live system. If you feel brave, run in enforcing mode and notify us of encountered errors with attached AVC messages. 
 
 Installing the software
