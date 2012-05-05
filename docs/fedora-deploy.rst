@@ -15,6 +15,10 @@ Installing the software
 
 Add the `tollgate repository`_, or grab the rpms manually.
 
+You can install the tollgate repository by running::
+        
+        yum localinstall --nogpgcheck 'http://repo.tollgate.org.au/pub/fedora/f16/rpms/tollgate-repo-2.8.4_dev-4.fc16.noarch.rpm'
+
 Install tollgate by running::
 
         yum install tollgate
@@ -185,5 +189,5 @@ You can now start the tollgate backends.::
 
 
 .. _rpmfusion-free: http://rpmfusion.org/Configuration
-.. _tollgate repository: http://repo.tollgate.org.au/fedora/
+.. _tollgate repository: http://repo.tollgate.org.au/pub/fedora/
 
