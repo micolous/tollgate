@@ -2,8 +2,8 @@
 #%global eggpath $RPM_BUILD_ROOT%{_prefix}/lib/python2.7/site-packages/
 
 Name:		tollgate
-Version:	2.8.4_dev
-Release:	4%{?dist}
+Version:	3.0.0
+Release:	1%{?dist}
 Summary:	Django based captive internet portal
 
 BuildArch: noarch
