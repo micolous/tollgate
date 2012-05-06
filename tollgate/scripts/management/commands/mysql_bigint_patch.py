@@ -34,8 +34,10 @@ class Command(BaseCommand):
 		
 		for table, fields in bigint_fields:
 			q = 'ALTER TABLE `%s` ' % table
-			for field in fields:
+			for i, field in enumerate(fields):
 				q += 'MODIFY `%s` BIGINT(32) UNSIGNED ' % field
+				if i > 0:
+					q += ', '
 			
 			cursor.execute(q)
 		
