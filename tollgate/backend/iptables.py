@@ -182,6 +182,17 @@ def create_nat():
 	run((IPTABLES,'-D','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset'))
 	run((IPTABLES,'-D','FORWARD','-j','REJECT','--reject-with',REJECT_MODE))
 	
+	# define port forwarding chain
+	run((IPTABLES,'-t','nat','-D','PREROUTING','-j',IP4PF_RULE))
+	run((IPTABLES,'-t','nat','-N',IP4PF_RULE))
+	run((IPTABLES,'-t','nat','-F',IP4PF_RULE))
+	run((IPTABLES,'-t','nat','-I','PREROUTING','1','-j',IP4PF_RULE))
+
+	run((IPTABLES,'-t','filter','-D','FORWARD','-j',IP4PF_RULE))
+	run((IPTABLES,'-t','filter','-N',IP4PF_RULE))
+	run((IPTABLES,'-t','filter','-F',IP4PF_RULE))
+	run((IPTABLES,'-t','filter','-I','FORWARD','1','-j',IP4PF_RULE))
+	
 	# handle captivity properly with tproxy
 	run((IPTABLES,'-D','FORWARD','-m','mark','--mark','0x1','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','ACCEPT'))
 	run((IPTABLES,'-D','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-p','tcp','--sport','80','-j','ACCEPT'))
@@ -422,7 +433,7 @@ class PortalBackendAPI(dbus.service.Object):
 		except:
 			return (False, 0)
 	
-	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='', out_signature='a(si)')
+	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='', out_signature='a(sx)')
 	def get_all_users_quota_remaining(self):
 		"""
 		Gets all user's remaining quota.
