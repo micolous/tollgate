@@ -18,7 +18,7 @@ setup(
 		'configparser_plus (>=1.0)',
 		'lxml',
 		'dbus',
-		'daemon',
+		'daemon', # not to be confused with python-daemon, an incompatible package
 		'pytz',
 		'djangorestframework',
 	),
