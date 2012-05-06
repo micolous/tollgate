@@ -20,4 +20,4 @@ Thomas Woolford (2012-)
    Does UI prettyness.
 
 William Brown (2009-)
-   Testing and feedback.  Deployment and packaging improvements.
+   Testing and feedback.  Deployment and packaging improvements.  Made all the Fedora packaging and documentation.

@@ -7,8 +7,21 @@ Changelog
 
 All releases in the 3.x series are named after types of toothpaste.
 
-3.0.0 "Cavity Protection" (May 2012)
-------------------------------------
+3.0.1 "Cavity Protection" (?? May 2012)
+---------------------------------------
+
+This is the first point release, intended for some bug fixing.
+
+* Switched ``backend`` and ``captivity`` to use ``daemon`` instead of ``python-daemon`` module.
+* ``backend``: Fix DBus service not working when run as a daemon.
+* ``backend``: Fix integer overflow in get_all_users_quota_remaining for users who had used more than 4GB quota.
+* ``backend``: Fix regression when ``TPROXY``-based captivity was introduced that broke port forwarding functionality.
+* ``frontend``: Fix port forward user online colour always being red (no).
+* ``frontend``: Fix template syntax error on internet-login-success page.
+
+
+3.0.0 "Cavity Protection" (5th May 2012)
+----------------------------------------
 
 This represents the first public stable release of tollgate (formerly portal2).  Changes from 2.8.3 (September 2010):
 

@@ -36,7 +36,8 @@ The following packages must be installed:
 * django-south
 * djangorestframework
 * nmap
-* python-daemon
+* python `daemon`_ module (not to be confused with `python-daemon`_).
+   * **Note**: tollgate 3.0.0 and earlier used `python-daemon`_ instead of `daemon`_.
 * python-dbus
 * python-iplib or python-ipy
 * python-lxml
@@ -48,6 +49,8 @@ Optional dependencies:
 
 - mrab-regex-hg
 
+.. _daemon: http://pypi.python.org/pypi/daemon/
+.. _python-daemon: http://pypi.python.org/pypi/python-daemon/
 
 Client Platform Support
 =======================

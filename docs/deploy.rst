@@ -252,6 +252,15 @@ You absolutely require this value to be set to the number of hosts in your subne
 
 If you set it to exactly 512, then the non-result ARP table entries will push out legitimate ones, and also entries from your WAN side will push out entries from your LAN size.
 
+MySQL / MariaDB quirks
+======================
+
+There is an issue where Django will not create a big enough field type for ``PositiveIntegerFields``, resulting in data collection failing when there has been more than 4GB used, or if more than 4GB is allocated to a user.
+
+You can patch the tables with this command on your deployed project::
+
+	python manage.py mysql_bigint_patch
+
 Windows Clients
 ===============
 
