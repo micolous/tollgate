@@ -60,6 +60,14 @@ oracle = ^oracle
 amd = ^advanced micro devices
 toshiba = ^toshiba( corporation)?$
 hp = ^hewlett[- ]packard
+foxconn = ^(foxconn|hon hai precision)
+; sometimes used by samsung?  but probably other vendors too
+murata = ^murata manufacturing
+muratamach = ^murata machinery
+samsung = ^samsung
+htc = ^htc
+; Fun fact: RIM's headquarters are the old Canadian office of Hayes.
+rim = ^(rim|research in motion)
 
 
 [oui-console]
