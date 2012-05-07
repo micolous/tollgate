@@ -60,7 +60,14 @@ def utcnow():
 	else:
 		# Timezone support is disabled, return localtime instead.
 		return datetime.now()
-		
+
+def unsigned_validator(value):
+	"""
+	Ensures that the passed value to the field is unsigned, ie: greater than or equal to 0.
+	"""
+	if value < 0:
+		raise ValidationError(_(u'%s is less than zero' % value))
+
 class UserProfile(Model):
 	class Meta:
 		ordering = ['user__username']
@@ -172,9 +179,9 @@ class EventAttendance(Model):
 		)
 	event = ForeignKey(Event)
 	user_profile = ForeignKey(UserProfile)
-	quota_used = PositiveIntegerField(default=0)
-	quota_multiplier = PositiveIntegerField(default=1)
-	quota_amount = PositiveIntegerField(default=long(settings.DEFAULT_QUOTA_AMOUNT)*1048576L)
+	quota_used = BigIntegerField(default=0, validators=[unsigned_validator])
+	quota_multiplier = PositiveIntegerField(default=1, validators=[unsigned_validator])
+	quota_amount = BigIntegerField(default=long(settings.DEFAULT_QUOTA_AMOUNT)*1048576L, validators=[unsigned_validator])
 	quota_unmetered = BooleanField(default=False)
 
 	# ALTER TABLE `tollgate`.`frontend_eventattendance` ADD COLUMN `coffee` TINYINT(1)  NOT NULL DEFAULT 0 AFTER `quota_unmetered`;
@@ -229,7 +236,7 @@ class EventAttendance(Model):
 			return bytes_str(self.last_datapoint().average_speed())+u"/s"
 		except:
 			return u"0"
-
+	
 	def __unicode__(self):
 		return u'(Event = %s) (User = %s) (Quota = %s/%s)' % (self.event, self.user_profile, bytes_str(self.quota_used), bytes_str(self.quota_amount * self.quota_multiplier))
 
@@ -270,7 +277,7 @@ class NetworkUsageDataPoint(Model):
 	when = DateTimeField(auto_now_add=True)
 	event_attendance = ForeignKey(EventAttendance)
 
-	bytes = PositiveIntegerField()
+	bytes = BigIntegerField(validators=[unsigned_validator])
 
 	def previous_dp(self):
 		# lookup the previous datapoint
