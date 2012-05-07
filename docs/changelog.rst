@@ -17,7 +17,7 @@ This is the first point release, intended for some bug fixing.
 * ``backend``: Fix integer overflow in get_all_users_quota_remaining for users who had used more than 4GB quota.
 * ``backend``: Fix regression when ``TPROXY``-based captivity was introduced that broke port forwarding functionality.
 * ``frontend``: Added scraper detection for Foxconn, HTC, Murata, RIM and Samsung.
-* ``frontend``: Added workaround for MySQL stopping accounting for quota at 4GB.
+* ``frontend``: Added workaround for MySQL stopping accounting for quota at 4GB (``mysql_bigint_patch``), migrated all byte counters to use bigger integers (limit is now about 8.16 EiB).
 * ``frontend``: Fix port forward user online colour always being red (no).
 * ``frontend``: Fix template syntax error on internet-login-success page.
 * ``frontend``: Fix template error on "my devices and quota" page when being offered a free reset (`Issue #21`_)
