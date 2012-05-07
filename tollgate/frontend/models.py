@@ -21,7 +21,7 @@ from datetime import datetime
 from django.conf import settings
 from tollgate.frontend.tollgate_controller_api import TollgateController
 from os import popen
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from socket import gethostbyaddr
 try:
 	from iplib import CIDR
@@ -132,7 +132,7 @@ class NetworkHost(Model):
 class Event(Model):
 	class Meta:
 		ordering = ['start']
-	name = CharField(max_length=50)
+	name = CharField(max_length=50, unique=True)
 	start = DateTimeField()
 	end = DateTimeField()
 	def is_active(self):
@@ -142,6 +142,24 @@ class Event(Model):
 
 	def __unicode__(self):
 		return u'%s: %s to %s (Active = %s)' % (self.name, self.start, self.end, self.is_active())
+		
+	def clean(self):
+		# check that start is less than end
+		if self.start >= self.end:
+			raise ValidationError(_(u'Start date must be before the end date.'))
+		
+		# find all other events.
+		other_events = Event.objects.exclude(id=self.id) if self.id else Event.objects.all()
+		
+		# find overlapping events in this event's range
+		if other_events.filter(
+			Q(start__gte=self.start, start__lte=self.end) | # start is inside event bounds
+			Q(end__gte=self.start, end__lte=self.end) |     # end is inside event bounds
+			Q(start__lte=self.start, end__gte=self.end)     # event is inside another event
+		).exists():
+			raise ValidationError(_(u'Another event overlaps with this event.'))
+		
+		
 
 class EventAttendance(Model):
 	class Meta:
