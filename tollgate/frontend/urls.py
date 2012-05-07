@@ -49,7 +49,8 @@ urlpatterns = (
 	url(r'^internet/login/(?P<mac_address>[\dA-Fa-f]{12})/$', 'internet_login', name='internet-login'),
 	url(r'^internet/disown/(?P<host_id>\d+)/$', 'internet_disown', name='internet-disown'),
 	url(r'^internet/$', 'internet', name='internet'),
-	url(r'^internet/refresh/$', 'host_refresh_quick', name='host-refres-quick'),
+	# this view is deprecated
+	#url(r'^internet/refresh/$', 'host_refresh_quick', name='host-refresh-quick'),	
 	url(r'^internet/offline/$', 'internet_offline', name='internet-offline'),
 
 	url(r'^quota/on/$', 'quota_on', name='quota-on'),
