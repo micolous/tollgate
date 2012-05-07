@@ -463,3 +463,47 @@ Layer 3 managed switches offer various filtering options.  You can limit the spr
 
 If you are low on budget, there's a good chance that you will not be able to afford all Layer 3 managed switches.  In this case, save the money for at least one on your backbone, so any rogue DHCP server issues will be limited to one leaf switch, and you'll be able to quickly determine which host is compromised.
 
+Allocating quota, "one free reset" and at present hard-coded policies
+=====================================================================
+
+Tollgate has a "quota reset" function whereby a user may gain their allocated quota again for their use.  No usage information is discarded.  So for example, if a user has 300 MiB of quota, they will gain an additional 300 MiB of quota for a total of 600 MiB.
+
+At present, tollgate has a hard-coded "one free quota reset" function, which is user accessible.  This becomes available to a user once they have used 70% of their quota allocation.
+
+An administrator may reset a user's quota any number of times.  However administrators are prevented from resetting their **own** quota more than once.
+
+There are two settings relating to this function:
+
+* ``RESET_EXCUSE_REQUIRED``: Toggles whether a user must provide a reason for having their quota reset.
+* ``RESET_PURCHASE``: Changes the language of the quota reset page to imply that a user may purchase additional data blocks.  Be aware, generally ISPs will disallow selling internet access as part of a residential access plan, and may disallow it as part of a sponsorship agreement (if you have one).  Use with caution.
+
+As a result, you should generally allocate a user about half of the total amount of quota you want them to use.  Your author has observed the following that makes these restrictions useful, and has some other notes:
+
+* When offered a free reset immediately, the user will often take it straight away, either through not understanding it's function or wanting all the quota they can get.  However, if they do reset their quota early, they'll often use it all up without realising, and not properly manage the use of their quota.  They'll then demand more quota to compensate.
+
+  As a result tollgate only offers it after the user has used 70% of their quota allocation.
+  
+* Administrators will often also reset themselves numerous times without regard, and fall into the same trap.  There is an "unmetered" function if it is really required to have unlimited access, however this is prone to abuse.
+  
+  As a result, tollgate prevents administrators from resetting their own quota more than once (no more than any other user).
+
+* If you are tracking regular attendees, it is generally a good idea to lower the quota of non-regular attendees.  Non-regulars more frequently try to exhaust as much quota as possible, often citing a right to use as much of the venue's bandwidth as possible.  They will also often not be familiar with what kind of traffic their computers use.
+  
+  Regular attendees are generally more respectful of the event and it's resources.
+
+* Most Windows-based traffic monitoring programs (like NetLimiter) do not accurately record internet usage.  Generally, these programs will show lower amounts of traffic as to what is actually produced.
+  
+  The hooks that these software use in Windows are unreliable, and require that each packet be sent to a userspace program.  If the program does not record the usage in a timely manner, it is possible for them to miss information about other packets.
+  
+  It is also for this reason that at present tollgate will never be able to act as a router on Windows.
+  
+  Windows network byte counters are provided by the network card driver.  Irregularities may occur as a result between different network card chipsets.
+  
+* Some programs that create "raw" packets may not be accounted for properly by the OS in either traffic counters or firewall quota records, nor might they be filtered by outbound rules.  Tollgate will also count traffic that the firewall may have rejected or dropped -- it has no way to tell if the client is ignoring or using the traffic or not.
+  
+  Additionally, these programs fail to take into account things like blacklisted and unmetered site access, as well as access from other sources (such as home internet use, or mobile broadband), which can cause them to read higher amounts of usage.
+  
+  It is important when reporting irregularities to come up with solid evidence that proves it.  I'm welcome to reproducable reports of these issues.  Please include all details in your report, including tollgate versions, kernel versions, network hardware, packet captures, etc., enough so that I can try to reproduce the problem and verify that there is not an issue with your reporting device.
+  
+  **Any reports incorporating data from only Windows machines will be ignored for the above reasons.  Incomplete, vague or non-reproducable reports will also be ignored.**
+
