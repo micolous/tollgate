@@ -16,8 +16,19 @@ This is the first point release, intended for some bug fixing.
 * ``backend``: Fix DBus service not working when run as a daemon.
 * ``backend``: Fix integer overflow in get_all_users_quota_remaining for users who had used more than 4GB quota.
 * ``backend``: Fix regression when ``TPROXY``-based captivity was introduced that broke port forwarding functionality.
+* ``frontend``: Added scraper detection for Foxconn, HTC, Murata, RIM and Samsung.
+* ``frontend``: Added workaround for MySQL stopping accounting for quota at 4GB.
 * ``frontend``: Fix port forward user online colour always being red (no).
 * ``frontend``: Fix template syntax error on internet-login-success page.
+* ``frontend``: Fix template error on "my devices and quota" page when being offered a free reset (`Issue #21`_)
+* ``frontend``: Internet usage report now shows when quota is unmetered for a user. (`Issue #22`_)
+* ``frontend``: Port forward creator field is now filled in automatically, and no longer allows user changes of it. (`Issue #16`_)
+* ``frontend``: Prevented creation of new events with overlapping times, start times after the end date, or non-unique event names. (`Issue #23`_)
+
+.. _Issue #16: https://github.com/micolous/tollgate/issues/16
+.. _Issue #21: https://github.com/micolous/tollgate/issues/21
+.. _Issue #22: https://github.com/micolous/tollgate/issues/22
+.. _Issue #23: https://github.com/micolous/tollgate/issues/23
 
 
 3.0.0 "Cavity Protection" (5th May 2012)
