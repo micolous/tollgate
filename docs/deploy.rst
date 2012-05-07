@@ -479,7 +479,9 @@ There are two settings relating to this function:
 
 As a result, you should generally allocate a user about half of the total amount of quota you want them to use.  Your author has observed the following that makes these restrictions useful, and has some other notes:
 
-* When offered a free reset immediately, the user will often take it straight away, either through not understanding it's function or wanting all the quota they can get.  However, if they do reset their quota early, they'll often use it all up without realising, and not properly manage the use of their quota.  They'll then demand more quota to compensate.
+* When offered a free reset immediately (or if no reset is used at all), the user will often take it straight away, either through not understanding it's function or wanting all the quota they can get.
+
+  However, if they do reset their quota early, they'll often use it all up without realising, and not properly manage the use of their quota.  They'll then demand more quota to compensate.
 
   As a result tollgate only offers it after the user has used 70% of their quota allocation.
   
@@ -491,13 +493,17 @@ As a result, you should generally allocate a user about half of the total amount
   
   Regular attendees are generally more respectful of the event and it's resources.
 
-* Most Windows-based traffic monitoring programs (like NetLimiter) do not accurately record internet usage.  Generally, these programs will show lower amounts of traffic as to what is actually produced.
+* Most Windows-based traffic monitoring programs (like DU Meter, NetLimiter) do not accurately record internet usage.  Generally, these programs will show lower amounts of traffic as to what is actually produced.
   
-  The hooks that these software use in Windows are unreliable, and require that each packet be sent to a userspace program.  If the program does not record the usage in a timely manner, it is possible for them to miss information about other packets.
+  NetLimiter in particular is notoriously bad at recording usage accurately, and will report several orders of magnitude low. [#nl1]_ [#nl2]_ [#nl3]_ [#nl4]_
+  
+  The WinSock hooks that these software use in Windows are unreliable, and require that each packet be sent to a userspace program.  If the program does not record the usage in a timely manner, it is possible for them to miss information about other packets.
   
   It is also for this reason that at present tollgate will never be able to act as a router on Windows.
   
-  Windows network byte counters are provided by the network card driver.  Irregularities may occur as a result between different network card chipsets.
+  Windows network byte counters are **optionally** provided by the network card driver.  Irregularities may occur as a result between different network card chipsets.
+  
+  **TL;DR:** It is impossible to get accurate traffic information out of Windows operating systems, **ever**.
   
 * Some programs that create "raw" packets may not be accounted for properly by the OS in either traffic counters or firewall quota records, nor might they be filtered by outbound rules.  Tollgate will also count traffic that the firewall may have rejected or dropped -- it has no way to tell if the client is ignoring or using the traffic or not.
   
@@ -507,3 +513,9 @@ As a result, you should generally allocate a user about half of the total amount
   
   **Any reports incorporating data from only Windows machines will be ignored for the above reasons.  Incomplete, vague or non-reproducable reports will also be ignored.**
 
+.. rubric:: Footnotes
+
+.. [#nl1] http://whrl.pl/RbdgEC
+.. [#nl2] http://whrl.pl/RbxbbZ
+.. [#nl3] http://whrl.pl/RDrTP
+.. [#nl4] http://whrl.pl/RbN17d
