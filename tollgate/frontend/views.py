@@ -36,8 +36,6 @@ from django.core.exceptions import *
 from django.contrib import messages
 import random
 
-# ...
-
 class NoCurrentEventException(Exception): pass
 
 
@@ -834,3 +832,17 @@ def ip4portforward_forceapply(request):
 	if request.method == 'POST':
 		apply_ip4portforwards()
 	return redirect('ip4portforward_list')
+
+def ip4portforward_create(request):
+	if request.method == 'POST':
+		form = IP4PortForwardForm(request.POST, user=request.user)
+		
+		if form.is_valid():
+			o = form.save()
+			return redirect(o.get_absolute_url())
+	
+	else:
+		form = IP4PortForwardForm(user=request.user)
+	
+	return render_to_response('frontend/ip4portforward_form.html', dict(form=form), context_instance=RequestContext(request))
+		

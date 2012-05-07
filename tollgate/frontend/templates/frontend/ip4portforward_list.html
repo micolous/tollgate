@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	<table class="internet">
 		<thead>
 			<tr>
-				<th rowspan="2">Host</th>
+				<th colspan="3">Host</th>
 				<th colspan="2">Online</th>
 				<th colspan="3">Protocol / Port</th>
 				<th rowspan="2">Created</th>
@@ -38,6 +38,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 				<th rowspan="2">Actions</th>
 			</tr>
 			<tr>
+				<th>Hostname</th>
+				<th>IP</th>
+				<th>MAC</th>
 				<th>Host</th>
 				<th>User</th>
 				<th><abbr title="Protocol">Proto</abbr></th>
@@ -49,7 +52,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<tbody>
 		{% for object in object_list %}
 			<tr class="{% cycle row1,row2 %}">
-				<td>{{ object.host }}</td>
+				<td>{{ object.host.computer_name }}</td>
+				<td>{{ object.host.ip_address }}</td>
+				<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ object.host.vendor }}.png" alt="{{ object.host.vendor }} " title="{{ object.host.vendor }}" class="cs"/><code>{{ object.host.mac_address }}</code></td>
 				<td><span class="{{ object.host.online|yesno }}">{{ object.host.online|yesno }}</span></td>
 				<td><span class="{{ object.host.user_profile.internet_on|yesno }}">{{ object.host.user_profile.internet_on|yesno }}</span></td>
 				<td{% if not object.protocol.has_port %} colspan="3"{% endif %}>{{ object.protocol.name }}</td>
