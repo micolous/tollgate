@@ -352,19 +352,32 @@ class PortalBackendAPI(dbus.service.Object):
 		run((IPTABLES,'-F',user_rule(uid)))
 
 		# then make them allowed
-		run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',user_rule(uid),'--grow'))
-		set_quota2_amount(user_rule(uid), 0L)
 		if quota != None:
+			# enforce quota limits for user.
+			# record quota use, but only if there is quota available.
+			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota',str(quota),'--no-change','-m','quota2','--name',user_rule(uid),'--grow'))
+			set_quota2_amount(user_rule(uid), 0L)
+			
+			# enforce a quota limit for the user
 			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota',str(quota),'-j',ALLOWED_RULE))
 			set_quota2_amount(limit_rule(uid), long(quota))
 		else:
-			# cheat here to allow all traffic through, because later on there is
-			# a "captivity check" which requires that it lets all of the first
-			# packet through.  it's no-count mode so it'll never change
+			# don't enforce quota limits for user (unlimited access)
+			# record quota use
+			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',user_rule(uid),'--grow'))
+			set_quota2_amount(user_rule(uid), 0L)
+		
+			# Cheat here to allow all traffic through, because later on there
+			# is a "captivity check" which requires that it lets all of the 
+			# first packet through.  It's no-count mode so it'll never change.
 			#
-			# however this has no effect if no rule exists that actually uses it
-			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota','999999','--no-change','-j',ALLOWED_RULE))
-			set_quota2_amount(limit_rule(uid), 999999)
+			# However this has no effect if no rule exists that actually uses it.
+			#
+			# This will likely break with packets bigger than the amount
+			# specified. It is set to stop at about 10 MiB, which is still
+			# bigger than the MTU for most systems.
+			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota','10485760','--no-change','-j',ALLOWED_RULE))
+			set_quota2_amount(limit_rule(uid), 10485760)
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='sss', out_signature='')
 	def add_host(self, uid, mac, ip):
