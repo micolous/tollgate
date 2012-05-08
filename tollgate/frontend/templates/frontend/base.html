@@ -21,8 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% load i18n %}
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{{ LANGUAGE_CODE }}" lang="{{ LANGUAGE_CODE }}">
 	<head>
-		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/flot/jquery.min.js"></script>
-		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/flot/jquery.flot.min.js"></script>
+		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/jquery.min.js"></script>
+		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/jquery.flot.min.js"></script>
 		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/underscore.min.js"></script>
 
 		{% if user.is_authenticated and user.get_profile.theme %}
