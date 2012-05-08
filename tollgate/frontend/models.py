@@ -189,7 +189,11 @@ class EventAttendance(Model):
 
 	registered_by = ForeignKey(UserProfile, null=True, blank=True, related_name="registered_by")
 	registered_on = DateTimeField(auto_now_add=True)
-
+	
+	@property
+	def is_revoked(self):
+		return self.quota_multiplier <= 0
+	
 	def is_unmetered(self):
 		return self.quota_unmetered
 

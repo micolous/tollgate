@@ -322,12 +322,13 @@ def quota_on(request):
 	attendance = get_userprofile_attendance(current_event, profile)
 	if attendance == None:
 		return render_to_response('frontend/not-signed-in.html', dict(event=current_event), context_instance=RequestContext(request))
-
-	try:
-		enable_user_quota(attendance)
-		sync_user_connections(profile)
-	except:
-		return controller_error(request)
+	
+	if not attendance.is_revoked:	
+		try:
+			enable_user_quota(attendance)
+			sync_user_connections(profile)
+		except:
+			return controller_error(request)
 
 	return redirect('quota')
 

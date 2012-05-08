@@ -45,7 +45,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 						{% if attendance.quota_unmetered %}
 							<abbr title="unlimited">U/L</abbr>
 						{% else %}
-							<pre>{{ attendance.quota_remaining_str }}</pre>
+							{% if attendance.is_revoked %}
+								<pre>REVOKED</pre>
+							{% else %}
+								<pre>{{ attendance.quota_remaining_str }}</pre>
+							{% endif %}
 						{% endif %}
 					</td>
 				</tr>
@@ -56,7 +60,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 						{% if attendance.quota_unmetered %}
 							<abbr title="unlimited">U/L</abbr>
 						{% else %}
-							<pre>{{ attendance.quota_amount_str }}</pre>
+							{% if attendance.is_revoked %}
+								<pre>REVOKED</pre>
+							{% else %}
+								<pre>{{ attendance.quota_amount_str }}</pre>
+							{% endif %}
 						{% endif %}
 					</td>
 				</tr>
@@ -64,7 +72,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 				<tr>
 					<th>Total Resets</th>
 					<td class="lcd">
-						{% if attendance.quota_unmetered %}
+						{% if attendance.quota_unmetered or attendance.is_revoked %}
 							0
 						{% else %}
 							{{ attendance.reset_count }}
@@ -156,7 +164,9 @@ $(function () {
 	<p>Internet access is currently <span class="no">disabled</span>.</p>
 {% endif %}
 <ul>
+	{% if not attendance.is_revoked %}
 	<li><a href="{% url 'quota-on' %}">Switch on internet connectivity.</a>  If you have quota available, internet access will be granted to all of your online computers and devices.</li>
+	{% endif %}
 	<li><a href="{% url 'quota-off' %}">Switch off internet connectivity.</a>  All computers listed here will lose internet access <em>immediately</em>, and all unfinished downloads will be terminated.  Internet access will resume when you opt to, or when you try to connect another computer to the internet in your name.</li>
 </ul>
 
