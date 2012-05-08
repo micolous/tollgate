@@ -354,19 +354,15 @@ class PortalBackendAPI(dbus.service.Object):
 		# then make them allowed
 		if quota != None:
 			# enforce quota limits for user.
-			# record quota use, but only if there is quota available.
-			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota',str(quota),'--no-change','-m','quota2','--name',user_rule(uid),'--grow'))
+			# Allow the traffic through if there is quota available, record it's
+			# use on the positive counter.
+			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota',str(quota),'-m','quota2','--name',user_rule(uid),'--grow','-j',ALLOWED_RULE))
 			set_quota2_amount(user_rule(uid), 0L)
 			
-			# enforce a quota limit for the user
-			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota',str(quota),'-j',ALLOWED_RULE))
 			set_quota2_amount(limit_rule(uid), long(quota))
 		else:
-			# don't enforce quota limits for user (unlimited access)
-			# record quota use
-			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',user_rule(uid),'--grow'))
-			set_quota2_amount(user_rule(uid), 0L)
-		
+			# Unlimited quota.
+			#
 			# Cheat here to allow all traffic through, because later on there
 			# is a "captivity check" which requires that it lets all of the 
 			# first packet through.  It's no-count mode so it'll never change.
@@ -376,7 +372,8 @@ class PortalBackendAPI(dbus.service.Object):
 			# This will likely break with packets bigger than the amount
 			# specified. It is set to stop at about 10 MiB, which is still
 			# bigger than the MTU for most systems.
-			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota','10485760','--no-change','-j',ALLOWED_RULE))
+			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota','10485760','--no-change','-m','quota2','--name',user_rule(uid),'--grow','-j',ALLOWED_RULE))
+			set_quota2_amount(user_rule(uid), 0L)
 			set_quota2_amount(limit_rule(uid), 10485760)
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='sss', out_signature='')
