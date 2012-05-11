@@ -110,7 +110,7 @@ def main_optparse():
 	server = TProxyServer(options.tollgate_uri, options.port, options.mark)
 	
 	if options.daemon:
-		from daemon import basic_daemonize
+		from daemon import daemonize
 		daemonize(options.pid_file)
 		
 	server.run()
