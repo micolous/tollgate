@@ -68,6 +68,7 @@ class TProxyServer:
 		self.server_address = ('', server_port)
 		self.mark = mark
 		self.tollgate_uri = tollgate_uri
+		
 	
 	def run(self):
 		self.httpd = HTTPServer(self.server_address, TProxyRequestHandler)
@@ -83,6 +84,7 @@ def main_optparse():
 	parser = OptionParser(usage="%prog [-D] -l 'https://tollgate.example.com'")
 	parser.add_option('-D', '--daemon', action='store_true', dest='daemon', help='start as a daemon')
 	parser.add_option('-l', '--tollgate-uri', dest='tollgate_uri', metavar='URI', help='root URI of tollgate frontend HTTPS server')
+	parser.add_option('-P', '--pid', dest='pid_file', default='/var/run/tollgate-captivity.pid', help='Location to write the PID file.  Only has effect in daemon mode.  [default: %default]')
 	parser.add_option('-p', '--port', dest='port', type='int', metavar='PORT', help='port of the tproxy service [default: %default]', default=50080)
 	parser.add_option('-m', '--mark', dest='mark', type='int', metavar='MARK', help='TPROXY mark tag for this service [default: %default]', default=1)
 	options, args = parser.parse_args()
@@ -102,11 +104,14 @@ def main_optparse():
 	if options.mark <= 0 or options.mark > 255:
 		parser.error('Mark value is invalid.')
 	
+	if not options.pid_file and options.daemon:
+		parser.error('No PID file specified and running in daemon mode!')
+	
 	server = TProxyServer(options.tollgate_uri, options.port, options.mark)
 	
 	if options.daemon:
 		from daemon import basic_daemonize
-		basic_daemonize()
+		daemonize(options.pid_file)
 		
 	server.run()
 
