@@ -140,7 +140,7 @@ def main(daemon_enable, pid_file, settings_file=SETTINGS_FILE):
 def main_optparse():
 	"Version of main() that takes arguments as if it were a normal program."
 	parser = OptionParser(usage='%prog [--daemon] tollgate.ini')
-	parser.add_option('-D', '--daemon', action='store_true', dest='daemon', help='Start as a daemon [default: %default]')
+	parser.add_option('-D', '--daemon', action='store_true', dest='daemon', default=False, help='Start as a daemon [default: %default]')
 	parser.add_option('-P', '--pid', dest='pid_file', default='/var/run/tollgate-backend.pid', help='Location to write the PID file.  Only has effect in daemon mode.  [default: %default]')
 	
 	options, args = parser.parse_args()
