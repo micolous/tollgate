@@ -34,6 +34,7 @@ from django.utils.translation import ugettext as _
 from tollgate.frontend.forms import *
 from django.core.exceptions import *
 from django.contrib import messages
+from django.views.decorators.csrf import requires_csrf_token
 import random
 
 class NoCurrentEventException(Exception): pass
@@ -638,6 +639,7 @@ def theme_change(request):
 
 	return redirect('index')
 
+@requires_csrf_token
 def captive_landing(request):
 	dest = ""
 	if request.GET.has_key('u'):
