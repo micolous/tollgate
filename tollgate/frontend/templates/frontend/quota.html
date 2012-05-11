@@ -124,7 +124,7 @@ $(function () {
 					// first element has no speed
 					var speed = 0;
 				} else {
-					var speed = (((v.bytes*1) - (data[k-1].bytes*1)) / (v.when - data[k-1].when)) / 1024;
+					var speed = (((v.bytes*1) - (data[k-1].bytes*1)) / ((v.when - data[k-1].when)/1000)) / 1024;
 				}
 				
 				//if (k > 0)

@@ -113,7 +113,7 @@ Install the init scripts and backend configuration::
    $ sudo cp platform/debian/init.d/* /etc/init.d/
    $ sudo cp platform/debian/default/* /etc/default/
    $ sudo mkdir /etc/tollgate/
-   $ sudo cp example/tollgate/backend.ini /etc/tollgate/
+   $ sudo cp docs/example/tollgate/backend.ini /etc/tollgate/
 
 Modify the scripts (``tollgate-backend`` and ``tollgate-captivity``) as appropriate to match the path to the tollgate_backend and tollgate_captivity scripts.
 
