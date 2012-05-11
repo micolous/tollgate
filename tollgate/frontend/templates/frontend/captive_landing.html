@@ -86,7 +86,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	<!-- user is not logged in -->
 	<p>Please login with your username and password to access the internet.</p>
 
-	<form method="post" action="{% url 'login' %}">
+	<form method="post" action="{% url 'login' %}">{% csrf_token %}
 		{{ f.as_p }}
 		<p><input type="submit" value="Login"></p>
 	</form>

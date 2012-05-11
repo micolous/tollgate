@@ -34,7 +34,6 @@ from django.utils.translation import ugettext as _
 from tollgate.frontend.forms import *
 from django.core.exceptions import *
 from django.contrib import messages
-from django.views.decorators.csrf import requires_csrf_token, csrf_exempt
 import random
 
 class NoCurrentEventException(Exception): pass
@@ -49,7 +48,6 @@ class RequestContext(RequestContextOriginal):
 def controller_error(request):
 	return render_to_response('frontend/controller-error.html', {'excinfo': "%s: %s" % (sys.exc_type, sys.exc_value), 'traceback': extract_tb(sys.exc_traceback)}, context_instance=RequestContext(request))
 
-@csrf_exempt
 def login(request):
 	if request.user.is_authenticated():
 		# already logged in
@@ -640,7 +638,6 @@ def theme_change(request):
 
 	return redirect('index')
 
-@requires_csrf_token
 def captive_landing(request):
 	dest = ""
 	if request.GET.has_key('u'):
