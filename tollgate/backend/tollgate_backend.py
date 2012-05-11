@@ -72,7 +72,7 @@ def parse_hostlist(hostlist, action):
 			else:
 				action(host, proto, port)
 
-def main(daemon_enable=True, settings_file=SETTINGS_FILE):
+def main(daemon_enable, pid_file, settings_file=SETTINGS_FILE):
 	# begin!
 	config = ConfigParserPlus(DEFAULT_SETTINGS)
 
@@ -132,7 +132,7 @@ def main(daemon_enable=True, settings_file=SETTINGS_FILE):
 
 	print "Starting DBUS Server (only debug messages will appear now)"
 	try:
-		iptables.boot_dbus(daemon_enable, b)
+		iptables.boot_dbus(daemon_enable, b, pid_file)
 	except KeyboardInterrupt:
 		print "Got Control-C!"
 		exit(0)
@@ -140,10 +140,12 @@ def main(daemon_enable=True, settings_file=SETTINGS_FILE):
 def main_optparse():
 	"Version of main() that takes arguments as if it were a normal program."
 	parser = OptionParser(usage='%prog [--daemon] tollgate.ini')
-	parser.add_option('-D', '--daemon', action='store_true', dest='daemon', help='start as a daemon')
+	parser.add_option('-D', '--daemon', action='store_true', dest='daemon', help='Start as a daemon [default: %default]')
+	parser.add_option('-P', '--pid', dest='pid_file', default='/var/run/tollgate-backend.pid', help='Location to write the PID file.  Only has effect in daemon mode.  [default: %default]')
+	
 	options, args = parser.parse_args()
 
-	a = [options.daemon]
+	a = [options.daemon, options.pid_file]
 	
 	if len(args) == 1:
 		a.append(args[0])

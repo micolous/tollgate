@@ -559,11 +559,12 @@ def setup_dbus():
 	name = dbus.service.BusName(DBUS_SERVICE, bus=system_bus)
 	return name	
 
-def boot_dbus(daemonise, name):
+def boot_dbus(daemonise, name, pid_file=None):
 	PortalBackendAPI(name)
 	loop = glib.MainLoop()
 	if daemonise:
-		from daemon import basic_daemonize
-		basic_daemonize()
+		assert pid_file, 'Running in daemon mode means pid_file must be specified.'
+		from daemon import daemonize
+		daemonize(pid_file)
 	loop.run()
 	
