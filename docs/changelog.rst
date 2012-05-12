@@ -12,23 +12,33 @@ All releases in the 3.x series are named after types of toothpaste.
 
 This is the first point release, intended for some bug fixing.
 
+* Improve daemon behaviours so they write PID files, fix Debian init scripts so that you can stop the daemons properly. (`Issue #29`_)
 * Switched ``backend`` and ``captivity`` to use ``daemon`` instead of ``python-daemon`` module.
 * ``backend``: Fix DBus service not working when run as a daemon.
 * ``backend``: Fix integer overflow in get_all_users_quota_remaining for users who had used more than 4GB quota.
 * ``backend``: Fix regression when ``TPROXY``-based captivity was introduced that broke port forwarding functionality.
+* ``backend``: Fix backend continuing to count rejected connection attempts after quota has been exceeded.  Quota will continue to be counted if it has been allowed through the standard mechanisms (so CARP setups may continue to show negative amounts).  (`Issue #20`_)
 * ``frontend``: Added scraper detection for Foxconn, HTC, Murata, RIM and Samsung.
 * ``frontend``: Added workaround for MySQL stopping accounting for quota at 4GB (``mysql_bigint_patch``), migrated all byte counters to use bigger integers (limit is now about 8.16 EiB).
+* ``frontend``: Fix missing CSRF toden on captive landing page, which would prevent you logging in using that view. (`Issue #28`_)
 * ``frontend``: Fix port forward user online colour always being red (no).
 * ``frontend``: Fix template syntax error on internet-login-success page.
 * ``frontend``: Fix template error on "my devices and quota" page when being offered a free reset (`Issue #21`_)
+* ``frontend``: Fix usage graph so that it shows the correct speed used (in KiB/s rather than KiB/ms). (`Issue #30`_)
+* ``frontend``: Improve display of quota when internet access has been revoked so it makes a bit more sense. (`Issue #27`_)
 * ``frontend``: Internet usage report now shows when quota is unmetered for a user. (`Issue #22`_)
 * ``frontend``: Port forward creator field is now filled in automatically, and no longer allows user changes of it. (`Issue #16`_)
 * ``frontend``: Prevented creation of new events with overlapping times, start times after the end date, or non-unique event names. (`Issue #23`_)
 
 .. _Issue #16: https://github.com/micolous/tollgate/issues/16
+.. _Issue #20: https://github.com/micolous/tollgate/issues/20
 .. _Issue #21: https://github.com/micolous/tollgate/issues/21
 .. _Issue #22: https://github.com/micolous/tollgate/issues/22
 .. _Issue #23: https://github.com/micolous/tollgate/issues/23
+.. _Issue #27: https://github.com/micolous/tollgate/issues/27
+.. _Issue #28: https://github.com/micolous/tollgate/issues/28
+.. _Issue #29: https://github.com/micolous/tollgate/issues/29
+.. _Issue #30: https://github.com/micolous/tollgate/issues/30
 
 
 3.0.0 "Cavity Protection" (5th May 2012)
