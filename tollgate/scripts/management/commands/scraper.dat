@@ -18,6 +18,9 @@
 ; run of ouiscraper.py.  This means that you don't have to wait during
 ; subsequent runs of the program (these rules are intended to be numerous and
 ; complex, so any speed boost we can give is a Good Thing).
+;
+; Helpful SQL to find common vendors that are unmatched:
+;   select count(*) a, full_name from frontend_oui where slug='pc' group by full_name order by a desc limit 10;
 
 ; Be careful of "Applera Holding" here...
 apple = ^apple([,\s].+)?$
@@ -37,8 +40,8 @@ tektronix = ^SONY TEKTRONIX
 asus = ^asustek computer
 msi = ^(msi|micro-star)
 gigabyte = ^giga-byte technology
-cisco = ^cisco (systems|SPVTG)
-linksys = ^(cisco-)?linksys
+cisco = ^cisco,?( systems| SPVTG| service provider video technology group| consumer products)?,?( (inc|llc)\.?)?$
+linksys = ^(cisco-?)?linksys,?( llc)?$
 juniper = ^juniper networks
 dlink = ^d-link
 netgear = ^netgear
@@ -59,7 +62,7 @@ vmware = ^vmware
 oracle = ^oracle
 amd = ^advanced micro devices
 toshiba = ^toshiba( corporation)?$
-hp = ^hewlett[- ]packard
+hp = ^(hewlett[- ]packard|procurve networking)
 foxconn = ^(foxconn|hon hai precision)
 ; sometimes used by samsung?  but probably other vendors too
 murata = ^murata manufacturing
@@ -68,6 +71,37 @@ samsung = ^samsung
 htc = ^htc
 ; Fun fact: RIM's headquarters are the old Canadian office of Hayes.
 rim = ^(rim|research in motion)
+xerox = ^xerox
+omron = ^omron
+fibronics = ^fibronics
+fujitsu = ^fujitsu
+next = ^next
+sytex = ^sytek
+normerel = ^normerel
+camex = ^camex
+ti = ^texas instruments
+nortel = ^nortel
+ibm = ^ibm
+dell = ^dell
+ub-networks = ^ungermann-bass
+2wire = ^2wire
+ruckus-wireless = ^ruckus wireless
+adb = ^adb broadband italia
+huawei = ^huawei
+lg = ^lg
+alcatel-lucent = ^alcatel-?lucent
+actiontec = ^actiontec
+tattile = ^tattile
+arris = ^arris
+avaya = ^avaya
+brocade = ^brocade
+zte = ^zte
+sagem = ^sagem
+avm = ^avm gmbh
+usi = ^universal global scientific industrial
+dec = ^digital equipment coporation
+liteon = ^liteon technology coporation
+thomson = ^thomson
 
 
 [oui-console]
