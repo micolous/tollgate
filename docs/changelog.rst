@@ -7,8 +7,8 @@ Changelog
 
 All releases in the 3.x series are named after types of toothpaste.
 
-3.0.1 "Cavity Protection" (?? May 2012)
----------------------------------------
+3.0.1 "Cavity Protection" (13th May 2012)
+-----------------------------------------
 
 This is the first point release, intended for some bug fixing.
 
