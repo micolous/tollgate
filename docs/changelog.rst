@@ -7,6 +7,12 @@ Changelog
 
 All releases in the 3.x series are named after types of toothpaste.
 
+3.1.0 "Tartar Control" (?? June 2012)
+-------------------------------------
+
+This release is still in development.
+
+
 3.0.1 "Cavity Protection" (13th May 2012)
 -----------------------------------------
 
