@@ -89,7 +89,7 @@ ruckus-wireless = ^ruckus wireless
 adb = ^adb broadband italia
 huawei = ^huawei
 lg = ^lg
-alcatel-lucent = ^alcatel-?lucent
+alcatel-lucent = ^alcatel[- ]lucent
 actiontec = ^actiontec
 tattile = ^tattile
 arris = ^arris
@@ -99,9 +99,11 @@ zte = ^zte
 sagem = ^sagem
 avm = ^avm gmbh
 usi = ^universal global scientific industrial
-dec = ^digital equipment coporation
-liteon = ^liteon technology coporation
+dec = ^digital equipment corporation
+liteon = ^liteon technology corporation
 thomson = ^thomson
+alps = ^alps electric
+buffalo = ^buffalo
 
 
 [oui-console]
