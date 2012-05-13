@@ -3,7 +3,7 @@
 tollgate - A captive portal software for Linux for LAN parties.
 Copyright 2008-2012 Michael Farrell <http://micolous.id.au>.
 
-Version 3.0.1-dev "Cavity Protection".
+Version 3.0.1 "Cavity Protection".
 
 ## Introduction ##
 
