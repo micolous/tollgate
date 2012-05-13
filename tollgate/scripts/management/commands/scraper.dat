@@ -6,18 +6,11 @@
 ;
 ; All matches are done case-insensitive.
 ;
-; Stuff that isn't matched here WILL NOT be entered into the database.
-;
-; It's designed to "normalise" all the different names in the file.
+; It's designed to "normalise" all the different names in the oui.txt data.
 ;
 ; You shouldn't need to normally modify this file, unless you're planning on
 ; changing the way that ouiscraper behaves, or trying to add more entries to
 ; the database.
-;
-; This file gets automatically cached into outscraper.dat.cache on the first
-; run of ouiscraper.py.  This means that you don't have to wait during
-; subsequent runs of the program (these rules are intended to be numerous and
-; complex, so any speed boost we can give is a Good Thing).
 ;
 ; Helpful SQL to find common vendors that are unmatched:
 ;   select count(*) a, full_name from frontend_oui where slug='pc' group by full_name order by a desc limit 10;
@@ -104,7 +97,15 @@ liteon = ^liteon technology corporation
 thomson = ^thomson
 alps = ^alps electric
 buffalo = ^buffalo
-
+arcadyan = ^arcadyan
+compal = ^compal
+pace = ^pace
+emerson = ^emerson
+gemtek = ^gemtek technology
+quanta = ^quanta
+seagate = ^seagate
+telco = ^telco systems
+zyxel = ^zyxel
 
 [oui-console]
 ; could this be a console?
