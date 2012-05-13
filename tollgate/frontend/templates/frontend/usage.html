@@ -52,9 +52,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			<td>{{ a.user_profile.user.username }}</td>
 			<td>{{ a.user_profile.user.first_name }} {{ a.user_profile.user.last_name }}</td>
 			<td>{{ a.quota_used_str }}</td>
+			{% if a.quota_unmetered %}
+			<td colspan="3">Unmetered</td>
+			{% else %}
+				{% if a.is_revoked %}
+			<td colspan="3">Revoked</td>
+				{% else %}
 			<td>{{ a.quota_remaining_str }}</td>
 			<td>{{ a.quota_amount_str }}</td>
 			<td>{{ a.reset_count }}</td>
+				{% endif %}
+			{% endif %}
 			<td>{{ a.last_datapoint_speed }}</td>
 			<td>
 				{% if a.user_profile.internet_on %}

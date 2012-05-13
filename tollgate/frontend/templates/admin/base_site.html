@@ -1,4 +1,5 @@
 {% extends "admin/base.html" %}
+{% load url from future %}
 {% load i18n %}
 
 {% block title %}{{ title }} | {% trans 'Tollgate site admin' %}{% endblock %}
@@ -7,4 +8,4 @@
 <h1 id="site-name">{% trans 'Tollgate administration' %}</h1>
 {% endblock %}
 
-{% block nav-global %}<a href="{% url index %}">Return to tollgate</a>{% endblock %}
+{% block nav-global %}<a href="{% url 'index' %}">Return to tollgate</a>{% endblock %}

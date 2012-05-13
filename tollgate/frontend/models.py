@@ -21,7 +21,7 @@ from datetime import datetime
 from django.conf import settings
 from tollgate.frontend.tollgate_controller_api import TollgateController
 from os import popen
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from socket import gethostbyaddr
 try:
 	from iplib import CIDR
@@ -60,7 +60,14 @@ def utcnow():
 	else:
 		# Timezone support is disabled, return localtime instead.
 		return datetime.now()
-		
+
+def unsigned_validator(value):
+	"""
+	Ensures that the passed value to the field is unsigned, ie: greater than or equal to 0.
+	"""
+	if value < 0:
+		raise ValidationError(_(u'%s is less than zero' % value))
+
 class UserProfile(Model):
 	class Meta:
 		ordering = ['user__username']
@@ -132,7 +139,7 @@ class NetworkHost(Model):
 class Event(Model):
 	class Meta:
 		ordering = ['start']
-	name = CharField(max_length=50)
+	name = CharField(max_length=50, unique=True)
 	start = DateTimeField()
 	end = DateTimeField()
 	def is_active(self):
@@ -142,6 +149,24 @@ class Event(Model):
 
 	def __unicode__(self):
 		return u'%s: %s to %s (Active = %s)' % (self.name, self.start, self.end, self.is_active())
+		
+	def clean(self):
+		# check that start is less than end
+		if self.start >= self.end:
+			raise ValidationError(_(u'Start date must be before the end date.'))
+		
+		# find all other events.
+		other_events = Event.objects.exclude(id=self.id) if self.id else Event.objects.all()
+		
+		# find overlapping events in this event's range
+		if other_events.filter(
+			Q(start__gte=self.start, start__lte=self.end) | # start is inside event bounds
+			Q(end__gte=self.start, end__lte=self.end) |     # end is inside event bounds
+			Q(start__lte=self.start, end__gte=self.end)     # event is inside another event
+		).exists():
+			raise ValidationError(_(u'Another event overlaps with this event.'))
+		
+		
 
 class EventAttendance(Model):
 	class Meta:
@@ -154,9 +179,9 @@ class EventAttendance(Model):
 		)
 	event = ForeignKey(Event)
 	user_profile = ForeignKey(UserProfile)
-	quota_used = PositiveIntegerField(default=0)
-	quota_multiplier = PositiveIntegerField(default=1)
-	quota_amount = PositiveIntegerField(default=long(settings.DEFAULT_QUOTA_AMOUNT)*1048576L)
+	quota_used = BigIntegerField(default=0, validators=[unsigned_validator])
+	quota_multiplier = PositiveIntegerField(default=1, validators=[unsigned_validator])
+	quota_amount = BigIntegerField(default=long(settings.DEFAULT_QUOTA_AMOUNT)*1048576L, validators=[unsigned_validator])
 	quota_unmetered = BooleanField(default=False)
 
 	# ALTER TABLE `tollgate`.`frontend_eventattendance` ADD COLUMN `coffee` TINYINT(1)  NOT NULL DEFAULT 0 AFTER `quota_unmetered`;
@@ -164,7 +189,11 @@ class EventAttendance(Model):
 
 	registered_by = ForeignKey(UserProfile, null=True, blank=True, related_name="registered_by")
 	registered_on = DateTimeField(auto_now_add=True)
-
+	
+	@property
+	def is_revoked(self):
+		return self.quota_multiplier <= 0
+	
 	def is_unmetered(self):
 		return self.quota_unmetered
 
@@ -211,7 +240,7 @@ class EventAttendance(Model):
 			return bytes_str(self.last_datapoint().average_speed())+u"/s"
 		except:
 			return u"0"
-
+	
 	def __unicode__(self):
 		return u'(Event = %s) (User = %s) (Quota = %s/%s)' % (self.event, self.user_profile, bytes_str(self.quota_used), bytes_str(self.quota_amount * self.quota_multiplier))
 
@@ -252,7 +281,7 @@ class NetworkUsageDataPoint(Model):
 	when = DateTimeField(auto_now_add=True)
 	event_attendance = ForeignKey(EventAttendance)
 
-	bytes = PositiveIntegerField()
+	bytes = BigIntegerField(validators=[unsigned_validator])
 
 	def previous_dp(self):
 		# lookup the previous datapoint

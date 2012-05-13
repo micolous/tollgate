@@ -16,39 +16,58 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
-
+{% load url from future %}
+{% load i18n %}
 
 {% block windowtitle %}ipv4 port forwarding list{% endblock %}
 {% block title %}ipv4 port forwarding list{% endblock %}
 
 {% block content %}
-	<form method="post" action="{% url ip4portforward_forceapply %}">
+	<form method="post" action="{% url 'ip4portforward_forceapply' %}">
 		{% csrf_token %}
-		<p><a href="{% url ip4portforward_add %}">Add entry</a> <input type="submit" value="Force-apply forwardings" /></p>
+		<p><a href="{% url 'ip4portforward_add' %}">Add entry</a> <input type="submit" value="Force-apply forwardings" /></p>
 	</form>
-	<table>
-		<tr>
-			<th>Host</th>
-			<th>Online (Host / User)</th>
-			<th>Protocol / (External / Internal Port)</th>
-			<th>Created</th>
-			<th>Enabled</th>
-			<th>Actions</th>
-		</tr>
-		
-		{% for object in object_list %}
+	<table class="internet">
+		<thead>
 			<tr>
-				<td>{{ object.host }}</td>
-				<td>
-					<span class="{{ object.host.online|yesno }}">{{ object.host.online|yesno }}</span>
-					<span class="{{ object.host.userprofile.internet_on|yesno }}">{{ object.host.user_profile.internet_on|yesno }}</span>
-				</td>
-				<td>{{ object.protocol.name }}{% if object.protocol.has_port %}/{{ object.external_port }} -> {{ object.port }}{% endif %}</td>
+				<th colspan="3">Host</th>
+				<th colspan="2">Online</th>
+				<th colspan="3">Protocol / Port</th>
+				<th rowspan="2">Created</th>
+				<th rowspan="2">Enabled</th>
+				<th rowspan="2">Actions</th>
+			</tr>
+			<tr>
+				<th>Hostname</th>
+				<th>IP</th>
+				<th>MAC</th>
+				<th>Host</th>
+				<th>User</th>
+				<th><abbr title="Protocol">Proto</abbr></th>
+				<th><abbr title="External Port">Ext</abbr></th>
+				<th><abbr title="Internal Port">Int</abbr></th>
+			</tr>
+		</thead>
+		
+		<tbody>
+		{% for object in object_list %}
+			<tr class="{% cycle row1,row2 %}">
+				<td>{{ object.host.computer_name }}</td>
+				<td>{{ object.host.ip_address }}</td>
+				<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ object.host.vendor }}.png" alt="{{ object.host.vendor }} " title="{{ object.host.vendor }}" class="cs"/><code>{{ object.host.mac_address }}</code></td>
+				<td><span class="{{ object.host.online|yesno }}">{{ object.host.online|yesno }}</span></td>
+				<td><span class="{{ object.host.user_profile.internet_on|yesno }}">{{ object.host.user_profile.internet_on|yesno }}</span></td>
+				<td{% if not object.protocol.has_port %} colspan="3"{% endif %}>{{ object.protocol.name }}</td>
+				{% if object.protocol.has_port %}
+					<td>{{ object.external_port }}</td>
+					<td>{{ object.port }}</td>
+				{% endif %}
 				<td>{{ object.created }} by {{ object.creator.user }}</td>
-				<td><form method="post" action="{% url ip4portforward_toggle object.id %}">{% csrf_token %}<input type="submit" class="{{ object.enabled|yesno }}" value="{{ object.enabled|yesno }}" /></form></td>
-				<td><a href="{% url ip4portforward_edit object.id %}">Edit</a> <a href="{% url ip4portforward_delete object.id %}">Delete</a></td>
+				<td><form method="post" action="{% url 'ip4portforward_toggle' object.id %}">{% csrf_token %}<input type="submit" class="{{ object.enabled|yesno }}" value="{{ object.enabled|yesno }}" /></form></td>
+				<td><a href="{% url 'ip4portforward_edit' object.id %}">Edit</a> <a href="{% url 'ip4portforward_delete' object.id %}">Delete</a></td>
 			</tr>
 		{% endfor %}
+		</tbody>
 	</table>
 
 {% endblock %}

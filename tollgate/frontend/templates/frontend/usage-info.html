@@ -31,14 +31,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% if a.quota_unmetered %}
 	<p>{{ a.user_profile.user.username }} has unlimited quota.  They've used <strong>{{ a.quota_used_str }}</strong> at this event.</p>
 {% else %}
-	<p>{{ a.user_profile.user.username }} gets <strong>{{ a.quota_amount_str }}</strong> of quota, which, so far, has been reset <strong>{{ a.reset_count }}</strong> time{{ a.reset_count|pluralize }}.</p>
+	{% if a.is_revoked %}
+		<p>{{ a.user_profile.user.username }} has had their internet connectivity revoked.</p>
+		
+		<p>They used <strong>{{ a.quota_used_str }}</strong>.</p>
+	{% else %}
+		<p>{{ a.user_profile.user.username }} gets <strong>{{ a.quota_amount_str }}</strong> of quota, which, so far, has been reset <strong>{{ a.reset_count }}</strong> time{{ a.reset_count|pluralize }}.</p>
 	
-	<p>They've used <strong>{{ a.quota_used_str }}</strong>, and have <strong>{{ a.quota_remaining_str }}</strong> remaining.</p>
+		<p>They've used <strong>{{ a.quota_used_str }}</strong>, and have <strong>{{ a.quota_remaining_str }}</strong> remaining.</p>
+	{% endif %}
 {% endif %}
 
 <h2>Internet Switch (currently {% if a.user_profile.internet_on %}<span class="yes">ON</span>{% else %}<span class="no">OFF</span>{% endif %})</h2>
 <ul>
+	{% if not a.is_revoked %}
 	<li><a href="{% url 'usage-on' a.id %}">Switch on {{ a.user_profile.user.username }}'s internet connectivity.</a>  If they have quota available, internet access will be granted to all of their computers and devices.</li>
+	{% endif %}
 	<li><a href="{% url 'usage-off' a.id %}">Switch off {{ a.user_profile.user.username }}'s internet connectivity.</a>  All computers listed here will loose internet access <em>immediately</em>, and all unfinished downloads will be terminated.  Internet access will resume when you or they opt to, or when they try to connect another computer to the internet in their name.</li>
 	{% if perms.frontend.can_reset_quota %}
 		{% if a.quota_unmetered %}

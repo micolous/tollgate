@@ -48,7 +48,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<li>
 			<p>You're not signed onto the internet from this computer and IP address.  This may occur if your IP address has changed for some reason.  This can also be caused by synchonisation problems.</p>
 			<ul>
-				<li><<a href="{% url 'internet-login-here' %}">>Click here to log this computer into the internet</a> to enable internet connectivity for this computer in your name.</li>
+				<li><a href="{% url 'internet-login-here' %}">Click here to log this computer into the internet</a> to enable internet connectivity for this computer in your name.</li>
 			</ul>
 		</li>
 
@@ -86,7 +86,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	<!-- user is not logged in -->
 	<p>Please login with your username and password to access the internet.</p>
 
-	<form method="post" action="{% url 'login' %}">
+	<form method="post" action="{% url 'login' %}">{% csrf_token %}
 		{{ f.as_p }}
 		<p><input type="submit" value="Login"></p>
 	</form>

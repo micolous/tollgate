@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
 	name="tollgate",
-	version="3.0.0",
+	version="3.0.1",
 	description="Python/Django-based captive portal for LAN parties.",
 	author="Michael Farrell",
 	author_email="micolous@gmail.com",
@@ -18,7 +18,7 @@ setup(
 		'configparser_plus (>=1.0)',
 		'lxml',
 		'dbus',
-		'daemon',
+		'daemon', # not to be confused with python-daemon, an incompatible package
 		'pytz',
 		'djangorestframework',
 	),

@@ -32,11 +32,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <p>Downloads from local file shares on the LAN are unmetered.</p>
 
-<p>You will be taken back to the <a href="{% url index %}">main portal page</a> in 30 seconds.</p>
+<p>You will be taken back to the <a href="{% url 'index' %}">main portal page</a> in 30 seconds.</p>
 
 <script type="text/javascript">
 	// replace this with a non-JS alternative.
-	setTimeout('location.href=\'{% url index %}\';', 30000);
+	setTimeout('location.href=\'{% url 'index' %}\';', 30000);
 </script>
 
 {% endblock %}

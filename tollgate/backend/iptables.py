@@ -20,7 +20,8 @@ from os import system, listdir
 from os.path import exists, join, isfile
 from sys import exit
 from re import compile as re_compile
-import dbus, dbus.service, dbus.glib, gobject
+import dbus, dbus.service, dbus.glib, glib
+from dbus.mainloop.glib import DBusGMainLoop
 
 DEBUG = False
 
@@ -181,11 +182,22 @@ def create_nat():
 	run((IPTABLES,'-D','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset'))
 	run((IPTABLES,'-D','FORWARD','-j','REJECT','--reject-with',REJECT_MODE))
 	
+	# define port forwarding chain
+	run((IPTABLES,'-t','nat','-D','PREROUTING','-j',IP4PF_RULE))
+	run((IPTABLES,'-t','nat','-N',IP4PF_RULE))
+	run((IPTABLES,'-t','nat','-F',IP4PF_RULE))
+	run((IPTABLES,'-t','nat','-I','PREROUTING','1','-j',IP4PF_RULE))
+
+	run((IPTABLES,'-t','filter','-D','FORWARD','-j',IP4PF_RULE))
+	run((IPTABLES,'-t','filter','-N',IP4PF_RULE))
+	run((IPTABLES,'-t','filter','-F',IP4PF_RULE))
+	run((IPTABLES,'-t','filter','-I','FORWARD','1','-j',IP4PF_RULE))
+	
 	# handle captivity properly with tproxy
-	run((IPTABLES,'-D','FORWARD','--mark','0x1','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','ACCEPT'))
-	run((IPTABLES,'-D','FORWARD','--mark','0x1','-o',INTERN_IFACE,'-p','tcp','--sport','80','-j','ACCEPT'))
-	run((IPTABLES,'-A','FORWARD','--mark','0x1','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','ACCEPT'))
-	run((IPTABLES,'-A','FORWARD','--mark','0x1','-o',INTERN_IFACE,'-p','tcp','--sport','80','-j','ACCEPT'))
+	run((IPTABLES,'-D','FORWARD','-m','mark','--mark','0x1','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','ACCEPT'))
+	run((IPTABLES,'-D','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-p','tcp','--sport','80','-j','ACCEPT'))
+	run((IPTABLES,'-A','FORWARD','-m','mark','--mark','0x1','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','ACCEPT'))
+	run((IPTABLES,'-A','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-p','tcp','--sport','80','-j','ACCEPT'))
 	
 	if REJECT_TCP_RESET:
 		run((IPTABLES,'-A','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset'))
@@ -340,19 +352,29 @@ class PortalBackendAPI(dbus.service.Object):
 		run((IPTABLES,'-F',user_rule(uid)))
 
 		# then make them allowed
-		run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',user_rule(uid),'--grow'))
-		set_quota2_amount(user_rule(uid), 0L)
 		if quota != None:
-			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota',str(quota),'-j',ALLOWED_RULE))
+			# enforce quota limits for user.
+			# Allow the traffic through if there is quota available, record it's
+			# use on the positive counter.
+			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota',str(quota),'-m','quota2','--name',user_rule(uid),'--grow','-j',ALLOWED_RULE))
+			set_quota2_amount(user_rule(uid), 0L)
+			
 			set_quota2_amount(limit_rule(uid), long(quota))
 		else:
-			# cheat here to allow all traffic through, because later on there is
-			# a "captivity check" which requires that it lets all of the first
-			# packet through.  it's no-count mode so it'll never change
+			# Unlimited quota.
 			#
-			# however this has no effect if no rule exists that actually uses it
-			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota','999999','--no-change','-j',ALLOWED_RULE))
-			set_quota2_amount(limit_rule(uid), 999999)
+			# Cheat here to allow all traffic through, because later on there
+			# is a "captivity check" which requires that it lets all of the 
+			# first packet through.  It's no-count mode so it'll never change.
+			#
+			# However this has no effect if no rule exists that actually uses it.
+			#
+			# This will likely break with packets bigger than the amount
+			# specified. It is set to stop at about 10 MiB, which is still
+			# bigger than the MTU for most systems.
+			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota','10485760','--no-change','-m','quota2','--name',user_rule(uid),'--grow','-j',ALLOWED_RULE))
+			set_quota2_amount(user_rule(uid), 0L)
+			set_quota2_amount(limit_rule(uid), 10485760)
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='sss', out_signature='')
 	def add_host(self, uid, mac, ip):
@@ -421,7 +443,7 @@ class PortalBackendAPI(dbus.service.Object):
 		except:
 			return (False, 0)
 	
-	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='', out_signature='a(si)')
+	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='', out_signature='a(sx)')
 	def get_all_users_quota_remaining(self):
 		"""
 		Gets all user's remaining quota.
@@ -532,12 +554,17 @@ class PortalBackendAPI(dbus.service.Object):
 
 
 def setup_dbus():
+	DBusGMainLoop(set_as_default=True)
 	system_bus = dbus.SystemBus()
 	name = dbus.service.BusName(DBUS_SERVICE, bus=system_bus)
-	object = PortalBackendAPI(name)
-	return object
+	return name	
 
-def boot_dbus():
-	mainloop = gobject.MainLoop()
-	mainloop.run()
-
+def boot_dbus(daemonise, name, pid_file=None):
+	PortalBackendAPI(name)
+	loop = glib.MainLoop()
+	if daemonise:
+		assert pid_file, 'Running in daemon mode means pid_file must be specified.'
+		from daemon import daemonize
+		daemonize(pid_file)
+	loop.run()
+	

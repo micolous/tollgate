@@ -3,6 +3,8 @@
 tollgate - A captive portal software for Linux for LAN parties.
 Copyright 2008-2012 Michael Farrell <http://micolous.id.au>.
 
+Version 3.0.1 "Cavity Protection".
+
 ## Introduction ##
 
 Welcome to tollgate.  This is a captive portal system for Linux, designed for operating LAN parties.  A lot of the concepts in the software are specific to how a LAN party operates, however you could use it for a sharehouse if you wanted, or something else.

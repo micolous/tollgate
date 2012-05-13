@@ -1,5 +1,5 @@
 ********************
-Deploying on fedora
+Deploying on Fedora
 ********************
 
 Before you start
@@ -144,17 +144,17 @@ Apache HTTPD is what provides the majority of ``Tollgate`` functionality. We hig
 
 We create certificates for use with ``Tollgate``.::
 
-        cd /etc/pki/tls/private/
-        openssl genrsa -out tollgate.key 2048
-        openssl req -new -key tollgate.key -out tollgate.csr
+	cd /etc/pki/tls/private/
+	openssl genrsa -out tollgate.key 2048
+	openssl req -new -key tollgate.key -out tollgate.csr
 
 It is ``CRUCIAL`` at this step, that when asked, you put in your servers hostname in the Common Name field.::
 
-        Common Name (eg, your name or your server's hostname) []:tollgate.example.lan
+	Common Name (eg, your name or your server's hostname) []: tollgate.example.lan
 
 Either you can send this CSR to be signed by another CA, or you can self sign. Either way, your resultant certificate should be tollgate.crt. Below is how you self sign your certificate::
 
-        openssl x509 -req -in tollgate.csr -days 365 -signkey tollgate.key -out tollgate.crt
+	openssl x509 -req -in tollgate.csr -days 365 -signkey tollgate.key -out tollgate.crt
 
 Now you should reconfigure the ServerName and ServerAlias parameters in ``/etc/httpd/conf.d/tollgate.conf``. Please note the VirtualHost for ``conntest.nintendo.net``. Do not modify this VirtualHost. 
 
@@ -162,23 +162,27 @@ Next you must edit ``/var/www/tollgate/tollgate_site/settings.py``. Fill in the 
 
 Additionally, you should configure the ``SOURCE_URL`` parameter to ensure that you uphoad your AGPL obligations. If you ``DO NOT`` modify the tollgate source code (With the sole exception of the configuration files) this obligation can be met by sharing the source RPMs to the package. The source url parameter you can use is ``SOURCE_URL='https://tollgate.example.lan/source/'``  To retrieve these, run the following commands. The HTTPD configuration doesn't need alteration to support this configuration.::
 
-        yum install yum-utils
-        yumdownloader --source tollgate --destdir /var/www/tollgate/source
+	yum install yum-utils
+	yumdownloader --source tollgate --destdir /var/www/tollgate/source
 
 NOTE: If you are using mysql, you must add to your settings.py ``USE_TZ = False``
 
 Finally, we need to sync the database, and collect the static components ready for deployment.::
 
-        cd /var/www/tollgate/tollgate_site
-        python manage.py syncdb --noinput
-        python manage.py migrate --noinput
-        python manage.py collectstatic --noinput
-        python manage.py createsuperuser
+	cd /var/www/tollgate/tollgate_site
+	python manage.py syncdb --noinput
+	python manage.py migrate --noinput
+	python manage.py collectstatic --noinput
+	python manage.py createsuperuser
+
+If you are running on MySQL or MariaDB, you will also need to patch the tables that Django has generated to allow big quota usage values, otherwise it will stop counting at 4GB::
+
+	python manage.py mysql_bigint_patch
 
 Now you should start httpd.::
 
-        systemctl enable httpd.service
-        systemctl start httpd.service    
+	systemctl enable httpd.service
+	systemctl start httpd.service    
 
 Tollgate backends
 =================
@@ -187,10 +191,10 @@ You should configure ``/etc/tollgate/backend.ini`` with your site details. Addit
 
 You can now start the tollgate backends.::
 
-        systemctl enable tollgate-backend.service
-        systemctl enable tollgate-captivity.service
-        systemctl start tollgate-backend.service
-        systemctl start tollgate-captivity.service
+	systemctl enable tollgate-backend.service
+	systemctl enable tollgate-captivity.service
+	systemctl start tollgate-backend.service
+	systemctl start tollgate-captivity.service
 
 
 

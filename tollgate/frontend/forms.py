@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from django import forms
 from tollgate.frontend import *
+from tollgate.frontend.models import IP4PortForward
 from django.conf import settings
 from django.utils.translation import ugettext as _
 
@@ -113,3 +114,20 @@ class ThemeChangeForm(forms.Form):
 		label=_('Theme'),
 		choices = THEME_CHOICES
 	)
+	
+class IP4PortForwardForm(forms.ModelForm):
+	class Meta:
+		model = IP4PortForward
+		fields = ('host', 'protocol', 'port', 'external_port')
+
+	
+	def __init__(self, *args, **kwargs):
+		self.user = kwargs.pop('user', None)
+		super(IP4PortForwardForm, self).__init__(*args, **kwargs)
+	
+	def save(self):
+		pf = super(IP4PortForwardForm, self).save(commit=False)
+		if not pf.id and self.user != None:
+			pf.creator = self.user.get_profile()
+		pf.save()
+		return pf

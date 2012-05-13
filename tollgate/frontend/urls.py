@@ -49,7 +49,8 @@ urlpatterns = (
 	url(r'^internet/login/(?P<mac_address>[\dA-Fa-f]{12})/$', 'internet_login', name='internet-login'),
 	url(r'^internet/disown/(?P<host_id>\d+)/$', 'internet_disown', name='internet-disown'),
 	url(r'^internet/$', 'internet', name='internet'),
-	url(r'^internet/refresh/$', 'host_refresh_quick', name='host-refres-quick'),
+	# this view is deprecated
+	#url(r'^internet/refresh/$', 'host_refresh_quick', name='host-refresh-quick'),	
 	url(r'^internet/offline/$', 'internet_offline', name='internet-offline'),
 
 	url(r'^quota/on/$', 'quota_on', name='quota-on'),
@@ -103,15 +104,14 @@ urlpatterns = (
 
 	url(
 		r'^ip4portforwards/add/$',
-		permission_required('frontend.can_ip4portforward')(create_object),
-		dict(model=IP4PortForward),
+		permission_required('frontend.can_ip4portforward')(ip4portforward_create),
 		name='ip4portforward_add'
 	),
 
 	url(
 		r'^ip4portforwards/(?P<object_id>\d+)/$',
 		permission_required('frontend.can_ip4portforward')(update_object),
-		dict(model=IP4PortForward),
+		dict(form_class=IP4PortForwardForm),
 		name='ip4portforward_edit'
 	),
 
