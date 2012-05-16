@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
-import os, stat
+import os
+import stat
+
 
 class Command(BaseCommand):
 	args = ''
@@ -33,7 +35,13 @@ class Command(BaseCommand):
 			os.path.join('tollgate', 'captive_landing', 'tproxy.py'),
 		]
 		
-		tollgate_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
+		tollgate_path = os.path.realpath(os.path.join(
+			os.path.dirname(__file__),
+			'..',
+			'..',
+			'..',
+			'..'
+		))
 		
 		for x in executable_files:
 			# chmod the file such that all that have read access have execute as well.

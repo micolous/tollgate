@@ -20,9 +20,13 @@ from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from django.db import connection, transaction
 
+
 class Command(BaseCommand):
 	args = ''
-	help = 'Modifies the MySQL tables so that any fields that Django would create with an INT are changed to BIGINT(32).'
+	help = """
+		Modifies the MySQL tables so that any fields that Django would create 
+		with an INT are changed to BIGINT(32).
+	"""
 	
 	def handle(self, *args, **kwargs):
 		bigint_fields = (

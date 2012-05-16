@@ -46,7 +46,8 @@ OUI_LIST_URL = 'http://standards.ieee.org/develop/regauth/oui/oui.txt'
 OUI_LIST_FILE = 'oui.txt'
 OUI_RE = re_compile(r'^([0-9A-F]{6})\s+\(base 16\)\s+(.*)\s*$')
 
-IP4P_LIST_URL = 'http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xml'
+IP4P_LIST_URL = \
+	'http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xml'
 IP4P_LIST_FILE = 'protocol-numbers.xml'
 
 HELPER_DATA = join(realpath(dirname(__file__)), 'scraper.dat')
@@ -54,13 +55,17 @@ HELPER_DATA = join(realpath(dirname(__file__)), 'scraper.dat')
 UA = 'tollgate/%s (scraper.py; Python)' % __version__
 PBAR_WIDGET_STYLE = [Percentage(), Bar(), ETA()]
 
+
 def download_file(filename, url):
 	etag_filename = filename + '.etag'
 	# check to see if there's an existing dump of the data
 	mtime = None
 	if exists(filename):
 		if not isfile(filename):
-			raise Exception('ERROR: %s exists but is not a file.  Please check this, and move it out of the way so I can run.' % filename)
+			raise Exception((
+				'ERROR: %s exists but is not a file.  Please check this, and' +
+				'move it out of the way so I can run.'
+			) % filename)
 
 	# lets also check for an etag, and use it if it's there.
 	etag = None
@@ -85,7 +90,7 @@ def download_file(filename, url):
 	try:
 		response = urlopen(request)
 	except HTTPError, ex:
-		if ex.code == 304: # not modified
+		if ex.code == 304:  # not modified
 			print "Data that is present appears to be current."
 		else:
 			raise ex
@@ -106,17 +111,19 @@ def download_file(filename, url):
 		try:
 			open(etag_filename, 'wb').write(response.info()['ETag'])
 		except:
-			print "Warning: Couldn't write ETag data.  This will mean when this script runs again, it will redownload all the content."
+			print "Warning: Couldn't write ETag data.  This will mean when"
+			print "this script runs again, it will redownload all the content."
 
 		print "File downloaded."
 
 	# done
 
+
 def parse_oui_data(filename, config):
 	# open the oui file into memory
 	fp = open(filename, 'rb')
 	# get the size of the file
-	fp.seek(0,2)
+	fp.seek(0, 2)
 	oui_bytes = fp.tell()
 	fp.seek(0, 0)
 	
@@ -129,11 +136,13 @@ def parse_oui_data(filename, config):
 			print "Expression: %s" % v
 			raise ex
 
-	# we're good.  lets clear the existing Oui table because it's data is now outdated.
-	# because we don't care about foreign relations, we should grab the cursor and nuke the table directly.
+	# We're good.  Lets clear the existing Oui table because it's data is now
+	# outdated.  Because we don't care about foreign relations, we should grab
+	# the cursor and nuke the table directly.
 	cursor = connection.cursor()
 
-	# these sql queries don't work properly with "correct" escaping.  maybe vulnerable to sqli.
+	# These sql queries don't work properly with "correct" escaping.  Maybe
+	# vulnerable to sqli -- but doesn't accept data from user sources anyway.
 	try:
 		cursor.execute('TRUNCATE TABLE `%s`' % (Oui._meta.db_table,))
 	except DatabaseError:
@@ -169,7 +178,10 @@ def parse_oui_data(filename, config):
 							hex=hex,
 							full_name=full_name,
 							slug=k,
-							is_console=(config.has_option('oui-console', k) and config.getboolean('oui-console', k))
+							is_console=(
+								config.has_option('oui-console', k) and
+								config.getboolean('oui-console', k)
+							)
 						)
 						matched = True
 				if not matched:
@@ -184,6 +196,7 @@ def parse_oui_data(filename, config):
 	progress.finish()
 	print 'Added %d entries to Oui table.' % Oui.objects.count()
 
+
 def parse_ip4p_data(filename, config):
 	tree = objectify.parse(open(filename, 'rb'))
 	root = tree.getroot()
@@ -192,7 +205,8 @@ def parse_ip4p_data(filename, config):
 
 	cursor = connection.cursor()
 
-	# these sql queries don't work properly with "correct" escaping.  maybe vulnerable to sqli.
+	# These sql queries don't work properly with "correct" escaping.  Maybe
+	# vulnerable to sqli -- but doesn't accept data from user sources anyway.
 	try:
 		cursor.execute('TRUNCATE TABLE `%s`' % (IP4Protocol._meta.db_table,))
 	except DatabaseError:
@@ -227,7 +241,10 @@ def parse_ip4p_data(filename, config):
 				id=record.value,
 				name=name,
 				description=description,
-				has_port=config.has_option('ip4p-has-port', str(record.value)) and config.getboolean('ip4p-has-port', str(record.value))
+				has_port=(
+					config.has_option('ip4p-has-port', str(record.value)) and
+					config.getboolean('ip4p-has-port', str(record.value))
+				)
 			)
 		except IntegrityError:
 			# dupe PK
@@ -236,9 +253,14 @@ def parse_ip4p_data(filename, config):
 	progress.finish()
 	print 'Added %d entries to Protocol table.' % IP4Protocol.objects.count()
 
+
 class Command(BaseCommand):
 	args = ''
-	help = 'Populates the database with information about IPv4 protocol types and vendor OUIs.'
+	help = """
+		Populates the database with information about IPv4 protocol types and
+		vendor OUIs.
+	"""
+	
 	def handle(self, *args, **options):
 		config = ConfigParser()
 		config.read(HELPER_DATA)

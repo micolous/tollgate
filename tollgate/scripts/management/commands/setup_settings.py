@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
-import string, random, os.path
+import string
+import random
+import os.path
+key_chars = string.letters + string.digits + string.punctuation
+
 
 class Command(BaseCommand):
 	args = ''
@@ -26,7 +30,14 @@ class Command(BaseCommand):
 	
 	def handle(self, *args, **kwargs):
 		# take a copy of the original local.py
-		local_py_location = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'settings', 'local.py'))
+		local_py_location = os.path.realpath(os.path.join(
+			os.path.dirname(__file__),
+			'..',
+			'..',
+			'..',
+			'settings',
+			'local.py'
+		))
 		if os.path.exists(local_py_location):
 			fh = open(local_py_location, 'rb')
 			local_py = fh.read()
@@ -41,7 +52,7 @@ class Command(BaseCommand):
 			fh.write("""
 SECRET_KEY = %r
 
-""" % "".join([random.choice(string.letters + string.digits + string.punctuation) for i in range(80)]))
+""" % "".join([random.choice(key_chars) for i in range(60)]))
 		
 		# write out the SOURCE_URL if needed.
 		if 'SOURCE_URL' not in local_py:
