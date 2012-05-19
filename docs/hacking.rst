@@ -65,6 +65,21 @@ This is how a packet is handled inside tollgate when running on Linux.
 
 1. If it's a new connection, it hits the NAT table rules.
 
+Submitting Patches / Coding Style Manual
+========================================
+
+All the patch management for the project is handled via the GitHub project.  Please file a pull request using the GitHub interface.
+
+As for coding "style", we use mostly follow `PEP-8`_, with the exception that we use tabs instead of spaces.  Anything that is thrown as an error by the `pep8` tool should be fixed.
+
+We target Python 2.6 and 2.7, and Django 1.2 - 1.4.
+
+Please make sure that any platform-specific (Linux) code you write has a fallback for development on non-Linux systems.  There's a platform support module in `frontend` for this.  `backend` doesn't matter -- that should only ever work on platforms that actually are supported.
+
+Never include any project files in the source tree, or any editor-specific garbage in the headers of files.
+
+.. _PEP-8: http://www.python.org/dev/peps/pep-0008/
+
 Known Issues
 ============
 
