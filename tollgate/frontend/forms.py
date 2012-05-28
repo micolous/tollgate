@@ -118,7 +118,7 @@ class ThemeChangeForm(forms.Form):
 class IP4PortForwardForm(forms.ModelForm):
 	class Meta:
 		model = IP4PortForward
-		fields = ('host', 'protocol', 'port', 'external_port')
+		fields = ('label', 'host', 'protocol', 'port', 'external_port')
 
 	
 	def __init__(self, *args, **kwargs):

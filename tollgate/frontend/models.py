@@ -355,6 +355,7 @@ class IP4PortForward(Model):
 	creator = ForeignKey(UserProfile)
 	created = DateTimeField(auto_now_add=True)
 	enabled = BooleanField(blank=True, default=True)
+	label = CharField(max_length=64, help_text="Optional description of the port forward", blank=True, default="")
 
 	def __unicode__(self):
 		return u'%s %s/%s->%s' % (self.host, self.protocol.name, self.external_port, self.port)
