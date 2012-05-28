@@ -349,7 +349,7 @@ class IP4PortForward(Model):
 			('can_ip4portforward', 'Can manage IPv4 port forwarding'),
 		)
 	host = ForeignKey(NetworkHost)
-	protocol = ForeignKey(IP4Protocol, help_text='The IPv4 protocol that this service uses.  If you don\'t know, try TCP or UDP.')
+	protocol = ForeignKey(IP4Protocol, default=6, help_text='The IPv4 protocol that this service uses.  If you don\'t know, try TCP or UDP.')
 	port = PositiveIntegerField(default=0, help_text='The internal port that the service is running on.  This has no effect if the protocol does not have port numbers.')
 	external_port = PositiveIntegerField(default=0, help_text='The external port that this service should show as running on.  This has no effect if the protocol does not have port numbers.')
 	creator = ForeignKey(UserProfile)
