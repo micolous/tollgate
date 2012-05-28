@@ -16,20 +16,25 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+
 from django.conf import settings
+
+
 try:
 	from iplib import CIDR
 except ImportError:
 	CIDR = None
 	import IPy
-	
+
 if CIDR:
 	LAN_CIDR = CIDR(settings.LAN_SUBNET)
 else:
 	LAN_CIDR = IPy.IP(settings.LAN_SUBNET)
+
 
 def in_lan_subnet(ip):
 	if CIDR:
 		return LAN_CIDR.is_valid_ip(ip)
 	else:
 		return IPy.IP(ip) in LAN_CIDR
+
