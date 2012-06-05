@@ -79,6 +79,32 @@ class UserProfile(Model):
 	internet_on = BooleanField(default=True)
 	theme = CharField(default='cake', max_length=30, choices=THEME_CHOICES)
 
+	maximum_quota_signins = PositiveIntegerField(
+		default=0,
+		help_text=_("""\
+			Sets the maximum amount of quota in MiB that the user may grant to 
+			users they sign in.  If set to 0, they will be able to set any quota 
+			amount.  Setting this value disallows setting unlimited quota.
+			
+			This will only have effect if the user has been granted permission
+			to sign in users.  Otherwise, they will not be able to sign in users.
+		""")
+	)
+	
+	maximum_quota_resets = PositiveIntegerField(
+		default=0,
+		help_text=_("""\
+			Sets the maximum amount of quota resets that the user may perform on
+			other users.  If set to 0, they will be able to reset quota an 
+			unlimited number of times.  If set to 1, this will mean that the user
+			can only perform the "one free reset" on behalf of another user.
+			
+			This will only have effect if the user has been granted permission
+			to reset user quota for other users.  Otherwise, they will not be able
+			to reset quota for other users at all.
+		""")
+	)
+
 	def get_hosts(self):
 		return NetworkHost.objects.filter(user_profile=self)
 
@@ -179,6 +205,8 @@ class EventAttendance(Model):
 			("can_view_quota", "View quota"),
 			("can_reset_quota", "Reset quota"),
 			("can_change_coffee", "Coffee request access change"), # this is a seperate ACL because of ravenge and dasman
+			('can_reset_own_quota', 'Reset own quota multiple times'),
+			('can_revoke_access', 'Revoke internet access for a user'),
 		)
 	event = ForeignKey(Event)
 	user_profile = ForeignKey(UserProfile)

@@ -170,9 +170,17 @@ $(function () {
 {% endif %}
 <ul>
 	{% if not attendance.is_revoked %}
-	<li><a href="{% url 'quota-on' %}">Switch on internet connectivity.</a>  If you have quota available, internet access will be granted to all of your online computers and devices.</li>
+	<li>
+		<form method="post" action="{% url 'quota-on' %}">{% csrf_token %}
+			<input type="submit" value="Switch on internet connectivity" />  If you have quota available, internet access will be granted to all of your online computers and devices.
+		</form>
+	</li>
 	{% endif %}
-	<li><a href="{% url 'quota-off' %}">Switch off internet connectivity.</a>  All computers listed here will lose internet access <em>immediately</em>, and all unfinished downloads will be terminated.  Internet access will resume when you opt to, or when you try to connect another computer to the internet in your name.</li>
+	<li>
+		<form method="post" action="{% url 'quota-off' %}">{% csrf_token %}
+			<input type="submit" value="Switch off internet connectivity" />  All computers listed here will lose internet access <em>immediately</em>, and all unfinished downloads will be terminated.  Internet access will resume when you opt to, or when you try to connect another computer to the internet in your name.
+		</form>
+	</li>
 </ul>
 
 <h2>Your Computers and Devices</h2>

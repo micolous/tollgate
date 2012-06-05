@@ -30,9 +30,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <ul>
 {% if perms.frontend.can_toggle_internet %}
-	<li><a href="{% url 'usage-all-on' %}">Turn on everyone's internet access that has opted to switch it on</a></li>
-	<li><a href="{% url 'usage-all-really-on' %}">Turn on everyone's internet access, even if they have disabled it</a></li>
-	<li><a href="{% url 'usage-all-off' %}">Turn off everyone's internet access.</a></li>
+	<li>
+		<form method="post" action="{% url 'usage-all-on' %}">{% csrf_token %}
+			<input type="submit" value="Turn on everyone's internet access that has opted to switch it on" />
+		</form>
+	</li>
+	<li>
+		<form method="post" action="{% url 'usage-all-really-on' %}">{% csrf_token %}
+			<input type="submit" value="Turn on everyone's internet access, even if they have disabled it" />
+		</form>
+	</li>
+	<li>
+		<form method="post" action="{% url 'usage-all-off' %}">{% csrf_token %}
+			<input type="submit" value="Turn off everyone's internet access" />
+		</form>
+	</li>	
 {% else %}
 	<li>You're not authorised to toggle other users' internet access, you need <code>can_toggle_internet</code>.</li>
 {% endif %}

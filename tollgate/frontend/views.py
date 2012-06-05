@@ -401,25 +401,26 @@ def quota(request):
 
 @login_required
 def quota_on(request):
-	user = request.user
-	profile = get_userprofile(user)
-	current_event = get_current_event()
-	if current_event == None:
-		return render_to_response('frontend/event-not-active.html',
-			context_instance=RequestContext(request))
+	if request.method == 'POST':
+		user = request.user
+		profile = get_userprofile(user)
+		current_event = get_current_event()
+		if current_event == None:
+			return render_to_response('frontend/event-not-active.html',
+				context_instance=RequestContext(request))
 	
-	attendance = get_userprofile_attendance(current_event, profile)
-	if attendance == None:
-		return render_to_response('frontend/not-signed-in.html', dict(
-			event=current_event
-		), context_instance=RequestContext(request))
+		attendance = get_userprofile_attendance(current_event, profile)
+		if attendance == None:
+			return render_to_response('frontend/not-signed-in.html', dict(
+				event=current_event
+			), context_instance=RequestContext(request))
 	
-	if not attendance.is_revoked:	
-		try:
-			enable_user_quota(attendance)
-			sync_user_connections(profile)
-		except:
-			return controller_error(request)
+		if not attendance.is_revoked:	
+			try:
+				enable_user_quota(attendance)
+				sync_user_connections(profile)
+			except:
+				return controller_error(request)
 
 	return redirect('quota')
 
@@ -489,21 +490,23 @@ def quota_user_reset(request):
 
 @login_required
 def quota_off(request):
-	user = request.user
-	profile = get_userprofile(user)
-	current_event = get_current_event()
-	if current_event == None:
-		return render_to_response('frontend/event-not-active.html',
-			context_instance=RequestContext(request))
-	attendance = get_userprofile_attendance(current_event, profile)
-	if attendance == None:
-		return render_to_response('frontend/not-signed-in.html', dict(
-			event=current_event
-		), context_instance=RequestContext(request))
-	try:
-		disable_user_quota(attendance)
-	except:
-		return controller_error(request)
+	if request.method == 'POST':
+		user = request.user
+		profile = get_userprofile(user)
+		current_event = get_current_event()
+		if current_event == None:
+			return render_to_response('frontend/event-not-active.html',
+				context_instance=RequestContext(request))
+		attendance = get_userprofile_attendance(current_event, profile)
+		if attendance == None:
+			return render_to_response('frontend/not-signed-in.html', dict(
+				event=current_event
+			), context_instance=RequestContext(request))
+		try:
+			disable_user_quota(attendance)
+		except:
+			return controller_error(request)
+			
 	return redirect('quota')
 
 
@@ -667,13 +670,24 @@ def usage_reset(request, aid):
 
 	# check if I'm trying to reset quota for the current user.
 	my_profile = get_userprofile(request.user)
-	if a.user_profile == my_profile and a.quota_multiplier > 1:
+	if not request.user.has_perm('frontend.can_reset_own_quota') and \
+		(a.user_profile == my_profile and a.quota_multiplier > 1):
 		# current user is trying to reset their own quota, and they have already
-		# reset quota before.
+		# reset quota before, and they do not have permission to reset their own
+		# quota.
 		return render_to_response('frontend/cant-reset-yourself.html',
 			context_instance=RequestContext(request))
-
-	if not a.quota_unmetered:
+			
+	if my_profile.maximum_quota_resets > 0 and \
+		my_profile.maximum_quota_resets < a.quota_multiplier:
+		# maximum quota resets exceeded.
+		messages.error(request, 
+			_("""\
+				The user has already had their quota more times than you are 
+				allowed to reset it for them.
+			""")
+		)
+	elif not a.quota_unmetered:
 		# do the log event first as that's more important.
 		excuse = reset_form.cleaned_data['excuse']
 		QuotaResetEvent.objects.create(
@@ -695,55 +709,59 @@ def usage_reset(request, aid):
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_toggle_internet'))
 def usage_all_on(request):
-	# find all users that are in attendance this lan
-	current_event = get_current_event()
-	if current_event == None:
-		return render_to_response('frontend/event-not-active.html',
-			context_instance=RequestContext(request))
+	if request.method == 'POST':
+		# find all users that are in attendance this lan
+		current_event = get_current_event()
+		if current_event == None:
+			return render_to_response('frontend/event-not-active.html',
+				context_instance=RequestContext(request))
 
-	attendances = EventAttendance.objects.filter(event__exact=current_event)
-	for attendance in attendances:
-		if attendance.user_profile.internet_on:
-			enable_user_quota(attendance)
+		attendances = EventAttendance.objects.filter(event__exact=current_event)
+		for attendance in attendances:
+			if attendance.user_profile.internet_on:
+				enable_user_quota(attendance)
+				
 	return redirect('usage')
 
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_toggle_internet'))
 def usage_all_really_on(request):
-	# find all users that are in attendance this lan
-	current_event = get_current_event()
-	if current_event == None:
-		return render_to_response('frontend/event-not-active.html',
-			context_instance=RequestContext(request))
+	if request.method == 'POST':
+		# find all users that are in attendance this lan
+		current_event = get_current_event()
+		if current_event == None:
+			return render_to_response('frontend/event-not-active.html',
+				context_instance=RequestContext(request))
 
-	attendances = EventAttendance.objects.filter(event__exact=current_event)
+		attendances = EventAttendance.objects.filter(event__exact=current_event)
 
-	sid = transaction.savepoint()
-	for attendance in attendances:
-		attendance.internet_on = True
-		enable_user_quota(attendance)
-		attendance.save()
-	transaction.savepoint_commit(sid)
+		sid = transaction.savepoint()
+		for attendance in attendances:
+			attendance.internet_on = True
+			enable_user_quota(attendance)
+			attendance.save()
+		transaction.savepoint_commit(sid)
 
 	return redirect('usage')
 
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_toggle_internet'))
 def usage_all_off(request):
-	# find all users that are in attendance this lan
-	current_event = get_current_event()
-	if current_event == None:
-		return render_to_response('frontend/event-not-active.html',
-			context_instance=RequestContext(request))
+	if request.method == 'POST':
+		# find all users that are in attendance this lan
+		current_event = get_current_event()
+		if current_event == None:
+			return render_to_response('frontend/event-not-active.html',
+				context_instance=RequestContext(request))
 
-	attendances = EventAttendance.objects.filter(event__exact=current_event)
+		attendances = EventAttendance.objects.filter(event__exact=current_event)
 
-	sid = transaction.savepoint()
-	for attendance in attendances:
-		attendance.user_profile.internet_on = False
-		attendance.user_profile.save()
-		disable_user_quota(attendance)
-	transaction.savepoint_commit(sid)
+		sid = transaction.savepoint()
+		for attendance in attendances:
+			attendance.user_profile.internet_on = False
+			attendance.user_profile.save()
+			disable_user_quota(attendance)
+		transaction.savepoint_commit(sid)
 
 	return redirect('usage')
 
@@ -751,37 +769,32 @@ def usage_all_off(request):
 @user_passes_test(lambda u: u.has_perm('frontend.can_toggle_internet'))
 def usage_on(request, aid):
 	a = get_object_or_404(EventAttendance, id=aid)
-	enable_user_quota(a)
+
+	if request.method == 'POST':
+		enable_user_quota(a)
 	return redirect('usage-info', a.id)
 
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_toggle_internet'))
 def usage_off(request, aid):
 	a = get_object_or_404(EventAttendance, id=aid)
-	disable_user_quota(a)
+	if request.method == 'POST':
+		disable_user_quota(a)
+		
 	return redirect('usage-info', a.id)
 
 
-@user_passes_test(lambda u: u.has_perm('frontend.can_reset_quota'))
+@user_passes_test(lambda u: u.has_perm('frontend.can_revoke_access'))
 def usage_disable(request, aid):
+	# revoke interent access for the user.
 	a = get_object_or_404(EventAttendance, id=aid)
-	a.quota_multiplier = 0
-	a.quota_unmetered = False
-	a.save()
-	disable_user_quota(a)
-	return redirect('usage-info', a.id)
 
-
-@user_passes_test(lambda u: u.has_perm('frontend.can_change_coffee'))
-def usage_coffee(request, aid):
-	a = get_object_or_404(EventAttendance, id=aid)
 	if request.method == "POST":
-		coffee_form = CoffeeForm(request.POST)
-		if coffee_form.is_valid():
-			a.coffee = coffee_form.cleaned_data["coffee"]
-			a.save()
+		a.quota_multiplier = 0
+		a.quota_unmetered = False
+		a.save()
+		disable_user_quota(a)
 
-	# we're done now, redirect back.
 	return redirect('usage-info', a.id)
 
 
@@ -952,7 +965,7 @@ def signin1(request):
 	), context_instance=RequestContext(request))
 
 
-@user_passes_test(lambda u: u.has_perm('frontend.can_signin'))
+@user_passes_test(lambda u: u.has_perm('frontend.can_register_attendance'))
 def signin2(request):
 	event = get_current_event()
 	if event == None:
@@ -1012,7 +1025,8 @@ def signin2(request):
 @user_passes_test(lambda u: u.has_perm('frontend.can_register_attendance'))
 def signin3(request, uid):
 	u = get_object_or_404(User, id=uid)
-
+	my_profile = get_userprofile(request.user)
+	
 	current_event = get_current_event()
 	if current_event == None:
 		messages.warning(request,
@@ -1036,31 +1050,50 @@ def signin3(request, uid):
 			# create an attendance!
 
 			if f.cleaned_data['quota_unlimited']:
-				# create unmetered attendance
-				a = EventAttendance(
-					quota_unmetered=True,
-					event=current_event,
-					user_profile=u.get_profile(),
-					registered_by=request.user.get_profile()
-				)
+				# check if setting unlimited quota is allowed.
+				if my_profile.maximum_quota_signins == 0:				
+					# create unmetered attendance
+					a = EventAttendance(
+						quota_unmetered=True,
+						event=current_event,
+						user_profile=u.get_profile(),
+						registered_by=request.user.get_profile()
+					)
+				else:
+					a = None
+					messages.error(request, _("""\
+						You are not permitted to sign in users with unlimited quota.
+					"""))
 			else:
-				a = EventAttendance(
-					quota_amount=f.cleaned_data['quota_amount'] * 1048576,
-					event=current_event,
-					user_profile=u.get_profile(),
-					registered_by=request.user.get_profile()
+				quota_amount = f.cleaned_data['quota_amount']
+				if my_profile.maximum_quota_signins == 0 or \
+					my_profile.maximum_quota_signins >= quota_amount:
+					
+					a = EventAttendance(
+						quota_amount=quota_amount * 1048576,
+						event=current_event,
+						user_profile=u.get_profile(),
+						registered_by=request.user.get_profile()
+					)
+				else:
+					a = None
+					messages.error(request, _("""\
+						You are not permitted to sign in users with more than
+						%(max_quota)d MiB of quota.
+					""") % dict(max_quota=my_profile.maximum_quota_signins))
+			
+			if a != None:
+				# attendance created, proceed
+				a.save()
+
+				# now sync user connections
+				enable_user_quota(a)
+
+				# attendance created, go back to signin page
+				messages.success(request, 
+					_('Attendance registered, and enabled internet access for user.')
 				)
-
-			a.save()
-
-			# now sync user connections
-			enable_user_quota(a)
-
-			# attendance created, go back to signin page
-			messages.success(request, 
-				_('Attendance registered, and enabled internet access for user.')
-			)
-			return redirect('signin')
+				return redirect('signin')
 	else:
 		f = SignInForm3()
 

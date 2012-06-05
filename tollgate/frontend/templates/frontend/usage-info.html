@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% load url from future %}
 {% load i18n %}
 {% load humanize %}
-{% block windowtitle %}internet usage report for {{ a.user_profile.user.username }} {% endblock %}
-{% block title %}internet usage report for {{ a.user_profile.user.username }} {% endblock %}
+{% block windowtitle %}internet usage report for {{ a.user_profile.user.username }} at {{ a.event.name }}{% endblock %}
+{% block title %}internet usage report for {{ a.user_profile.user.username }} at {{ a.event.name }}{% endblock %}
 
 {% block content %}
 {% if quota_update_fail %}
@@ -46,9 +46,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <ul>
 	{% if perms.frontend.can_toggle_internet %}
 		{% if not a.is_revoked %}
-		<li><a href="{% url 'usage-on' a.id %}">Switch on {{ a.user_profile.user.username }}'s internet connectivity.</a>  If they have quota available, internet access will be granted to all of their computers and devices.</li>
+		<li>
+			<form method="post" action="{% url 'usage-on' a.id %}">{% csrf_token %}
+				<input type="submit" value="Switch on {{ a.user_profile.user.username }}'s internet connectivity" />  If they have quota available, internet access will be granted to all of their computers and devices.
+			</form>
+		</li>
 		{% endif %}
-		<li><a href="{% url 'usage-off' a.id %}">Switch off {{ a.user_profile.user.username }}'s internet connectivity.</a>  All computers listed here will loose internet access <em>immediately</em>, and all unfinished downloads will be terminated.  Internet access will resume when you or they opt to, or when they try to connect another computer to the internet in their name.</li>
+		<li>
+			<form method="post" action="{% url 'usage-off' a.id %}">{% csrf_token %}
+				<input type="submit" value="Switch off {{ a.user_profile.user.username }}'s internet connectivity" />  All computers listed here will loose internet access <em>immediately</em>, and all unfinished downloads will be terminated.  Internet access will resume when you or they opt to, or when they try to connect another computer to the internet in their name.
+			</form>
+		</li>
 	{% else %}
 		<li>You're not authorised to toggle other users' internet access, you need <code>can_toggle_internet</code>.</li>
 	{% endif %}
@@ -65,9 +73,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 				</form>
 			</li>
 		{% endif %}
-		<li><a href="{% url 'usage-disable' a.id %}">Revoke internet access rights.</a>  The user will loose their unlimited status (if any), and their available quota multiplier will be set to zero.  Internet access will be terminated, and can only be reinstated by an administrator.</li>
 	{% else %}
-		<li>You're not authorised to reset user quotas or revoke internet access, you need <code>can_reset_quota</code>.</li>
+		<li>You're not authorised to reset user quotas, you need <code>can_reset_quota</code>.</li>
+	{% endif %}
+	{% if perms.frontend.can_revoke_access %}
+		<li>
+			<form method="post" action="{% url 'usage-disable' a.id %}">{% csrf_token %}
+				<input type="submit" value="Revoke internet access rights" /> The user will loose their unlimited status (if any), and their available quota multiplier will be set to zero.  Internet access will be terminated, and can only be reinstated by an administrator.
+			</form>
+		</li>
+	{% else %}
+		<li>You're not authorised to revoke internet access, you need <code>can_revoke_access</code>.</li>
 	{% endif %}
 </ul>
 
