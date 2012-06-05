@@ -13,6 +13,12 @@ Allows the user to sign in users to the event.  This is done with the "sign in" 
 
 This will also allow the user to create new users through the sign-in system.
 
+In conjunction with this, there is a UserProfile field called ``maximum_quota_signins`` which controls the maximum amount of quota a user may set when signing in another user.
+
+If set to 0, it will not restrict the quota that may be granted.
+
+If set to greater values, this is the maximum number of megabytes that a user may grant during the sign-in process, and disables use of the unlimited quota option.
+
 
 ``EventAttendance.can_view_quota``: View quota
 ==============================================
