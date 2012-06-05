@@ -10,7 +10,24 @@ All releases in the 3.x series are named after types of toothpaste.
 3.1.0 "Tartar Control" (?? June 2012)
 -------------------------------------
 
-This release is still in development.
+This release is still in development.  This release includes security fixes, and is recommended for all users.
+
+* Commenced cleanup of PEP8 warnings, wrote style guide documentation.
+* ``docs``: Documented permissions.
+* ``frontend``: Added extra reason why "cannot find MAC" page would display on the page.
+* ``frontend``: Added labels to IPv4 port forwards. (`Issue #15`_)
+* ``frontend``: Default protocol of IPv4 port forwards is now TCP.  (`Issue #17`_)
+* ``frontend``: Fix a bug where non-superusers could not sign in other users that are new, when they had the permission they would require.
+* ``frontend``: New permissions: ``can_revoke_access``, ``can_reset_own_quota``, ``can_toggle_internet``.
+* ``frontend``: New user profile flags to control the number of times a user may reset another user's quota, and the maximum amount of quota they may grant a user at sign-in.
+* ``frontend``: Permission names are now much shorter.
+* ``frontend``: **Security**: Fix a CSRF issue where a malicious user could trick an administrative user into toggling or revoking internet access for other users, toggling internet access for all users, and where it could trick a regular user into toggling their own internet access.
+* ``frontend``: Usage graph now shows usage in the local time of the user, rather than UTC.
+* ``scripts``: Added new OUI vendors, improved detection of Cisco.  OUI scraper now grabs all vendors, even if it doesn't recognise them.  Fixed some encoding issues when handling non-ASCII vendor names.
+
+
+.. _Issue #15: https://github.com/micolous/tollgate/issues/15
+.. _Issue #17: https://github.com/micolous/tollgate/issues/17
 
 
 3.0.1 "Cavity Protection" (13th May 2012)
