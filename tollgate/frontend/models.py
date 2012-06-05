@@ -103,7 +103,7 @@ class NetworkHost(Model):
 	class Meta:
 		ordering = ['mac_address']
 		permissions = (
-			("can_view_ownership", "May see who owns a specific computer."),
+			("can_view_ownership", "View ownership of host"),
 		)
 	mac_address = CharField(max_length=12)
 	ip_address = IPAddressField()
@@ -172,10 +172,10 @@ class EventAttendance(Model):
 	class Meta:
 		ordering = ['event', 'user_profile']
 		permissions = (
-			("can_register_attendance", "May use the event attendance registration system."),
-			("can_view_quota", "May view quota usage summaries."),
-			("can_reset_quota", "May reset quota usage."),
-			("can_change_coffee", "May change who has access to send coffee requests."), # this is a seperate ACL because of ravenge and dasman
+			("can_register_attendance", "Register event attendance"),
+			("can_view_quota", "View quota"),
+			("can_reset_quota", "Reset quota"),
+			("can_change_coffee", "Coffee request access change"), # this is a seperate ACL because of ravenge and dasman
 		)
 	event = ForeignKey(Event)
 	user_profile = ForeignKey(UserProfile)
@@ -346,7 +346,7 @@ class IP4PortForward(Model):
 	class Meta:
 		verbose_name = 'IP4 Port Forward'
 		permissions = (
-			('can_ip4portforward', 'Can manage IPv4 port forwarding'),
+			('can_ip4portforward', 'Manage IPv4 port forwarding'),
 		)
 	host = ForeignKey(NetworkHost)
 	protocol = ForeignKey(IP4Protocol, default=6, help_text='The IPv4 protocol that this service uses.  If you don\'t know, try TCP or UDP.')
