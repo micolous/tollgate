@@ -71,6 +71,9 @@ def unsigned_validator(value):
 class UserProfile(Model):
 	class Meta:
 		ordering = ['user__username']
+		permissions = (
+			('can_toggle_internet', 'Toggle internet access for users'),
+		)
 
 	user = ForeignKey(User, unique=True, related_name="user")
 	internet_on = BooleanField(default=True)

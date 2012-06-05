@@ -693,7 +693,7 @@ def usage_reset(request, aid):
 	return redirect('usage-info', a.id)
 
 
-@user_passes_test(lambda u: u.has_perm('frontend.can_view_quota'))
+@user_passes_test(lambda u: u.has_perm('frontend.can_toggle_internet'))
 def usage_all_on(request):
 	# find all users that are in attendance this lan
 	current_event = get_current_event()
@@ -708,7 +708,7 @@ def usage_all_on(request):
 	return redirect('usage')
 
 
-@user_passes_test(lambda u: u.has_perm('frontend.can_view_quota'))
+@user_passes_test(lambda u: u.has_perm('frontend.can_toggle_internet'))
 def usage_all_really_on(request):
 	# find all users that are in attendance this lan
 	current_event = get_current_event()
@@ -728,7 +728,7 @@ def usage_all_really_on(request):
 	return redirect('usage')
 
 
-@user_passes_test(lambda u: u.has_perm('frontend.can_view_quota'))
+@user_passes_test(lambda u: u.has_perm('frontend.can_toggle_internet'))
 def usage_all_off(request):
 	# find all users that are in attendance this lan
 	current_event = get_current_event()
@@ -748,14 +748,14 @@ def usage_all_off(request):
 	return redirect('usage')
 
 
-@user_passes_test(lambda u: u.has_perm('frontend.can_view_quota'))
+@user_passes_test(lambda u: u.has_perm('frontend.can_toggle_internet'))
 def usage_on(request, aid):
 	a = get_object_or_404(EventAttendance, id=aid)
 	enable_user_quota(a)
 	return redirect('usage-info', a.id)
 
 
-@user_passes_test(lambda u: u.has_perm('frontend.can_view_quota'))
+@user_passes_test(lambda u: u.has_perm('frontend.can_toggle_internet'))
 def usage_off(request, aid):
 	a = get_object_or_404(EventAttendance, id=aid)
 	disable_user_quota(a)
