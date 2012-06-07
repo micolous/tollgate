@@ -134,7 +134,7 @@ class NetworkHost(Model):
 		permissions = (
 			("can_view_ownership", "View ownership of host"),
 		)
-	mac_address = CharField(max_length=12)
+	mac_address = CharField(max_length=12, unique=True)
 	ip_address = IPAddressField()
 	computer_name = CharField(max_length=128)
 	first_connection = DateTimeField('first connection')
@@ -526,10 +526,13 @@ def sync_user_connections(profile, portal=None):
 	if portal == None:
 		portal = get_portalapi()
 
-	portal.flush(user_id)
-
 	# find all the user's computers.
-	hosts = NetworkHost.objects.filter(user_profile__exact=profile, online__exact=True)
+	hosts = list(NetworkHost.objects.filter(
+		user_profile__exact=profile, online__exact=True
+	).only('mac_address', 'ip_address'))
+	
+	# flush the 
+	portal.flush(user_id)
 
 	for host in hosts:
 		if in_lan_subnet(host.ip_address) and (not settings.ONLY_CONSOLE or host.is_console()):
