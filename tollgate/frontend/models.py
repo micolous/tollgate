@@ -71,10 +71,39 @@ def unsigned_validator(value):
 class UserProfile(Model):
 	class Meta:
 		ordering = ['user__username']
+		permissions = (
+			('can_toggle_internet', 'Toggle internet access for users'),
+		)
 
 	user = ForeignKey(User, unique=True, related_name="user")
 	internet_on = BooleanField(default=True)
 	theme = CharField(default='cake', max_length=30, choices=THEME_CHOICES)
+
+	maximum_quota_signins = PositiveIntegerField(
+		default=0,
+		help_text=_("""\
+			Sets the maximum amount of quota in MiB that the user may grant to 
+			users they sign in.  If set to 0, they will be able to set any quota 
+			amount.  Setting this value disallows setting unlimited quota.
+			
+			This will only have effect if the user has been granted permission
+			to sign in users.  Otherwise, they will not be able to sign in users.
+		""")
+	)
+	
+	maximum_quota_resets = PositiveIntegerField(
+		default=0,
+		help_text=_("""\
+			Sets the maximum amount of quota resets that the user may perform on
+			other users.  If set to 0, they will be able to reset quota an 
+			unlimited number of times.  If set to 1, this will mean that the user
+			can only perform the "one free reset" on behalf of another user.
+			
+			This will only have effect if the user has been granted permission
+			to reset user quota for other users.  Otherwise, they will not be able
+			to reset quota for other users at all.
+		""")
+	)
 
 	def get_hosts(self):
 		return NetworkHost.objects.filter(user_profile=self)
@@ -103,7 +132,7 @@ class NetworkHost(Model):
 	class Meta:
 		ordering = ['mac_address']
 		permissions = (
-			("can_view_ownership", "May see who owns a specific computer."),
+			("can_view_ownership", "View ownership of host"),
 		)
 	mac_address = CharField(max_length=12)
 	ip_address = IPAddressField()
@@ -172,10 +201,12 @@ class EventAttendance(Model):
 	class Meta:
 		ordering = ['event', 'user_profile']
 		permissions = (
-			("can_register_attendance", "May use the event attendance registration system."),
-			("can_view_quota", "May view quota usage summaries."),
-			("can_reset_quota", "May reset quota usage."),
-			("can_change_coffee", "May change who has access to send coffee requests."), # this is a seperate ACL because of ravenge and dasman
+			("can_register_attendance", "Register event attendance"),
+			("can_view_quota", "View quota"),
+			("can_reset_quota", "Reset quota"),
+			("can_change_coffee", "Coffee request access change"), # this is a seperate ACL because of ravenge and dasman
+			('can_reset_own_quota', 'Reset own quota multiple times'),
+			('can_revoke_access', 'Revoke internet access for a user'),
 		)
 	event = ForeignKey(Event)
 	user_profile = ForeignKey(UserProfile)
@@ -346,15 +377,16 @@ class IP4PortForward(Model):
 	class Meta:
 		verbose_name = 'IP4 Port Forward'
 		permissions = (
-			('can_ip4portforward', 'Can manage IPv4 port forwarding'),
+			('can_ip4portforward', 'Manage IPv4 port forwarding'),
 		)
 	host = ForeignKey(NetworkHost)
-	protocol = ForeignKey(IP4Protocol, help_text='The IPv4 protocol that this service uses.  If you don\'t know, try TCP or UDP.')
+	protocol = ForeignKey(IP4Protocol, default=6, help_text='The IPv4 protocol that this service uses.  If you don\'t know, try TCP or UDP.')
 	port = PositiveIntegerField(default=0, help_text='The internal port that the service is running on.  This has no effect if the protocol does not have port numbers.')
 	external_port = PositiveIntegerField(default=0, help_text='The external port that this service should show as running on.  This has no effect if the protocol does not have port numbers.')
 	creator = ForeignKey(UserProfile)
 	created = DateTimeField(auto_now_add=True)
 	enabled = BooleanField(blank=True, default=True)
+	label = CharField(max_length=64, help_text="Optional description of the port forward", blank=True, default="")
 
 	def __unicode__(self):
 		return u'%s %s/%s->%s' % (self.host, self.protocol.name, self.external_port, self.port)

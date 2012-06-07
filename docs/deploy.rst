@@ -470,12 +470,12 @@ Tollgate has a "quota reset" function whereby a user may gain their allocated qu
 
 At present, tollgate has a hard-coded "one free quota reset" function, which is user accessible.  This becomes available to a user once they have used 70% of their quota allocation.
 
-An administrator may reset a user's quota any number of times.  However administrators are prevented from resetting their **own** quota more than once.
-
-There are two settings relating to this function:
+There are three settings relating to this function:
 
 * ``RESET_EXCUSE_REQUIRED``: Toggles whether a user must provide a reason for having their quota reset.
 * ``RESET_PURCHASE``: Changes the language of the quota reset page to imply that a user may purchase additional data blocks.  Be aware, generally ISPs will disallow selling internet access as part of a residential access plan, and may disallow it as part of a sponsorship agreement (if you have one).  Use with caution.
+* ``UserProfile.maximum_quota_resets``: Controls the number of times a user with ``can_reset_quota`` permission can reset another user's quota.
+* Permission ``can_reset_own_quota``: Controls whether a user with ``can_reset_quota`` permission can reset their own quota more than once.
 
 As a result, you should generally allocate a user about half of the total amount of quota you want them to use.  Your author has observed the following that makes these restrictions useful, and has some other notes:
 
@@ -487,7 +487,7 @@ As a result, you should generally allocate a user about half of the total amount
   
 * Administrators will often also reset themselves numerous times without regard, and fall into the same trap.  There is an "unmetered" function if it is really required to have unlimited access, however this is prone to abuse.
   
-  As a result, tollgate prevents administrators from resetting their own quota more than once (no more than any other user).
+  As a result, tollgate prevents administrators from resetting their own quota more than once (no more than any other user), unless ``can_reset_own_quota`` has been granted.
 
 * If you are tracking regular attendees, it is generally a good idea to lower the quota of non-regular attendees.  Non-regulars more frequently try to exhaust as much quota as possible, often citing a right to use as much of the venue's bandwidth as possible.  They will also often not be familiar with what kind of traffic their computers use.
   

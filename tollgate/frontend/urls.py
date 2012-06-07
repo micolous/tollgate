@@ -67,7 +67,6 @@ urlpatterns = (
 	url(r'^usage/(?P<aid>\d+)/off/$', 'usage_off', name='usage-off'),
 	url(r'^usage/(?P<aid>\d+)/reset/$', 'usage_reset', name='usage-reset'),
 	url(r'^usage/(?P<aid>\d+)/disable/$', 'usage_disable', name='usage-disable'),
-	url(r'^usage/(?P<aid>\d+)/coffee/$', 'usage_coffee', name='usage-coffee'),
 	#url(r'^usage/(?P<aid>\d+)/graph.png$', 'usage_graph', name='usage-graph'),
 	url(r'^usage/(?P<aid>\d+)/$', 'usage_info', name='usage-info'),
 	url(r'^usage/$', 'usage', name='usage'),
