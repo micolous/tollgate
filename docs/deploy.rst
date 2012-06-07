@@ -153,7 +153,7 @@ Included in the examples is how to configure a gitweb instance.  You could also 
 Configure DHCP server
 ---------------------
 
-You require requires a small wrapper script in order to be used with the ``dhcp-script``, as follows::
+You require a small wrapper script in order to be used with the ``dhcp-script``, as follows::
 
    #!/bin/sh
    cd /var/tollgate_site; ./manage.py dhcp_script $*
