@@ -541,7 +541,13 @@ def sync_user_connections(profile, portal=None):
 def refresh_quota_usage(event_attendance, portal=None):
 	if portal == None:
 		portal = get_portalapi()
-
+	
+	event = get_current_event()
+	
+	if event != event_attendance.event:
+		# not part of this event
+		return False
+	
 	r = portal.get_quota(event_attendance.user_profile.user.id)
 	if r != None:
 		# now set counters
@@ -553,6 +559,8 @@ def refresh_quota_usage(event_attendance, portal=None):
 			event_attendance = event_attendance,
 			bytes = event_attendance.quota_used
 		)
+		
+		return True
 
 def refresh_all_quota_usage(portal=None):
 	if portal == None:

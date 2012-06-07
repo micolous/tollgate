@@ -633,7 +633,7 @@ def usage_morereset(request):
 @user_passes_test(lambda u: u.has_perm('frontend.can_view_quota'))
 def usage_info(request, aid):
 	a = get_object_or_404(EventAttendance, id=aid)
-
+	
 	quota_update_fail = False
 	try:
 		refresh_quota_usage(a)
@@ -661,6 +661,17 @@ def usage_reset(request, aid):
 	a = get_object_or_404(EventAttendance, id=aid)
 
 	if request.method != 'POST':
+		return redirect('usage-info', a.id)
+
+	current_event = get_current_event()
+	if current_event == None:
+		return render_to_response('frontend/event-not-active.html',
+			context_instance=RequestContext(request))
+	
+	if current_event != a.event:
+		messages.warning(request,
+			_("That attendance is not part of this event.")
+		)
 		return redirect('usage-info', a.id)
 
 	reset_form = ResetExcuseForm(request.POST)
@@ -770,17 +781,37 @@ def usage_all_off(request):
 def usage_on(request, aid):
 	a = get_object_or_404(EventAttendance, id=aid)
 
-	if request.method == 'POST':
+	current_event = get_current_event()
+	if current_event == None:
+		return render_to_response('frontend/event-not-active.html',
+			context_instance=RequestContext(request))
+	
+	if current_event != a.event:
+		messages.warning(request,
+			_("That attendance is not part of this event.")
+		)
+	elif request.method == 'POST':
 		enable_user_quota(a)
+		
 	return redirect('usage-info', a.id)
 
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_toggle_internet'))
 def usage_off(request, aid):
 	a = get_object_or_404(EventAttendance, id=aid)
-	if request.method == 'POST':
+
+	current_event = get_current_event()
+	if current_event == None:
+		return render_to_response('frontend/event-not-active.html',
+			context_instance=RequestContext(request))
+	
+	if current_event != a.event:
+		messages.warning(request,
+			_("That attendance is not part of this event.")
+		)
+	elif request.method == 'POST':
 		disable_user_quota(a)
-		
+
 	return redirect('usage-info', a.id)
 
 
@@ -789,7 +820,16 @@ def usage_disable(request, aid):
 	# revoke interent access for the user.
 	a = get_object_or_404(EventAttendance, id=aid)
 
-	if request.method == "POST":
+	current_event = get_current_event()
+	if current_event == None:
+		return render_to_response('frontend/event-not-active.html',
+			context_instance=RequestContext(request))
+	
+	if current_event != a.event:
+		messages.warning(request,
+			_("That attendance is not part of this event.")
+		)
+	elif request.method == 'POST':
 		a.quota_multiplier = 0
 		a.quota_unmetered = False
 		a.save()
