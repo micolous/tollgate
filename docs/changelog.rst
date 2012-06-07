@@ -16,6 +16,7 @@ This release is still in development.  This release includes security fixes, and
 * ``docs``: Documented permissions.
 * ``frontend``: Added extra reason why "cannot find MAC" page would display on the page.
 * ``frontend``: Added labels to IPv4 port forwards. (`Issue #15`_)
+* ``frontend``: Added support for DHCP servers (dnsmasq and ISC) to notify when hosts come online / go offline. (`Issue #32`_)
 * ``frontend``: Default protocol of IPv4 port forwards is now TCP.  (`Issue #17`_)
 * ``frontend``: Fix a bug where non-superusers could not sign in other users that are new, when they had the permission they would require.
 * ``frontend``: New permissions: ``can_revoke_access``, ``can_reset_own_quota``, ``can_toggle_internet``.
@@ -28,6 +29,7 @@ This release is still in development.  This release includes security fixes, and
 
 .. _Issue #15: https://github.com/micolous/tollgate/issues/15
 .. _Issue #17: https://github.com/micolous/tollgate/issues/17
+.. _Issue #32: https://github.com/micolous/tollgate/issues/32
 
 
 3.0.1 "Cavity Protection" (13th May 2012)

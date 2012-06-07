@@ -150,6 +150,48 @@ You will need to modify the path of static items (like the WPAD and WFC vhosts, 
 
 Included in the examples is how to configure a gitweb instance.  You could also push code changes to an external repository, however it must be accessible to users at all times (ie: you should mark it as "unmetered").
 
+Configure DHCP server
+---------------------
+
+You require requires a small wrapper script in order to be used with the ``dhcp-script``, as follows::
+
+   #!/bin/sh
+   cd /var/tollgate_site; ./manage.py dhcp_script $*
+
+There is an example of this in ``/docs/example/tollgate_dhcp_script.sh``.  You must also make the script executable.
+
+This script allows your DHCP server to notify tollgate when a system goes comes online or goes offline.
+
+dnsmasq
+^^^^^^^
+
+You can then use the ``dhcp-script`` parameter in ``dnsmasq.conf``::
+
+	dhcp-script=/usr/local/bin/tollgate_dhcp_script.sh
+   
+ISC dhcpd
+^^^^^^^^^
+
+In order to handle events in ISC dhcpd, you require the following configuration::
+
+	on commit {
+		set clip = binary-to-ascii(10, 8, ".", leased-address);
+		set clhw = binary-to-ascii(16, 8, ":", substring(hardware, 1, 6));
+		execute("/usr/local/bin/tollgate_dhcp_script.sh", "add", clhw, clip, host-decl-name);
+	}
+	
+	on release {
+		set clip = binary-to-ascii(10, 8, ".", leased-address);
+		set clhw = binary-to-ascii(16, 8, ":", substring(hardware, 1, 6));
+		execute("/usr/local/bin/tollgate_dhcp_script.sh", "del", clhw, clip, host-decl-name);
+	}
+	
+	on expiry {
+		set clip = binary-to-ascii(10, 8, ".", leased-address);
+		set clhw = binary-to-ascii(16, 8, ":", substring(hardware, 1, 6));
+		execute("/usr/local/bin/tollgate_dhcp_script.sh", "del", clhw, clip, host-decl-name);
+	}
+
 Start the daemons
 -----------------
 
@@ -470,7 +512,7 @@ Tollgate has a "quota reset" function whereby a user may gain their allocated qu
 
 At present, tollgate has a hard-coded "one free quota reset" function, which is user accessible.  This becomes available to a user once they have used 70% of their quota allocation.
 
-There are three settings relating to this function:
+There are several settings relating to this function:
 
 * ``RESET_EXCUSE_REQUIRED``: Toggles whether a user must provide a reason for having their quota reset.
 * ``RESET_PURCHASE``: Changes the language of the quota reset page to imply that a user may purchase additional data blocks.  Be aware, generally ISPs will disallow selling internet access as part of a residential access plan, and may disallow it as part of a sponsorship agreement (if you have one).  Use with caution.
