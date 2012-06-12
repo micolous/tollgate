@@ -535,25 +535,55 @@ As a result, you should generally allocate a user about half of the total amount
   
   Regular attendees are generally more respectful of the event and it's resources.
 
-* Most Windows-based traffic monitoring programs (like DU Meter, NetLimiter) do not accurately record Internet usage.  Generally, these programs will show lower amounts of traffic as to what is actually produced.
+Reporting quota metering errors
+===============================  
+
+So you think tollgate is counting your traffic wrong?  I'm open to hear about it, and I want to fix it if there is a problem!  However, please be aware of the following **before you report it as an issue**:
+
+Windows network accounting is broken
+------------------------------------
+
+Most Windows-based traffic monitoring programs (like DU Meter, NetLimiter) do not accurately record Internet usage.  Generally, these programs will show lower amounts of traffic as to what is actually produced.
   
-  NetLimiter in particular is notoriously bad at recording usage accurately, and will report several orders of magnitude low. [#nl1]_ [#nl2]_ [#nl3]_ [#nl4]_
+NetLimiter in particular is notoriously bad at recording usage accurately, and will report several orders of magnitude low. [#nl1]_ [#nl2]_ [#nl3]_ [#nl4]_
   
-  The WinSock hooks that these software use in Windows are unreliable, and require that each packet be sent to a user space program.  If the program does not record the usage in a timely manner, it is possible for them to miss information about other packets.
+The WinSock hooks that these software use in Windows are unreliable, and require that each packet be sent to a user space program.  If the program does not record the usage in a timely manner, it is possible for them to miss information about other packets.
   
-  It is also for this reason that at present tollgate will never be able to act as a router on Windows.
+It is also for this reason that at present tollgate will never be able to act as a router on Windows.
   
-  Windows network byte counters are **optionally** provided by the network card driver.  Irregularities may occur as a result between different network card chipsets.
+Windows network byte counters are **optionally** provided by the network card driver.  Irregularities may occur as a result between different network card chipsets.
   
-  **TL;DR:** It is impossible to get accurate traffic information out of Windows operating systems, **ever**.
+**TL;DR:** It is impossible to get accurate traffic information out of Windows operating systems, **ever**.
+
+Raw packets
+-----------
+
+Some programs that create "raw" packets may not be accounted for properly by the OS in either traffic counters or firewall quota records, nor might they be filtered by outbound rules.  Tollgate will also count traffic that the firewall may have rejected or dropped -- it has no way to tell if the client is ignoring or using the traffic or not.
+
+Blacklists and whitelists, traffic from other sources
+-----------------------------------------------------
   
-* Some programs that create "raw" packets may not be accounted for properly by the OS in either traffic counters or firewall quota records, nor might they be filtered by outbound rules.  Tollgate will also count traffic that the firewall may have rejected or dropped -- it has no way to tell if the client is ignoring or using the traffic or not.
+Most accounting information will fail to take into account things like blacklisted and unmetered site access, as well as access from other sources (such as home Internet use, or mobile broadband), which can cause them to read higher amounts of usage.
+
+Binary gibibytes vs. metric/drivemaker's gigabytes
+--------------------------------------------------
+
+Tollgate reports all values in it's web interface either in bytes, or binary units.
+
+This means that 1 KiB == 1024 bytes.
+
+Other usage monitoring programs using tollgate's API may report this information differently -- quota values are provided in the API in bytes.
+
+Conclusion
+----------
   
-  Additionally, these programs fail to take into account things like blacklisted and unmetered site access, as well as access from other sources (such as home Internet use, or mobile broadband), which can cause them to read higher amounts of usage.
+It is important when reporting irregularities to come up with solid evidence that proves it.  I'm welcome to **reproducible** reports of these issues.
+
+Please include all details in your report, including tollgate versions, kernel versions, network hardware, packet captures, database server, deployment steps, etc., enough so that I can try to reproduce the problem and verify that there is not an issue with your reporting device or something else.
+
+I have had issues in the past where tollgate has read quota usage low (or has stopped counting).  These were due to integer overflow issues in ``backend`` and MySQL at 4 GiB.  These have been fixed in later versions.
   
-  It is important when reporting irregularities to come up with solid evidence that proves it.  I'm welcome to reproducible reports of these issues.  Please include all details in your report, including tollgate versions, kernel versions, network hardware, packet captures, etc., enough so that I can try to reproduce the problem and verify that there is not an issue with your reporting device.
-  
-  **Any reports incorporating data from only Windows machines will be ignored for the above reasons.  Incomplete, vague or non-reproducible reports will also be ignored.**
+**Any reports incorporating data from only Windows machines will be ignored for the above reasons.  Incomplete, vague or non-reproducible reports will also be ignored.**
 
 .. rubric:: Footnotes
 
