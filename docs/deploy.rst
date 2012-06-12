@@ -425,7 +425,7 @@ Mass-mailing Worms
 
 It's pretty much a given you will have problems with infected Windows hosts.  One major thing you will want to consider is blocking external SMTP traffic to at least prevent your network from becoming a spam hub, and angering your ISP (as well as other internet users).  You can do this with an entry in ``backend.ini``, under the section ``blacklist``::
 
-   externaldns = 0.0.0.0/25
+   externaldns = 0.0.0.0/0:25
    
 Normally you only have to block port 25 traffic.  SMTP over SSL is generally never used by such worms, and mail servers running on SSL generally also require authentication (which the spam bots won't have).
 
@@ -491,7 +491,7 @@ Block external DNS servers
 
 This can be done in ``backend.ini``, by adding a blacklist line like::
 
-   externaldns = 0.0.0.0/53
+   externaldns = 0.0.0.0/0:53
 
 This will only allow your DNS server, and any whitelisted / unmetered servers to have DNS traffic passed through to them.
 
