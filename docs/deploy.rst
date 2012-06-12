@@ -7,42 +7,42 @@ Deploying tollgate into a Django project
 
 The "proper" way to deploy tollgate is to install the software (using ``setup.py``), and then create a Django project with tollgate setup inside of it.
 
-This is achieveable fairly simply, however be aware that **tollgate only manages routing**, it does **not** manage things like DNS and DHCP which you'll need to make your network actually accept clients.
+This is achievable fairly simply, however be aware that **tollgate only manages routing**, it does **not** manage things like DNS and DHCP which you'll need to make your network actually accept clients.
 
 This has the advantage of allowing you to easily customise configuration and templates.  Be aware though that all modifications to tollgate **must** be made available, as well as the software itself, to all of your users, as a condition of the license.
 
-Pre-requisites
+Prerequisites
 --------------
 
 I'm assuming here that you have:
 
-* Installed and configured an apache2 server with mod_wsgi and mod_ssl.
+* Installed and configured an ``apache2`` server with ``mod_wsgi`` and ``mod_ssl``.
 * Installed and configured a database server, for example, MySQL, as well as installed appropriate Python bindings to allow interaction.
 * Installed everything else you need to make your network work -- that is, DHCP server, DNS server, multiple network interfaces in your tollgate machine (which will be your router / default gateway).
-* Installed and configured DBUS.
+* Installed and configured D-Bus.
 * Installed other dependencies.
  
-Installation and configuration of those is outside of the scope of this document.  If you're looking up HOWTO documents on the internet, do not do anything with `iptables`, as setting up a NAT and routing itself is part of tollgate.
+Installation and configuration of those is outside of the scope of this document.  If you're looking up HOW-TO documents on the Internet, do not do anything with `iptables`, as setting up a NAT and routing itself is part of tollgate.
 
 Install tollgate
 ----------------
 
-Install tollgate, either using an official stable build, git repository, or distribution package.  You can install the latest `master` version of tollgate using `pip` with this command::
+Install tollgate, either using an official stable build, git repository, or distribution package.  You can install the latest `master` version of tollgate using ``pip`` with this command::
 
    $ sudo pip install git+https://github.com/micolous/tollgate.git
 
 This **may** not work though, as the state of `git master` may be in flux.
 
-This will install the entire `tollgate` package into your Python path, and install the captivity and backend daemons.
+This will install the entire ``tollgate`` package into your Python path, and install the ``captivity`` and ``backend`` daemons.
 
-Configure DBUS
---------------
+Configure D-Bus
+---------------
 
-We need to add some configuration files for tollgate to DBUS' configuration in order to allow the web server process to use tollgate's backend.
+We need to add some configuration files for tollgate to D-Bus' configuration in order to allow the web server process to use tollgate's backend.
 
-In ``docs/example/dbus/system.d/tollgate.conf`` are some example configuration you can use with tollgate.  Copy this to ``/etc/dbus-1/system.d/``, and modify with the appropriate username that the webserver uses (if it is not ``www-data``).
+In ``docs/example/dbus/system.d/tollgate.conf`` are some example configuration you can use with tollgate.  Copy this to ``/etc/dbus-1/system.d/``, and modify with the appropriate username that the web server uses (if it is not ``www-data``).
 
-Then reload the DBUS configuration with ``/etc/init.d/dbus reload``.
+Then reload the D-Bus configuration with ``/etc/init.d/dbus reload``.
 
 Create a project
 ----------------
@@ -101,7 +101,7 @@ You should also add the following extra settings for tollgate and configure appr
    LOGIN_URL='/login/'
    LOGOUT_URL='/logout/'
 
-The final setting to add is a URL where you are hosting the tollgate sources with your modifications, ``SOURCE_URL``.  You should **never** link back to the official tollgate repository using this method (there is already a link to the official repo on the source page).
+The final setting to add is a URL where you are hosting the tollgate sources with your modifications, ``SOURCE_URL``.  You should **never** link back to the official tollgate repository using this method (there is already a link to the official repository on the source page).
 
 Not hosting the source code yourself may expose you to legal liability.
 
@@ -131,11 +131,11 @@ We won't start the daemons just yet, though.
 Configure cron
 --------------
 
-tollgate requires a periodic cronjob to refresh the list of hosts in it's database.
+tollgate requires a periodic cron job to refresh the list of hosts in it's database.
 
 An example configuration is given in ``docs/example/tollgate.cron``.  You will need to adapt it to point to the path of your Django project.
 
-Configure webserver
+Configure web server
 -------------------
 
 You'll need to now configure your web server.
@@ -148,7 +148,7 @@ There is an example apache2 configuration, including all vhosts, in ``docs/examp
 
 You will need to modify the path of static items (like the WPAD and WFC vhosts, and aliases for static files) to the appropriate locations, and URLs.
 
-Included in the examples is how to configure a gitweb instance.  You could also push code changes to an external repository, however it must be accessible to users at all times (ie: you should mark it as "unmetered").
+Included in the examples is how to configure a ``gitweb`` instance.  You could also push code changes to an external repository, however it must be accessible to users at all times (ie: you should mark it as "unmetered").
 
 Configure DHCP server
 ---------------------
@@ -201,9 +201,9 @@ The first time you run you'll need to manually start the daemons.  They will sta
 Deploying tollgate in development
 =================================
 
-In development, you can run and deploy ``tollgate`` from within a git clone of the repository.  This is the "old" way of deploying tollgate in production, and has since been superceeded.
+In development, you can run and deploy ``tollgate`` from within a git clone of the repository.  This is the "old" way of deploying tollgate in production, and has since been superseded.
 
-You can run tollgate in development either out of a WSGI-compatible webserver, or using Django's single-threaded development server.
+You can run tollgate in development either out of a WSGI-compatible web server, or using Django's single-threaded development server.
 
 Useful Functions
 ----------------
@@ -235,14 +235,14 @@ tollgate's quota saving procedures are written in such a way that it will work w
 
 However, there is a window (between ``refresh_hosts`` calls, normally every 10 minutes) where you can use all of your quota via one tollgate and still have it available on the other, because the counters aren't synchronised live (and doing so is quite expensive).
 
-In typical deployments however I haven't had this as a real problem, as it hasn't been possible to use more than 50% of the allocated quota in 10 minutes.  Doing so would require quite fast internet access, and you're generally competing for that resource with other clients on the network.
+In typical deployments however I haven't had this as a real problem, as it hasn't been possible to use more than 50% of the allocated quota in 10 minutes.  Doing so would require quite fast Internet access, and you're generally competing for that resource with other clients on the network.
 
 Be sure when configuring your network infrastructure for redundancy that:
 
 * Your two tollgate machines have different power sources.  This could mean they're supplied via a different mains circuit, or one of them has a battery backup.
 * You also provide redundancy for the switch, if you have one.
 * You have either a multi-master database server setup, or a single database server with redundant power supplies or battery backup.
-* If running with one database server, make sure that if one half of your power goes down, that the database server is still accessible (ie: use two switches and two NICs in your database server).
+* If running with one database server, make sure that if one half of your power goes down, that the database server is still accessible (ie: use two switches and two network cards in your database server).
 * Use protocols like Spanning Tree Protocol (STP) on your switches to break routing loops.
 
 At the moment, tollgate doesn't support running multiple instances of itself managing *different* subnets.  That's a plan for down the track.
@@ -288,7 +288,7 @@ You should keep those ratios if you adjust it, but gc_thresh needs to be able to
 
 This will automatically set all three garbage collector thresholds appropriately according to the ratios above.
 
-You absolutely require this value to be set to the number of hosts in your subnet, with a little bit of leeway for your WAN ethernet interface.  Which means if you have a ``/23`` (512 IPs) on your LAN side, and about 10 machines on your WAN side, you should set the value to about 530 (enough for both sides with some leeway)::
+You absolutely require this value to be set to the number of hosts in your subnet, with a little bit of leeway for your WAN Ethernet interface.  Which means if you have a ``/23`` (512 IP addresses) on your LAN side, and about 10 machines on your WAN side, you should set the value to about 530 (enough for both sides with some leeway)::
 
    arp_table_size = 530
 
@@ -423,7 +423,7 @@ After this, reload your Samba and DHCP daemon.
 Mass-mailing Worms
 ------------------
 
-It's pretty much a given you will have problems with infected Windows hosts.  One major thing you will want to consider is blocking external SMTP traffic to at least prevent your network from becoming a spam hub, and angering your ISP (as well as other internet users).  You can do this with an entry in ``backend.ini``, under the section ``blacklist``::
+It's pretty much a given you will have problems with infected Windows hosts.  One major thing you will want to consider is blocking external SMTP traffic to at least prevent your network from becoming a spam hub, and angering your ISP (as well as other Internet users).  You can do this with an entry in ``backend.ini``, under the section ``blacklist``::
 
    externaldns = 0.0.0.0/0:25
    
@@ -440,27 +440,27 @@ Nintendo Consoles / WFC
 .. WARNING::
    Nintendo DS and DS Lite, as well as any DS games on the DSi and 3DS will **only** connect to wireless networks that are either unencrypted or encrypted with WEP.  Additionally, they will only connect to 2.4GHz 802.11b networks.
    
-   Because of the additional radio bandwidth that 802.11b clients require, it is recommended that you run a seperate 802.11b-only network for those devices.
+   Because of the additional radio bandwidth that 802.11b clients require, it is recommended that you run a separate 802.11b-only network for those devices.
    
 .. NOTE::
    On the Nintendo DSi and 3DS, connection profiles 1 - 3 do not support WPA or WPA2 encryption (for compatibility with DS games), only the profiles 4 - 6 support it.
 
 All of Nintendo's gaming consoles, with the exception of the Gamecube, will probe a site called ``conntest.nintendowifi.net`` during connection setup.
 
-If this site is inaccessible or does not return a "200 OK" response, the console will assume it cannot connect to the internet, and refuse to save the connection profile.
+If this site is inaccessible or does not return a "200 OK" response, the console will assume it cannot connect to the Internet, and refuse to save the connection profile.
 
 Included in tollgate's source repository in ``/www/wpad/`` is a website you can host at ``conntest.nintendowifi.net``, with a DNS record pointing to your server.  This must be accessible inside of your LAN.
 
-Playstation Portable (PSP)
+PlayStation Portable (PSP)
 ==========================
 
 .. WARNING::
-   Playstation Portable will only connect to 2.4GHz 802.11b networks, and does not support WPA2 encryption.
+   PlayStation Portable will only connect to 2.4GHz 802.11b networks, and does not support WPA2 encryption.
    
-   Because of the additional radio bandwidth that 802.11b clients require, it is recommended that you run a seperate 802.11b-only network for those devices.
+   Because of the additional radio bandwidth that 802.11b clients require, it is recommended that you run a separate 802.11b-only network for those devices.
 
 .. WARNING::
-   Playstation Portable E-1000 does not have WiFi.
+   PlayStation Portable E-1000 does not have WiFi.
 
 PSP System software v2.00 includes a web browser.  Earlier versions of the system software do not include a web browser.
 
@@ -477,12 +477,12 @@ The general process for logging a system into tollgate when the device does not 
 #. Find the device in tollgate's `login other computers` screen, and sign it in.
 #. Reattempt the connection test (this should succeed).
 
-After this, the device will be registered with that user's account.  Whenever they are signed into the event they will automatically grant access to the internet for all of their devices.
+After this, the device will be registered with that user's account.  Whenever they are signed into the event they will automatically grant access to the Internet for all of their devices.
 
 Rogue DHCP / DNS Servers
 ========================
 
-There have been several instances at events your author has administed where Windows worms propegating on the network will send out rogue DHCP server responses, attempting to either route traffic through the infected machine, or replace DNS with a third-party server that will redirect traffic to popular websites through an attacker's server.
+There have been several instances at events your author has administered where Windows worms propagating on the network will send out rogue DHCP server responses, attempting to either route traffic through the infected machine, or replace DNS with a third-party server that will redirect traffic to popular websites through an attacker's server.
 
 There are two major mitigation steps you should take:
 
@@ -493,7 +493,7 @@ This can be done in ``backend.ini``, by adding a blacklist line like::
 
    externaldns = 0.0.0.0/0:53
 
-This will only allow your DNS server, and any whitelisted / unmetered servers to have DNS traffic passed through to them.
+This will only allow your DNS server, and any white-listed / unmetered servers to have DNS traffic passed through to them.
 
 Use layer 3 managed switches with DHCP filtering
 ------------------------------------------------
@@ -515,7 +515,7 @@ At present, tollgate has a hard-coded "one free quota reset" function, which is 
 There are several settings relating to this function:
 
 * ``RESET_EXCUSE_REQUIRED``: Toggles whether a user must provide a reason for having their quota reset.
-* ``RESET_PURCHASE``: Changes the language of the quota reset page to imply that a user may purchase additional data blocks.  Be aware, generally ISPs will disallow selling internet access as part of a residential access plan, and may disallow it as part of a sponsorship agreement (if you have one).  Use with caution.
+* ``RESET_PURCHASE``: Changes the language of the quota reset page to imply that a user may purchase additional data blocks.  Be aware, generally ISPs will disallow selling Internet access as part of a residential access plan, and may disallow it as part of a sponsorship agreement (if you have one).  Use with caution.
 * ``UserProfile.maximum_quota_resets``: Controls the number of times a user with ``can_reset_quota`` permission can reset another user's quota.
 * Permission ``can_reset_own_quota``: Controls whether a user with ``can_reset_quota`` permission can reset their own quota more than once.
 
@@ -535,11 +535,11 @@ As a result, you should generally allocate a user about half of the total amount
   
   Regular attendees are generally more respectful of the event and it's resources.
 
-* Most Windows-based traffic monitoring programs (like DU Meter, NetLimiter) do not accurately record internet usage.  Generally, these programs will show lower amounts of traffic as to what is actually produced.
+* Most Windows-based traffic monitoring programs (like DU Meter, NetLimiter) do not accurately record Internet usage.  Generally, these programs will show lower amounts of traffic as to what is actually produced.
   
   NetLimiter in particular is notoriously bad at recording usage accurately, and will report several orders of magnitude low. [#nl1]_ [#nl2]_ [#nl3]_ [#nl4]_
   
-  The WinSock hooks that these software use in Windows are unreliable, and require that each packet be sent to a userspace program.  If the program does not record the usage in a timely manner, it is possible for them to miss information about other packets.
+  The WinSock hooks that these software use in Windows are unreliable, and require that each packet be sent to a user space program.  If the program does not record the usage in a timely manner, it is possible for them to miss information about other packets.
   
   It is also for this reason that at present tollgate will never be able to act as a router on Windows.
   
@@ -549,11 +549,11 @@ As a result, you should generally allocate a user about half of the total amount
   
 * Some programs that create "raw" packets may not be accounted for properly by the OS in either traffic counters or firewall quota records, nor might they be filtered by outbound rules.  Tollgate will also count traffic that the firewall may have rejected or dropped -- it has no way to tell if the client is ignoring or using the traffic or not.
   
-  Additionally, these programs fail to take into account things like blacklisted and unmetered site access, as well as access from other sources (such as home internet use, or mobile broadband), which can cause them to read higher amounts of usage.
+  Additionally, these programs fail to take into account things like blacklisted and unmetered site access, as well as access from other sources (such as home Internet use, or mobile broadband), which can cause them to read higher amounts of usage.
   
-  It is important when reporting irregularities to come up with solid evidence that proves it.  I'm welcome to reproducable reports of these issues.  Please include all details in your report, including tollgate versions, kernel versions, network hardware, packet captures, etc., enough so that I can try to reproduce the problem and verify that there is not an issue with your reporting device.
+  It is important when reporting irregularities to come up with solid evidence that proves it.  I'm welcome to reproducible reports of these issues.  Please include all details in your report, including tollgate versions, kernel versions, network hardware, packet captures, etc., enough so that I can try to reproduce the problem and verify that there is not an issue with your reporting device.
   
-  **Any reports incorporating data from only Windows machines will be ignored for the above reasons.  Incomplete, vague or non-reproducable reports will also be ignored.**
+  **Any reports incorporating data from only Windows machines will be ignored for the above reasons.  Incomplete, vague or non-reproducible reports will also be ignored.**
 
 .. rubric:: Footnotes
 
