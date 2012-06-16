@@ -177,19 +177,22 @@ In order to handle events in ISC dhcpd, you require the following configuration:
 	on commit {
 		set clip = binary-to-ascii(10, 8, ".", leased-address);
 		set clhw = binary-to-ascii(16, 8, ":", substring(hardware, 1, 6));
-		execute("/usr/local/bin/tollgate_dhcp_script.sh", "add", clhw, clip, host-decl-name);
+		set hname = pick-first-value(host-decl-name, option host-name, "");
+		execute("/usr/local/bin/tollgate_dhcp_script.sh", "add", clhw, clip, hname);
 	}
 	
 	on release {
 		set clip = binary-to-ascii(10, 8, ".", leased-address);
 		set clhw = binary-to-ascii(16, 8, ":", substring(hardware, 1, 6));
-		execute("/usr/local/bin/tollgate_dhcp_script.sh", "del", clhw, clip, host-decl-name);
+		set hname = pick-first-value(host-decl-name, option host-name, "");
+		execute("/usr/local/bin/tollgate_dhcp_script.sh", "del", clhw, clip, hname);
 	}
 	
 	on expiry {
 		set clip = binary-to-ascii(10, 8, ".", leased-address);
 		set clhw = binary-to-ascii(16, 8, ":", substring(hardware, 1, 6));
-		execute("/usr/local/bin/tollgate_dhcp_script.sh", "del", clhw, clip, host-decl-name);
+		set hname = pick-first-value(host-decl-name, option host-name, "");
+		execute("/usr/local/bin/tollgate_dhcp_script.sh", "del", clhw, clip, hname);
 	}
 
 Start the daemons
