@@ -1,4 +1,6 @@
-"""tollgate frontend views
+#!/usr/bin/env python
+"""
+tollgate frontend views
 Copyright 2008-2012 Michael Farrell
 
 This program is free software: you can redistribute it and/or modify
