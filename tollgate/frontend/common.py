@@ -1,5 +1,7 @@
-"""tollgate frontend middleware
-Copyright 2008-2011 Michael Farrell <http://micolous.id.au/>
+#!/usr/bin/env python
+"""
+tollgate frontend middleware
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -22,14 +24,27 @@ from tollgate.frontend.tollgate_controller_api import NotAConsoleException
 from django.conf import settings
 from base64 import b32decode, b64decode
 from django.core.validators import URLValidator
+from django.utils.translation import ugettext as _
 import sys
+
 
 class TollgateMiddleware:
 	def process_exception(self, request, exception):
 		if sys.exc_type is NotAConsoleException:
-			return render_to_response('frontend/not-a-console.html', context_instance=RequestContext(request))
+			return render_to_response(
+				'frontend/not-a-console.html',
+				context_instance=RequestContext(request)
+			)
 		else:
-			return render_to_response('frontend/error.html', {'error_message': 'An unhandled error occured.', 'excinfo': "%s: %s" % (sys.exc_type, sys.exc_value), 'traceback': extract_tb(sys.exc_traceback)}, context_instance=RequestContext(request))
+			return render_to_response(
+				'frontend/error.html',
+				{
+					'error_message': _('An unhandled error occured.'),
+					'excinfo': "%s: %s" % (sys.exc_type, sys.exc_value),
+					'traceback': extract_tb(sys.exc_traceback)
+				},
+				context_instance=RequestContext(request)
+			)
 
 	def process_response(self, request, response):
 		# Guvf pbqr vf yvtugyl boshfpngrq gb nibvq pyhrovrf terccvat sbe vg.
