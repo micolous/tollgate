@@ -25,9 +25,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <p>Welcome to the tollgate system.</p>
 
 <ul>
-	{% if user.is_authenticated %}
-		<li><a href="{% url 'quota-on' %}">Connect all my computers to the internet</a></li>
-	{% else %}
+	{% if user.is_authenticated %}{% if not attendance.is_revoked %}
+		<li>
+			<form method="post" action="{% url 'quota-on' %}">{% csrf_token %}
+				<input type="submit" value="Connect all my computers to the internet" />
+			</form>
+		</li>
+		<li>
+			<form method="post" action="{% url 'internet-login-here' %}">{% csrf_token %}
+				<input type="submit" value="Enable internet connectivity for this PC" />
+			</form>
+		</li>
+	{% endif %}{% else %}
 		<li><a href="{% url 'login' %}">Login</a></li>
 	{% endif %}
 </ul>
