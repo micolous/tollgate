@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
 	name="tollgate",
-	version="3.1.0-dev",
+	version="3.0.2-rc",
 	description="Python/Django-based captive portal for LAN parties.",
 	author="Michael Farrell",
 	author_email="micolous@gmail.com",
