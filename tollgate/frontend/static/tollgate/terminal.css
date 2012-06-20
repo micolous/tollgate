@@ -41,9 +41,12 @@ html, body, #menubar, #menubar ul, #menubar ul li, #submenubar, #submenubar ul, 
 	left: 0;
 	right: 0;
 	top: 0;
+	border-bottom: 1px #0f0 solid;
+}
+
+#menubar ul li form input, #submenubar ul li form input, #menubar, #submenubar {
 	font-size: 14px;
 	font-family: sans-serif;
-	border-bottom: 1px #0f0 solid;
 	font-weight: bold;
 }
 
@@ -132,4 +135,8 @@ span.no {
 #usage_graph {
 	background-color: #fff;
 	color: #000;
+}
+
+li form {
+	display: inline;
 }

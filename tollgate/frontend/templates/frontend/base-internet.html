@@ -22,7 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% block title %}{% trans "login other computers" %}{% endblock %}
 {% block submenu %}
 	<ul>
-		<li><a href="{% url 'internet-login-here' %}">{% trans "enable internet connectivity for this pc" %}</a></li>
+		<li>
+			<form method="post" action="{% url 'internet-login-here' %}">{% csrf_token %}
+				<input type="submit" value="{% trans 'enable internet connectivity for this PC' %}" />
+			</form>
+		</li>
 	</ul>
 {% endblock %}
 

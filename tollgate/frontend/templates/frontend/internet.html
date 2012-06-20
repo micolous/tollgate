@@ -27,7 +27,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% if settings.ONLY_CONSOLE %}
 	<p class="information">Only gaming consoles can be logged in to this instance of portal.</p>
 {% else %}
-	<p>Please select a host to login to the internet for.  Alternatively, you can <a href="{% url 'internet-login-here' %}">log this computer into the internet</a>.</p>
+	<form method="post" action="{% url 'internet-login-here' %}">{% csrf_token %}
+		<p>Please select a host to login to the internet for.  Alternatively, you can <input type="submit" value="log this computer into the internet" />.</p>
+	</form>
 {% endif %}
 
 <p>Try accessing the internet from the host you want to login before looking here.  This will record it in the portal's MAC address cache, which is shown here.</p>
