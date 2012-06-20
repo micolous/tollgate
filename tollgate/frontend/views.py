@@ -37,6 +37,7 @@ from django.utils.translation import ugettext as _
 from tollgate.frontend.forms import *
 from django.core.exceptions import *
 from django.contrib import messages
+from django.views.decorators.http import require_http_methods
 import random
 
 
@@ -152,7 +153,8 @@ def login(request):
 			if f.cleaned_data['internet']:
 				# we need to do an internet login as well for the user.
 				# lets send them across
-				return redirect('internet-login-here')
+				#return redirect('internet-login-here')
+				return internet_login_here(request)
 
 			# no internet login requested
 			# send to homepage
@@ -171,6 +173,7 @@ def logout(request):
 		context_instance=RequestContext(request))
 
 
+@require_http_methods(['POST'])
 @login_required
 def internet_login_here(request):
 	# find my MAC address
@@ -186,9 +189,11 @@ def internet_login_here(request):
 	
 	#mac = mac.replace(":", "")
 
-	return redirect('internet-login', mac)
+	#return redirect('internet-login', mac)
+	return internet_login(request, mac)
 
 
+@require_http_methods(['POST'])
 @login_required
 def internet_login(request, mac_address):
 	# we assume urls were setup right so we don't have to fux around with
@@ -299,6 +304,7 @@ def internet_login(request, mac_address):
 	}, context_instance=RequestContext(request))
 
 
+@require_http_methods(['POST'])
 @login_required
 def internet_disown(request, host_id):
 	h = get_object_or_404(NetworkHost, id=host_id)

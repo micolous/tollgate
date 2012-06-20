@@ -121,19 +121,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			<th>Disown/Disconnect</th>
 		</tr>
 		{% for host in a.user_profile.get_hosts %}
-			<tr class="{% cycle row1,row2 %}">
-				<td>{{ host.computer_name }}</td>
-				<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.vendor }}.png" alt="{{ host.vendor }} " title="{{ host.vendor }}"  class="cs"/><code>{{ host.mac_address }}</code></td>
-				<td><code>{{ host.ip_address }}</code></td>
-				<td>
-					{% if host.online %}
-						<span class="yes">Yes</span>
-					{% else %}
-						<span class="no">No</span>
-					{% endif %}
-				</td>
-				<td><a href="{% url 'internet-disown' host.id %}" title="This will make it so the computer is no longer marked as owned by the user, disconnecting it from the internet">Disown Computer</a></td>
-			</tr>
+			<form method="post" action="{% url 'internet-disown' host.id %}">{% csrf_token %}
+				<tr class="{% cycle row1,row2 %}">
+					<td>{{ host.computer_name }}</td>
+					<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.vendor }}.png" alt="{{ host.vendor }} " title="{{ host.vendor }}"  class="cs"/><code>{{ host.mac_address }}</code></td>
+					<td><code>{{ host.ip_address }}</code></td>
+					<td>
+						{% if host.online %}
+							<span class="yes">Yes</span>
+						{% else %}
+							<span class="no">No</span>
+						{% endif %}
+					</td>
+					<td><input type="submit" value="Disown Computer" title="This will make it so the computer is no longer marked as owned by the user, disconnecting it from the internet"/></td>
+				</tr>
+			</form>
 		{% endfor %}
 	</table>
 {% else %}
