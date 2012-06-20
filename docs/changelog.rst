@@ -7,8 +7,13 @@ Changelog
 
 All releases in the 3.x series are named after types of toothpaste.
 
-3.1.0 "Tartar Control" (?? June 2012)
+3.1.0 "Tartar Control" (?? July 2012)
 -------------------------------------
+
+This release is still in development.
+
+3.0.2 "Cavity Protection" (?? June 2012)
+----------------------------------------
 
 This release is still in development.  This release includes security fixes, and is recommended for all users.
 
@@ -22,7 +27,7 @@ This release is still in development.  This release includes security fixes, and
 * ``frontend``: New permissions: ``can_revoke_access``, ``can_reset_own_quota``, ``can_toggle_internet``.
 * ``frontend``: New user profile flags to control the number of times a user may reset another user's quota, and the maximum amount of quota they may grant a user at sign-in.
 * ``frontend``: Permission names are now much shorter.
-* ``frontend``: **Security**: Fix a CSRF issue where a malicious user could trick an administrative user into toggling or revoking internet access for other users, toggling internet access for all users, and where it could trick a regular user into toggling their own internet access.
+* ``frontend``: **Security**: Fix a CSRF issue where a malicious user could trick an administrative user into toggling or revoking internet access for other users, toggling internet access for all users, and where it could trick a regular user into toggling their own internet access or (dis)owning hosts.
 * ``frontend``: Usage graph now shows usage in the local time of the user, rather than UTC.
 * ``scripts``: Added new OUI vendors, improved detection of Cisco.  OUI scraper now grabs all vendors, even if it doesn't recognise them.  Fixed some encoding issues when handling non-ASCII vendor names.
 
