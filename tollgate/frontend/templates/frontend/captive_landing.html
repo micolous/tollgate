@@ -31,15 +31,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	{% endif %}
 	
 	{% if reason_disabled %}
-		<p><strong>Disabled Internet Access:</strong> You have disabled your internet access.  During an emergency situation, administrators may also disable internet access temporarily.  If there isn't an emergency issue, you can <a href="{% url 'quota-on' %}">click here to re-enable it.</a></p>
+		<form method="post" action="{% url 'quota-on' %}">{% csrf_token %}
+			<p><strong>Disabled Internet Access:</strong> You have disabled your internet access.  During an emergency situation, administrators may also disable internet access temporarily.  If there isn't an emergency issue, you can <input type="submit" value="click here to re-enable it" /></p>
+		</form>
 	{% endif %}
 
 	{% if reason_sync %}
-		<p><strong>Synchronisation:</strong> You've previously claimed this computer as being yours and signed in for this event, however your computer is presently marked as being offline.  Every 10 minutes, tollgate disables internet access to computers that have been switched off, and enables internet access to those that have been switched on.  You can either wait ten minutes or <a href="{% url 'internet-login-here' %}">turn on internet access for this computer right now</a>.</p>
+		<form method="post" action="{% url 'internet-login-here' %}">{% csrf_token %}
+			<p><strong>Synchronisation:</strong> You've previously claimed this computer as being yours and signed in for this event, however your computer is presently marked as being offline.  Every 10 minutes, tollgate disables internet access to computers that have been switched off, and enables internet access to those that have been switched on.  You can either wait ten minutes or <input type="submit" value="turn on internet access for this computer right now" />.</p>
+			
+			<p><strong>If your administrator has enabled DHCP binding</strong>, this could indicate a bug with your operating system attempting to use expired or closed DHCP leases.  This particularly effects Android and iOS.</p>
+		</form>
 	{% endif %}
 
 	{% if reason_login %}
-		<p><strong>Not Owned:</strong> This computer has not been marked as being owned by anyone.  You're currently logged in, so if you wish to claim ownership of this computer and sign it in to the internet in your name, you can <a href="{% url 'internet-login-here' %}">do so now</a>.</p>
+		<form method="post" action="{% url 'internet-login-here' %}">{% csrf_token %}
+			<p><strong>Not Owned:</strong> This computer has not been marked as being owned by anyone.  You're currently logged in, so if you wish to claim ownership of this computer and sign it in to the internet in your name, you can <input type="submit" value="do so now" />.</p>
+		</form>
 	{% endif %}
 
 	<h2>Other reasons for connection problems:</h2>
@@ -48,14 +56,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<li>
 			<p>You're not signed onto the internet from this computer and IP address.  This may occur if your IP address has changed for some reason.  This can also be caused by synchonisation problems.</p>
 			<ul>
-				<li><a href="{% url 'internet-login-here' %}">Click here to log this computer into the internet</a> to enable internet connectivity for this computer in your name.</li>
+				<li>
+					<form method="post" action="{% url 'internet-login-here' %}">{% csrf_token %}
+						<input type="submit" value="Click here to log this computer into the internet" /> to enable internet connectivity for this computer in your name.
+					</form>
+				</li>
 			</ul>
 		</li>
 
 		<li>
 			<p>You have disabled internet access for yourself.</p>
 			<ul>
-				<li><a href="{% url 'quota-on' %}">Click here to enable internet access for yourself.</a></li>
+				<li>
+					<form method="post" action="{% url 'quota-on' %}">{% csrf_token %}
+						<input type="submit" value="Enable internet access for myself." />
+					</form>
+				</li>
 			</ul>
 		</li>
 
@@ -69,7 +85,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<li>
 			<p>You haven't logged onto portal and been registered as attending the event.</p>
 			<ul>
-				<li><a href="{% url 'quota-on' %}">Click here to login to tollgate</a></li>
+				<li>
+					<form method="post" action="{% url 'quota-on' %}">{% csrf_token %}
+						<input type="submit" value="Click here to log in" />
+					</form>
+				</li>
 			</ul>
 		</li>
 

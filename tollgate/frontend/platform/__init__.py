@@ -19,11 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from platform import system
 import warnings
+from django.utils.translation import ugettext as _
 system = system().lower()
 from tollgate.frontend.platform.common import *
 
 if system == 'linux':
 	from tollgate.frontend.platform.linux import *
 else:
-	warnings.warn('Platform %r is unsupported.  Some OS-specific functionality will not work.' % system, UserWarning)
+	warnings.warn(_("""\
+Platform %(platform)s is unsupported.  Some OS-specific functionality will not work.
+""") % dict(platform=system), UserWarning)
 	from tollgate.frontend.platform.dummy import *
+

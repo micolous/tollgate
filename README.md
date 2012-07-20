@@ -1,9 +1,12 @@
 # tollgate README #
 
 tollgate - A captive portal software for Linux for LAN parties.
+
 Copyright 2008-2012 Michael Farrell <http://micolous.id.au>.
 
-Version 3.0.1 "Cavity Protection".
+Version 3.0.2 "Cavity Protection".
+
+Website: <http://tollgate.org.au/>
 
 ## Introduction ##
 
@@ -22,5 +25,5 @@ This software isn't based on any existing captive portal solution - it's entirel
 
 Full documentation for the project is located in the `docs` folder and may be generated with Sphinx.
 
-Alternatively, it is available online at: http://tollgate.rtfd.org/
+Alternatively, it is available online at: <http://tollgate.rtfd.org/>
 

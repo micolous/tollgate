@@ -110,6 +110,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $(function () {
 	// use the tollgate api to get usage history
 	// consider this an example of how to use the tollgate httpget api in jquery.
+	
+	// For some stupid (American) reason, Javascript uses offsets as negative.
+	// ie: timezones west of Grenwich are positive, timezones east are negative.
+	var utc_offset = 0 - ((new Date()).getTimezoneOffset() * 60000);
+	
 	$.getJSON(
 		'/api/attendance/me/usage/?format=json', // we can't send Accept headers
 		null, // don't send any data
@@ -119,7 +124,7 @@ $(function () {
 			
 			// calculate the speed at each data point
 			_.each(data, function(v, k) {
-				v.when = new Date(v.when);
+				v.when = new Date(new Date(v.when).getTime() + utc_offset);
 				if (k == 0) {
 					// first element has no speed
 					var speed = 0;
@@ -136,11 +141,11 @@ $(function () {
 			// earliest point is 36 hours ago.
 			var start = new Date();
 			start.setHours(start.getHours()-36);
-			$.plot($("#usage_graph"), [{label:'Speed (kB/s)',data:speed_data},], {
+			$.plot($("#usage_graph"), [{label:'Speed (KiB/s)',data:speed_data},], {
 				xaxis: {
 					mode: 'time',
-					min: start.getTime(),
-					max: (new Date()).getTime()
+					min: start.getTime() + utc_offset,
+					max: (new Date()).getTime() + utc_offset
 				}
 			});
 		}
@@ -165,9 +170,17 @@ $(function () {
 {% endif %}
 <ul>
 	{% if not attendance.is_revoked %}
-	<li><a href="{% url 'quota-on' %}">Switch on internet connectivity.</a>  If you have quota available, internet access will be granted to all of your online computers and devices.</li>
+	<li>
+		<form method="post" action="{% url 'quota-on' %}">{% csrf_token %}
+			<input type="submit" value="Switch on internet connectivity" />  If you have quota available, internet access will be granted to all of your online computers and devices.
+		</form>
+	</li>
 	{% endif %}
-	<li><a href="{% url 'quota-off' %}">Switch off internet connectivity.</a>  All computers listed here will lose internet access <em>immediately</em>, and all unfinished downloads will be terminated.  Internet access will resume when you opt to, or when you try to connect another computer to the internet in your name.</li>
+	<li>
+		<form method="post" action="{% url 'quota-off' %}">{% csrf_token %}
+			<input type="submit" value="Switch off internet connectivity" />  All computers listed here will lose internet access <em>immediately</em>, and all unfinished downloads will be terminated.  Internet access will resume when you opt to, or when you try to connect another computer to the internet in your name.
+		</form>
+	</li>
 </ul>
 
 <h2>Your Computers and Devices</h2>
@@ -182,19 +195,21 @@ $(function () {
 		<th>Disown/Disconnect</th>
 	</tr>
 	{% for host in my_hosts %}
-		<tr class="{% cycle row1,row2 %}">
-			<td>{{ host.computer_name }}</td>
-			<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.vendor }}.png" alt="{{ host.vendor }} " title="{{ host.vendor }}" class="cs"/><code>{{ host.mac_address }}</code></td>
-			<td><code>{{ host.ip_address }}</code></td>
-			<td>
-				{% if host.online %}
-					<span class="yes">Yes</span>
-				{% else %}
-					<span class="no">No</span>
-				{% endif %}
-			</td>
-			<td><a href="{% url 'internet-disown' host.id %}" title="This will make it so the computer is no longer marked as owned by you, disconnecting it from the internet">Disown Computer</a></td>
-		</tr>
+		<form method="post" action="{% url 'internet-disown' host.id %}">{% csrf_token %}
+			<tr class="{% cycle row1,row2 %}">
+				<td>{{ host.computer_name }}</td>
+				<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.vendor }}.png" alt="{{ host.vendor }} " title="{{ host.vendor }}" class="cs"/><code>{{ host.mac_address }}</code></td>
+				<td><code>{{ host.ip_address }}</code></td>
+				<td>
+					{% if host.online %}
+						<span class="yes">Yes</span>
+					{% else %}
+						<span class="no">No</span>
+					{% endif %}
+				</td>
+				<td><input type="submit" value="Disown Computer" title="This will make it so the computer is no longer marked as owned by you, disconnecting it from the internet"/></td>
+			</tr>
+		</form>
 	{% endfor %}
 </table>
 

@@ -17,11 +17,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from django.core.management.base import BaseCommand, CommandError
-from tollgate.frontend.models import get_portalapi, refresh_networkhost, apply_ip4portforwards, refresh_all_quota_usage
+from tollgate.frontend.models import get_portalapi, refresh_networkhost, \
+	apply_ip4portforwards, refresh_all_quota_usage
+
 
 class Command(BaseCommand):
 	args = ''
-	help = 'Refreshes data about hosts on the network and accounting data.  Run this from crontab every 10 minutes.'
+	help = 'Refreshes data about hosts on the network and accounting data.  ' +\
+		'Run this from crontab every 10 minutes.'
+
 	def handle(self, *args, **options):
 		# refresh information about networkhosts and quota for crontab.
 		portal = get_portalapi()

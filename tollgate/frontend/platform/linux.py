@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from tollgate.frontend.platform.common import *
 
+
 def get_ip_address(mac):
 	fh = open('/proc/net/arp', 'r')
 	# skip header
@@ -29,7 +30,8 @@ def get_ip_address(mac):
 	# try active entries first
 	for l in d:
 		a = l.split()
-		if a[3] == mac and a[5] == settings.LAN_IFACE and in_lan_subnet(a[0]) and a[2] == "0x2":
+		if a[3] == mac and a[5] == settings.LAN_IFACE and in_lan_subnet(a[0]) \
+			and a[2] == "0x2":
 			return a[0]
 
 	# try expired ones.
@@ -38,6 +40,7 @@ def get_ip_address(mac):
 		if a[3] == mac and a[5] == settings.LAN_IFACE and in_lan_subnet(a[0]):
 			return a[0]
 	return None
+
 
 def get_arp_cache():
 	fh = open('/proc/net/arp', 'r')
@@ -52,18 +55,21 @@ def get_arp_cache():
 	# expired entries first, so they get overwritten by active ones.
 	for l in d:
 		a = l.split()
-		if a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE and in_lan_subnet(a[0]) and a[2] == "0x0":
-			mac = a[3].replace(":","")
+		if a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE and \
+			in_lan_subnet(a[0]) and a[2] == "0x0":
+			mac = a[3].replace(":", "")
 
 			o[a[0]] = mac
 
 	# active entries overwrite expired ones.
 	for l in d:
 		a = l.split()
-		if a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE and in_lan_subnet(a[0]) and a[2] == "0x2":
-			mac = a[3].replace(":","")
+		if a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE and \
+			in_lan_subnet(a[0]) and a[2] == "0x2":
+			mac = a[3].replace(":", "")
 			o[a[0]] = mac
 	return o
+
 
 def get_mac_address(ip):
 	fh = open('/proc/net/arp', 'r')
@@ -79,15 +85,17 @@ def get_mac_address(ip):
 	# try active entries first
 	for l in d:
 		a = l.split()
-		if a[0] == ip and a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE and a[2] == "0x2":
-			mac = a[3].replace(':','')
+		if a[0] == ip and a[3] != '00:00:00:00:00:00' and \
+			a[5] == settings.LAN_IFACE and a[2] == "0x2":
+			mac = a[3].replace(':', '')
 			return mac
 
 	# now expired ones.
 	for l in d:
 		a = l.split()
-		if a[0] == ip and a[3] != '00:00:00:00:00:00' and a[5] == settings.LAN_IFACE:
-			mac = a[3].replace(':','')
+		if a[0] == ip and a[3] != '00:00:00:00:00:00' and \
+			a[5] == settings.LAN_IFACE:
+			mac = a[3].replace(':', '')
 			return mac
 
 	return None

@@ -86,6 +86,9 @@ html, body, #menubar, #menubar ul, #menubar ul li, #submenubar, #submenubar ul, 
 	top: 0;
 /*	font-size: 14px; */
 	border-bottom: 1px #000 solid;
+}
+
+#menubar ul li form input, #submenubar ul li form input, #menubar, #submenubar {
 	font-weight: bold;
 }
 
@@ -168,4 +171,8 @@ span.yes {
 span.no {
 	background-color: #f00;
 	color: #ff0;
+}
+
+li form {
+	display: inline;
 }

@@ -17,14 +17,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import os
-PROJECT_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..'))
+PROJECT_PATH = os.path.realpath(os.path.join(
+	os.path.dirname(__file__),
+	'..',
+	'..'
+))
 
-# You probably should turn this off in an actual deployment.  We have stricter tracebacks anyways.
+# You probably should turn this off in an actual deployment.  We have stricter
+# tracebacks anyways.
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
+	# ('Your Name', 'your_email@domain.com'),
 )
 
 MANAGERS = ADMINS
@@ -74,17 +79,16 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
+	'django.template.loaders.filesystem.Loader',
+	'django.template.loaders.app_directories.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
 	'django.middleware.csrf.CsrfViewMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
-    #'tollgate.frontend.common.TollgateMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.middleware.locale.LocaleMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 )
 
@@ -97,25 +101,26 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 ROOT_URLCONF = 'tollgate.urls'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+	# Put strings here, like "/home/html/django_templates" or
+	# "C:/www/django/templates".
+	# Always use forward slashes, even on Windows.
+	# Don't forget to use absolute paths, not relative paths.
 	os.path.join(PROJECT_PATH, 'templates'),
 )
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.admin',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.humanize',
-    'django.contrib.messages',
+	'django.contrib.auth',
+	'django.contrib.admin',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.sites',
+	'django.contrib.humanize',
+	'django.contrib.messages',
 	'django.contrib.staticfiles',
 	'djangorestframework',
-    'south',
-    'tollgate.frontend',
-    'tollgate.api',
+	'south',
+	'tollgate.frontend',
+	'tollgate.api',
 	'tollgate.scripts',
 
 )
@@ -140,8 +145,8 @@ SOURCE_URL = None
 RESTRICTED_CALLS_KEY = ''
 
 _ = lambda s: s
-LANGUAGES = (
-  ('en', _('English (Australia)')),
-  ('eo', _('Esperanto'))
-)
+#LANGUAGES = (
+#	('en', _('English (Australia)')),
+#	('eo', _('Esperanto'))
+#)
 

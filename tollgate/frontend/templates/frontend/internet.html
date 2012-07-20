@@ -27,7 +27,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% if settings.ONLY_CONSOLE %}
 	<p class="information">Only gaming consoles can be logged in to this instance of portal.</p>
 {% else %}
-	<p>Please select a host to login to the internet for.  Alternatively, you can <a href="{% url 'internet-login-here' %}">log this computer into the internet</a>.</p>
+	<form method="post" action="{% url 'internet-login-here' %}">{% csrf_token %}
+		<p>Please select a host to login to the internet for.  Alternatively, you can <input type="submit" value="log this computer into the internet" />.</p>
+	</form>
 {% endif %}
 
 <p>Try accessing the internet from the host you want to login before looking here.  This will record it in the portal's MAC address cache, which is shown here.</p>
@@ -51,12 +53,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		<th>First Seen</th>
 	</tr>
 	{% for host in hosts %}
-		<tr class="{% cycle row1,row2 %}">
-			<td>{{ host.computer_name }}</td>
-			<td><a href="{% url 'internet-login' host.mac_address %}" title="Log in this host"><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.vendor }}.png" alt="{{ host.vendor }} " title="{{ host.vendor }}" class="cs"/><code>{{ host.mac_address }}</code></a></td>
-			<td><code><a href="{% url 'internet-login' host.mac_address %}" title="Log in this host">{{ host.ip_address }}</a></code></td>
-			<td><abbr title="{{ host.first_connection|naturalday }} at {{ host.first_connection|time }}">{{ host.first_connection|timesince }} ago</abbr></td>
-		</tr>
+		<form method="post" action="{% url 'internet-login' host.mac_address %}">{% csrf_token %}
+			<tr class="{% cycle row1,row2 %}">
+				<td>{{ host.computer_name }}</td>
+				<td><img src="{{ STATIC_URL }}tollgate/console_icons/{{ host.vendor }}.png" alt="{{ host.vendor }} " title="{{ host.vendor }}" class="cs"/><input type="submit" value="{{ host.mac_address }}"/></td>
+				<td><input type="submit" value="{{ host.ip_address }}"/></td>
+				<td><abbr title="{{ host.first_connection|naturalday }} at {{ host.first_connection|time }}">{{ host.first_connection|timesince }} ago</abbr></td>
+			</tr>
+		</form>
 	{% endfor %}
 </table>
 
