@@ -12,7 +12,7 @@ All releases in the 3.x series are named after types of toothpaste.
 
 This release is still in development.
 
-3.0.2 "Cavity Protection" (?? June 2012)
+3.0.2 "Cavity Protection" (20 July 2012)
 ----------------------------------------
 
 This release is still in development.  This release includes security fixes, and is recommended for all users.
