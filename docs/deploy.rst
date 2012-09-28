@@ -49,7 +49,7 @@ Install some required depedencies that are needed to use the setup.py infrastruc
    # pip install --upgrade pip distribute
    # apt-get remove python-setuptools python-pip
 
-Now the rest of the installation can be resumed.
+Now the rest of the installation can be resumed::
 
    # apt-get install build-essential libxml2-dev libxslt-dev python-dev module-assistant
    # m-a a-i xtables-addons
