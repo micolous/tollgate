@@ -35,6 +35,33 @@ This **may** not work though, as the state of `git master` may be in flux.
 
 This will install the entire ``tollgate`` package into your Python path, and install the ``captivity`` and ``backend`` daemons.
 
+Alternative installation
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Check out the code from git::
+
+   $ git clone git://github.com/micolous/tollgate.git
+   $ cd tollgate
+
+Install some required depedencies that are needed to use the setup.py infrastructure.  One of the dependancies (URLobject) requires a newer version of ``distribute`` than what is in Debian stable, but we first require pip in order to install that::
+
+   # apt-get install python-setuptools python-pip
+   # pip install --upgrade pip distribute
+   # apt-get remove python-setuptools python-pip
+
+Now the rest of the installation can be resumed.
+
+   # apt-get install build-essential libxml2-dev libxslt-dev python-dev module-assistant
+   # m-a a-i xtables-addons
+   # pip install -r requirements.txt
+
+This will automatically upgrade any packages which are missing or out of date.
+
+You can then install tollgate proper::
+
+   # ./setup.py install
+   
+
 Configure D-Bus
 ---------------
 
