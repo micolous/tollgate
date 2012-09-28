@@ -15,7 +15,7 @@ setup(
 		'Django (>=1.3)',
 		'South (>=0.7.4)',
 		'progressbar (>=2.2)',
-		'configparser_plus (>=1.0)',
+		'configparser (>=3.2.0)',
 		'lxml',
 		'dbus',
 		'daemon', # not to be confused with python-daemon, an incompatible package

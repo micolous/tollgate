@@ -15,7 +15,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from configparser_plus import ConfigParserPlus
+from configparser import ConfigParser
 from sys import argv, exit
 from optparse import OptionParser
 import BaseHTTPServer, iptables
@@ -74,7 +74,8 @@ def parse_hostlist(hostlist, action):
 
 def main(daemon_enable, pid_file, settings_file=SETTINGS_FILE):
 	# begin!
-	config = ConfigParserPlus(DEFAULT_SETTINGS)
+	config = ConfigParser()
+	config.read_dict(DEFAULT_SETTINGS)
 
 	print "Loading configuration: %s" % settings_file
 	
