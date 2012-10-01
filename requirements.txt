@@ -5,3 +5,8 @@ progressbar>=2.2
 configparser>=3.2.0
 pytz
 djangorestframework
+IPy
+
+# required for operation on linux
+dbus
+daemon
