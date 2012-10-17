@@ -77,7 +77,11 @@ class TProxyServer:
 		self.httpd.socket.setsockopt(SOL_IP, IP_TRANSPARENT, self.mark)
 		
 		while self.keep_running:
-			self.httpd.handle_request()
+			try:
+				self.httpd.handle_request()
+			except:
+				# don't die when there's a pathetic error
+				pass
 			
 def main_optparse():
 	"Entrypoint for the tproxy handler, that uses optparse to parse commandline arguments."
