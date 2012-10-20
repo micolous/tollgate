@@ -15,9 +15,11 @@ except ImportError:
 try:
 	# py3
 	from http.server import HTTPServer, BaseHTTPRequestHandler
+	from socketserver import ForkingMixIn
 except ImportError:
 	# py2
 	from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+	from SocketServer import ForkingMixIn
 	
 try:
 	from socket import IP_TRANSPARENT
@@ -26,6 +28,14 @@ except ImportError:
 	# /usr/include/linux/in.h says this is 19.
 	IP_TRANSPARENT = 19
 	warn("Your version of Python doesn't support socket.IP_TRANSPARENT.  It could also be that you're running this on a non-Linux platform, which probably won't work.")
+
+# http://stackoverflow.com/questions/10003866/http-server-hangs-while-accepting-packets
+class ForkingHTTPServer(ForkingMixIn, HTTPServer):
+	def finish_request(self, request, client_address):
+		request.settimeout(30)
+		# explicitly call HttpServer.finish_request
+		HTTPServer.finish_request(self, request, client_address)
+
 
 class TProxyRequestHandler(BaseHTTPRequestHandler):
 	def do_GET(self):
@@ -58,6 +68,7 @@ class TProxyRequestHandler(BaseHTTPRequestHandler):
 			page = bytes(page, 'UTF-8')
 			
 		self.wfile.write(page)
+		self.wfile.close()
 		
 	do_HEAD = do_POST = do_GET
 
@@ -71,7 +82,7 @@ class TProxyServer:
 		
 	
 	def run(self):
-		self.httpd = HTTPServer(self.server_address, TProxyRequestHandler)
+		self.httpd = ForkingHTTPServer(self.server_address, TProxyRequestHandler)
 		self.httpd.server_version = 'tollgate'
 		self.httpd.redirect = '%s/captive_landing/?u=%%s' % self.tollgate_uri
 		self.httpd.socket.setsockopt(SOL_IP, IP_TRANSPARENT, self.mark)
