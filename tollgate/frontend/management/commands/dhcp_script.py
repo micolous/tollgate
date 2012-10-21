@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from django.core.management.base import BaseCommand, CommandError
 from tollgate.frontend.models import sync_user_connections, NetworkHost, utcnow
 from django.core.exceptions import ObjectDoesNotExist
+import string
 
 
 class Command(BaseCommand):
@@ -37,14 +38,24 @@ class Command(BaseCommand):
 			return
 			
 		action = args[0].strip().lower()
-		mac = ''
+		mac = args[1].strip().lower()
 		ip = args[2].strip()
 		hostname = args[3].strip() if len(args) >= 4 else ''
+		if ':' in mac:
+			# handle no leading zero on octets split by :
+			mac = ''.join([('%02x' % int(x, 16)) for x in mac.split(':')])
+		elif '-' in mac:
+			# handle no leading zero on octets split by -
+			mac = ''.join([('%02x' % int(x, 16)) for x in mac.split('-')])
 		
-		for c in args[1].strip().lower():
+		# last resort, and backup filter to make it probably valid...
+		mac2 = ''
+		for c in mac:
 			# remove non-hex characters.
-			if c in '0123456789abcdef':
-				mac += c
+			if c in string.hexdigits:
+				mac2 += c
+		mac = mac2
+		del mac2
 		
 		if len(mac) != 12:
 			# not the right number of characters.
@@ -52,7 +63,17 @@ class Command(BaseCommand):
 				" total)."
 			print mac
 			return
-		
+
+		# filter hostname (problem with Nintendo 3DS sending hostname with spaces)
+		# django has some issue with dealing with spaces in arguments?
+		hostname2 = ''
+		for c in hostname:
+			if (c in string.letters) or (c in string.digits):
+				hostname2 += c
+
+		hostname = hostname2
+		del hostname2
+
 		# TODO: Validate IP address
 		
 		if action in ('add', 'del'):
@@ -75,6 +96,8 @@ class Command(BaseCommand):
 			# now refresh the owner's hosts, if any.
 			if host.user_profile != None:
 				sync_user_connections(host.user_profile)
+				
+			print "%s host: mac=%s; ip=%s; hostname=%s" % (action, mac, ip, hostname)
 		else:
 			print "Error: unknown action %r" % action
 			return
