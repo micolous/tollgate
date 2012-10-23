@@ -178,7 +178,7 @@ def create_nat():
 	run((IPTABLES,'-F',BLACKLIST_RULE))
 	run((IPTABLES,'-I','FORWARD','2','-j',BLACKLIST_RULE))
 
-	# create rejection rule
+	# delete existing rejection rule
 	run((IPTABLES,'-D','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset'))
 	run((IPTABLES,'-D','FORWARD','-j','REJECT','--reject-with',REJECT_MODE))
 	
@@ -194,11 +194,12 @@ def create_nat():
 	run((IPTABLES,'-t','filter','-I','FORWARD','1','-j',IP4PF_RULE))
 	
 	# handle captivity properly with tproxy
-	run((IPTABLES,'-D','FORWARD','-m','mark','--mark','0x1','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','ACCEPT'))
-	run((IPTABLES,'-D','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-p','tcp','--sport','80','-j','ACCEPT'))
-	run((IPTABLES,'-A','FORWARD','-m','mark','--mark','0x1','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','ACCEPT'))
-	run((IPTABLES,'-A','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-p','tcp','--sport','80','-j','ACCEPT'))
+	run((IPTABLES,'-D','FORWARD','-m','mark','--mark','0x1','-i',INTERN_IFACE,'-j','ACCEPT'))
+	run((IPTABLES,'-D','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-j','ACCEPT'))
+	run((IPTABLES,'-A','FORWARD','-m','mark','--mark','0x1','-i',INTERN_IFACE,'-j','ACCEPT'))
+	run((IPTABLES,'-A','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-j','ACCEPT'))
 	
+	# create new rejection rule
 	if REJECT_TCP_RESET:
 		run((IPTABLES,'-A','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset'))
 	run((IPTABLES,'-A','FORWARD','-j','REJECT','--reject-with',REJECT_MODE))
@@ -206,40 +207,32 @@ def create_nat():
 	run((IPTABLES,'-P','FORWARD','DROP'))
 
 	# captivity related entries
-
-	# define port forwarding chain
-	run((IPTABLES,'-t','mangle','-D','PREROUTING','-j',IP4PF_RULE))
-	run((IPTABLES,'-t','mangle','-N',IP4PF_RULE))
-	run((IPTABLES,'-t','mangle','-F',IP4PF_RULE))
-	run((IPTABLES,'-t','mangle','-I','PREROUTING','1','-j',IP4PF_RULE))
-
-	run((IPTABLES,'-t','filter','-D','FORWARD','-j',IP4PF_RULE))
-	run((IPTABLES,'-t','filter','-N',IP4PF_RULE))
-	run((IPTABLES,'-t','filter','-F',IP4PF_RULE))
-	run((IPTABLES,'-t','filter','-I','FORWARD','1','-j',IP4PF_RULE))
 	# define unmetered chain
 	run((IPTABLES,'-t','mangle','-D','PREROUTING','-j',UNMETERED_RULE))
 	run((IPTABLES,'-t','mangle','-N',UNMETERED_RULE))
 	run((IPTABLES,'-t','mangle','-F',UNMETERED_RULE))
-	run((IPTABLES,'-t','mangle','-I','PREROUTING','2','-j',UNMETERED_RULE))
+	run((IPTABLES,'-t','mangle','-I','PREROUTING','1','-j',UNMETERED_RULE))
 
 	# define blacklist chain
 	run((IPTABLES,'-t','mangle','-D','PREROUTING','-j',BLACKLIST_RULE))
 	run((IPTABLES,'-t','mangle','-N',BLACKLIST_RULE))
 	run((IPTABLES,'-t','mangle','-F',BLACKLIST_RULE))
-	run((IPTABLES,'-t','mangle','-I','PREROUTING','3','-j',BLACKLIST_RULE))
+	run((IPTABLES,'-t','mangle','-I','PREROUTING','2','-j',BLACKLIST_RULE))
 
-	# define "captive" rule
+	# define "captive" rule (DIVERT)
 	run((IPTABLES,'-t','mangle','-N',CAPTIVE_RULE))
 	run((IPTABLES,'-t','mangle','-F',CAPTIVE_RULE))
 	run((IPTABLES,'-t','mangle','-A',CAPTIVE_RULE,'-j','MARK','--set-mark','1'))
-	run((IPTABLES,'-t','mangle','-A',CAPTIVE_RULE,'-m','socket','-j','ACCEPT'))
+	run((IPTABLES,'-t','mangle','-A',CAPTIVE_RULE,'-j','ACCEPT'))
 	
 	# define the catch-all
-	run((IPTABLES,'-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-p','tcp','-j',CAPTIVE_RULE))
-	run((IPTABLES,'-t','mangle','-A','PREROUTING','-i',INTERN_IFACE,'-p','tcp','-j',CAPTIVE_RULE))
-	run((IPTABLES,'-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-m','mark','--mark','1','-p','tcp','--dport','80','-j','TPROXY','--tproxy-mark','0x1/0x1','--on-port',str(CAPTIVE_PORT)))
-	run((IPTABLES,'-t','mangle','-A','PREROUTING','-i',INTERN_IFACE,'-m','mark','--mark','1','-p','tcp','--dport','80','-j','TPROXY','--tproxy-mark','0x1/0x1','--on-port',str(CAPTIVE_PORT)))
+	# -m socket handles connections that have already been opened, and sends them to the "captive" rule above.
+	run((IPTABLES,'-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-p','tcp','--dport','80','-m','socket','-j',CAPTIVE_RULE))
+	run((IPTABLES,'-t','mangle','-A','PREROUTING','-i',INTERN_IFACE,'-p','tcp','--dport','80','-m','socket','-j',CAPTIVE_RULE))
+	
+	# This handles traffic that is a new connection.  For that, we mark the socket, and send it down to the tproxy handler.
+	run((IPTABLES,'-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','TPROXY','--tproxy-mark','0x1/0x1','--on-port',str(CAPTIVE_PORT)))
+	run((IPTABLES,'-t','mangle','-A','PREROUTING','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','TPROXY','--tproxy-mark','0x1/0x1','--on-port',str(CAPTIVE_PORT)))
 
 
 def add_unmetered(ip,proto=None,port=None):
@@ -386,7 +379,7 @@ class PortalBackendAPI(dbus.service.Object):
 		run((IPTABLES,'-I','FORWARD','4','-o',INTERN_IFACE,'-d',ip,'-j',user_rule(uid)))
 
 		# take the host out of captivity
-		start_at = '4'
+		start_at = '3'
 		run((IPTABLES,'-t','mangle','-I','PREROUTING',start_at,'-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT'))
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
