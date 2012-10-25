@@ -58,6 +58,9 @@ def run_capture_output(*args):
 	
 def iptables(*args):
 	return run(IPTABLES, *args)
+
+def ipset(*args):
+	return run(IPSET, *args)
 	
 def read_all_file(filename):
 	fh = open(filename)
@@ -109,7 +112,7 @@ def load_modules(*modules):
 	
 def create_nat():
 	# load kernel modules that may not have loaded.
-	modules = set(('x_tables', 'xt_quota2', 'xt_TPROXY', 'nf_conntrack', 'nf_conntrack_ipv4', 'iptable_nat', 'ipt_MASQUERADE', 'iptable_filter', 'xt_state', 'ipt_REJECT', 'iptable_mangle', 'xt_mark'))
+	modules = set(('x_tables', 'xt_quota2', 'xt_TPROXY', 'nf_conntrack', 'nf_conntrack_ipv4', 'iptable_nat', 'ipt_MASQUERADE', 'iptable_filter', 'xt_state', 'ipt_REJECT', 'iptable_mangle', 'xt_mark', 'xt_set'))
 
 	symbols = set((
 		'xt_table_open', # x_tables
@@ -124,6 +127,7 @@ def create_nat():
 		'reject_tg', # ipt_REJECT
 		'iptable_mangle_net_init', # iptable_mangle
 		'mark_tg', # xt_mark
+		'xt_set_init', # xt_set
 	))
 	
 	load_modules(*modules)
@@ -288,6 +292,12 @@ def add_blacklist(ip,proto=None,port=None):
 		cmd = cmd + ['-p', proto, '--sport', port]
 	iptables(*cmd)
 
+def ipmac_set_name(uid):
+	return IPMACSET_PREFIX + str(uid)
+
+def ip_set_name(uid):
+	return IPSET_PREFIX + str(uid)
+
 def user_rule(uid):
 	return USER_RULE_PREFIX + str(uid)
 
@@ -346,6 +356,14 @@ class PortalBackendAPI(dbus.service.Object):
 		"""Enables a user and sets a quota on a user."""
 		# delete all rules on that user first
 		iptables('-F',user_rule(uid))
+		
+		# ipset bitmap:ip,mac strangeness from http://comments.gmane.org/gmane.linux.network/217806
+		# "bitmap:ip,mac is a two dimensional set and therefore it requires two directional parameters" (src,src)
+		# (why you would want to match based on ip on one way and mac from another is beyond me...)
+		iptables('-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-m','set','--match-set',ipmac_set_name(uid),'src,src','-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT')
+		iptables('-D','FORWARD','-i',INTERN_IFACE,'-m','set','--match-set',ipmac_set_name(uid),'src,src','-j',user_rule(uid))
+		iptables('-D','FORWARD','-o',INTERN_IFACE,'-m','set','--match-set',ip_set_name(uid),'dst','-j',user_rule(uid))
+
 
 		# then make them allowed
 		if quota != None:
@@ -353,6 +371,7 @@ class PortalBackendAPI(dbus.service.Object):
 			# Allow the traffic through if there is quota available, record it's
 			# use on the positive counter.
 			iptables('-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota',str(quota),'-m','quota2','--name',user_rule(uid),'--grow','-j',ALLOWED_RULE)
+			iptables('-t','mangle','-I','PREROUTING','3','-i',INTERN_IFACE,'-m','set','--match-set',ipmac_set_name(uid),'src,src','-m','quota2','--name',limit_rule(uid),'--quota',str(quota),'--no-change','-j','ACCEPT')
 			set_quota2_amount(user_rule(uid), 0L)
 			
 			set_quota2_amount(limit_rule(uid), long(quota))
@@ -369,60 +388,44 @@ class PortalBackendAPI(dbus.service.Object):
 			# specified. It is set to stop at about 10 MiB, which is still
 			# bigger than the MTU for most systems.
 			iptables('-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota','10485760','--no-change','-m','quota2','--name',user_rule(uid),'--grow','-j',ALLOWED_RULE)
+			iptables('-t','mangle','-I','PREROUTING','3','-i',INTERN_IFACE,'-m','set','--match-set',ipmac_set_name(uid),'src,src','-m','quota2','--name',limit_rule(uid),'--quota','10485860','--no-change','-j','ACCEPT')
 			set_quota2_amount(user_rule(uid), 0L)
 			set_quota2_amount(limit_rule(uid), 10485760)
+			
+		# Create ipsets for the user if they don't already exist
+		# match by ip+mac for outgoing, ip only for incoming
+		ipset('create', ipmac_set_name(uid), 'bitmap:ip,mac', 'range', INTERN_SUBNET)
+		ipset('create', ip_set_name(uid), 'bitmap:ip', 'range', INTERN_SUBNET)
+		
+		# add packet handlers for user
+		iptables('-I','FORWARD','4','-i',INTERN_IFACE,'-m','set','--match-set',ipmac_set_name(uid),'src,src','-j',user_rule(uid))
+		iptables('-I','FORWARD','4','-o',INTERN_IFACE,'-m','set','--match-set',ip_set_name(uid),'dst','-j',user_rule(uid))
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='sss', out_signature='')
 	def add_host(self, uid, mac, ip):
 		"""Registers a host as belonging to a certain user id."""
+		
+		# add ip+mac ipset entry
+		ipset('add', ipmac_set_name(uid), ','.join([ip, mac]))
+		
+		# add ip ipset entry
+		ipset('add', ip_set_name(uid), ip)
+		
 		# filter outgoing packets by ip + mac
-		iptables('-I','FORWARD','4','-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-j',user_rule(uid))
+		#iptables('-I','FORWARD','4','-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-j',user_rule(uid))
 
 		# filter outgoing packets by ip only... after all you can't establish a connection without a correct MAC
-		iptables('-I','FORWARD','4','-o',INTERN_IFACE,'-d',ip,'-j',user_rule(uid))
+		#iptables('-I','FORWARD','4','-o',INTERN_IFACE,'-d',ip,'-j',user_rule(uid))
 
 		# take the host out of captivity
-		start_at = '3'
-		iptables('-t','mangle','-I','PREROUTING',start_at,'-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT')
+		#start_at = '3'
+		#iptables('-t','mangle','-I','PREROUTING',start_at,'-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT')
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def flush_hosts(self, uid):
 		"""Removes all hosts for a user."""
-		# TODO: This is somewhat dangerous, really should prevent multiple actions occuring while this one is.
-		d = run_capture_output(IPTABLES,'-L','FORWARD','-n','--line-numbers')
-		a = d.split('\n')
-
-		rules_to_remove = []
-		for line in a:
-			r = PARSE_RULE.search(line)
-			# debugging
-			#if r != None:
-			#	print "Parsed with user-rule %s and line %s" % (r.group('user'), r.group('rule_num'))
-			#else:
-			#	print "no match: %s" % (line,)
-
-			if r != None and r.group('user') == user_rule(uid):
-				try:
-					rules_to_remove.append(long(r.group('rule_num')))
-
-					if r.group('mac') != None:
-						# take the host out of captive-exempt mode, we know it's mac address.
-						iptables('-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-s',r.group('ip'),'-m','mac','--mac-source',r.group('mac'),'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT')
-				except:
-					# Non-match, we don't care.
-					pass
-
-		# sort out the list of rules, and put it in reverse order as otherwise the numbering shuffles
-		rules_to_remove.sort()
-		rules_to_remove.reverse()
-
-		#print "Will delete: %s" % (rules_to_remove,)
-		# now remove those rules
-		for ln in rules_to_remove:
-			iptables('-D','FORWARD',str(ln))
-
-		# doesn't work as you have to provide exact rule
-		#iptables('-D','FORWARD','-j',user_rule(uid))
+		ipset('flush', ipmac_set_name(uid))
+		ipset('flush', ip_set_name(uid))
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='bt')
 	def get_quota(self, uid):

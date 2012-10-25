@@ -27,6 +27,7 @@ DEFAULT_SETTINGS = {
 		'reject_mode': 'icmp-net-unreachable',
 		'reject_tcp_rst': True,
 		'iptables': '/sbin/iptables',
+		'ipset': '/usr/sbin/ipset',
 		'internal_iface': 'eth1',
 		'external_iface': 'eth0',
 		'captive_rule': 'p2_captive',
@@ -36,6 +37,8 @@ DEFAULT_SETTINGS = {
 		'ip4pf_rule': 'p2_ip4pf',
 		'user_rule_prefix': 'p2u_',
 		'limit_rule_prefix': 'p2l_',
+		'ipset_prefix': 'p2i_',
+		'ipmacset_prefix': 'p2m_',
 		'debug': True
 	},
 	'captive': {
@@ -84,7 +87,9 @@ def main(daemon_enable, pid_file, settings_file=SETTINGS_FILE):
 		exit(1)
 
 	print "Setting configuration values..."
+	# FIXME: this should be done with proper classes instead of ugly global variables.
 	iptables.IPTABLES = config.get('tollgate', 'iptables')
+	iptables.IPSET = config.get('tollgate', 'ipset')
 	iptables.INTERN_IFACE = config.get('tollgate', 'internal_iface')
 	iptables.EXTERN_IFACE = config.get('tollgate', 'external_iface')
 	iptables.CAPTIVE_RULE = config.get('tollgate', 'captive_rule')
@@ -94,6 +99,8 @@ def main(daemon_enable, pid_file, settings_file=SETTINGS_FILE):
 	iptables.IP4PF_RULE = config.get('tollgate', 'ip4pf_rule')
 	iptables.USER_RULE_PREFIX = config.get('tollgate', 'user_rule_prefix')
 	iptables.LIMIT_RULE_PREFIX = config.get('tollgate', 'limit_rule_prefix')
+	iptables.IPSET_PREFIX = config.get('tollgate', 'ipset_prefix')
+	iptables.IPMACSET_PREFIX = config.get('tollgate', 'ipmacset_prefix')
 	iptables.REJECT_MODE = config.get('tollgate', 'reject_mode')
 	iptables.REJECT_TCP_RESET = config.getboolean('tollgate', 'reject_reset_tcp')
 	iptables.DEBUG = config.getboolean('tollgate', 'debug')
@@ -116,6 +123,22 @@ def main(daemon_enable, pid_file, settings_file=SETTINGS_FILE):
 	blacklist_hosts = None
 	if config.has_section('blacklist'):
 		blacklist_hosts = config.items('blacklist')
+		
+	# get network interface configuration for LAN side
+	# TODO: replace this.  This does some sanity checks
+	iface_info = iptables.run_capture_output('ip', '-4', 'addr', 'show', 'dev', iptables.INTERN_IFACE).split('\n')
+	if len(iface_info) != 3:
+		print "Error: Interface %s (internal side) does not have exactly 1 IPv4 address defined." % iptables.INTERN_IFACE
+		exit(1)
+	
+	ip_parts = iface_info[1].split()
+	assert ip_parts[0] == 'inet', 'Interface does not have inet address!?'
+	assert '/' in ip_parts[1], 'Does not appear to be a CIDR address?'
+	
+	# This gives slightly funny address, but ipset doesn't care that the IP in
+	# here is not the network address (but the host address).
+	iptables.INTERN_SUBNET = ip_parts[1]
+	
 
 	print "Creating DBUS API..."
 	b = iptables.setup_dbus()
@@ -140,7 +163,7 @@ def main(daemon_enable, pid_file, settings_file=SETTINGS_FILE):
 
 def main_optparse():
 	"Version of main() that takes arguments as if it were a normal program."
-	parser = OptionParser(usage='%prog [--daemon] tollgate.ini')
+	parser = OptionParser(usage='%prog [--daemon] backend.ini')
 	parser.add_option('-D', '--daemon', action='store_true', dest='daemon', default=False, help='Start as a daemon [default: %default]')
 	parser.add_option('-P', '--pid', dest='pid_file', default='/var/run/tollgate-backend.pid', help='Location to write the PID file.  Only has effect in daemon mode.  [default: %default]')
 	
