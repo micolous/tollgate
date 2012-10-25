@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """iptables support module for tollgate
-Copyright 2008-2010 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -24,9 +24,6 @@ import dbus, dbus.service, dbus.glib, glib
 from dbus.mainloop.glib import DBusGMainLoop
 
 DEBUG = False
-
-PARSE_REGEXP_RULE = r'^[\s]*(?P<rule_num>\d+)[\s]+(?P<user>p2u_\d+)[\s]+all[\s]+\-\-[\s]+(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(.+MAC (?P<mac>[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}).*$)?'
-PARSE_RULE = re_compile(PARSE_REGEXP_RULE)
 
 DBUS_INTERFACE = 'au.org.tollgate.TollgateBackendInterface'
 DBUS_SERVICE = 'au.org.tollgate.TollgateBackendService'
@@ -360,6 +357,11 @@ class PortalBackendAPI(dbus.service.Object):
 		# ipset bitmap:ip,mac strangeness from http://comments.gmane.org/gmane.linux.network/217806
 		# "bitmap:ip,mac is a two dimensional set and therefore it requires two directional parameters" (src,src)
 		# (why you would want to match based on ip on one way and mac from another is beyond me...)
+		#
+		# Also from the ipset man page:
+		# "Please note, the set match and SET target netfilter kernel modules
+		# always use the source MAC address from the packet to match, add or
+		# delete entries from a bitmap:ip,mac type of set."
 		iptables('-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-m','set','--match-set',ipmac_set_name(uid),'src,src','-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT')
 		iptables('-D','FORWARD','-i',INTERN_IFACE,'-m','set','--match-set',ipmac_set_name(uid),'src,src','-j',user_rule(uid))
 		iptables('-D','FORWARD','-o',INTERN_IFACE,'-m','set','--match-set',ip_set_name(uid),'dst','-j',user_rule(uid))
@@ -404,22 +406,11 @@ class PortalBackendAPI(dbus.service.Object):
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='sss', out_signature='')
 	def add_host(self, uid, mac, ip):
 		"""Registers a host as belonging to a certain user id."""
-		
 		# add ip+mac ipset entry
 		ipset('add', ipmac_set_name(uid), ','.join([ip, mac]))
 		
 		# add ip ipset entry
 		ipset('add', ip_set_name(uid), ip)
-		
-		# filter outgoing packets by ip + mac
-		#iptables('-I','FORWARD','4','-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-j',user_rule(uid))
-
-		# filter outgoing packets by ip only... after all you can't establish a connection without a correct MAC
-		#iptables('-I','FORWARD','4','-o',INTERN_IFACE,'-d',ip,'-j',user_rule(uid))
-
-		# take the host out of captivity
-		#start_at = '3'
-		#iptables('-t','mangle','-I','PREROUTING',start_at,'-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT')
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def flush_hosts(self, uid):
