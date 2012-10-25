@@ -37,17 +37,17 @@ QUOTA2_PATH = '/proc/net/xt_quota/'
 GC_THRESH = None
 
 # global level functions that aren't supposed to be exposed to the API
-def run(args):
+def run(*args):
 	"""Wrapper function for executing commands in a blocking fashion.  This is
 	a wrapper so we can replace things in future if needed, and implement
 	security fixes, logging, and other features in all commands.
 
 	Should return the errorcode from iptables."""
 	if DEBUG:
-		print "call(%s)" % str(args)
+		print "call(%r)" % (args,)
 	return call(args)
 
-def run_capture_output(args):
+def run_capture_output(*args):
 	"""Runs a command and returns it's output in a string."""
 	if DEBUG:
 		print "capturing output from call(%s)" % str(args)
@@ -55,6 +55,9 @@ def run_capture_output(args):
 	p = Popen(args, stdout=PIPE)
 	stdout = p.communicate()[0]
 	return stdout
+	
+def iptables(*args):
+	return run(IPTABLES, *args)
 	
 def read_all_file(filename):
 	fh = open(filename)
@@ -102,7 +105,7 @@ def check_symbols(*symbols):
 
 def load_modules(*modules):
 	for module in modules:
-		run(('modprobe', '-v', module))
+		run('modprobe', '-v', module)
 	
 def create_nat():
 	# load kernel modules that may not have loaded.
@@ -157,87 +160,87 @@ def create_nat():
 		write_file('/proc/sys/net/ipv4/neigh/default/gc_thresh3', GC_THRESH * 8)
 		
 	# define NAT rule
-	run((IPTABLES,'-t','nat','-F','POSTROUTING'))
-	run((IPTABLES,'-t','nat','-A','POSTROUTING','-o',EXTERN_IFACE,'-j','MASQUERADE'))
+	iptables('-t','nat','-F','POSTROUTING')
+	iptables('-t','nat','-A','POSTROUTING','-o',EXTERN_IFACE,'-j','MASQUERADE')
 
 	# define allowed chain
-	run((IPTABLES,'-N',ALLOWED_RULE))
-	run((IPTABLES,'-F',ALLOWED_RULE))
-	run((IPTABLES,'-A',ALLOWED_RULE,'-i',EXTERN_IFACE,'-o',INTERN_IFACE,'-m','state','--state','RELATED,ESTABLISHED','-j','ACCEPT'))
-	run((IPTABLES,'-A',ALLOWED_RULE,'-i',INTERN_IFACE,'-o',EXTERN_IFACE,'-j','ACCEPT'))
+	iptables('-N',ALLOWED_RULE)
+	iptables('-F',ALLOWED_RULE)
+	iptables('-A',ALLOWED_RULE,'-i',EXTERN_IFACE,'-o',INTERN_IFACE,'-m','state','--state','RELATED,ESTABLISHED','-j','ACCEPT')
+	iptables('-A',ALLOWED_RULE,'-i',INTERN_IFACE,'-o',EXTERN_IFACE,'-j','ACCEPT')
 
 	# define unmetered chain
-	run((IPTABLES,'-D','FORWARD','-j',UNMETERED_RULE))
-	run((IPTABLES,'-N',UNMETERED_RULE))
-	run((IPTABLES,'-F',UNMETERED_RULE))
-	run((IPTABLES,'-I','FORWARD','1','-j',UNMETERED_RULE))
+	iptables('-D','FORWARD','-j',UNMETERED_RULE)
+	iptables('-N',UNMETERED_RULE)
+	iptables('-F',UNMETERED_RULE)
+	iptables('-I','FORWARD','1','-j',UNMETERED_RULE)
 
 	# define blacklist chain
-	run((IPTABLES,'-D','FORWARD','-j',BLACKLIST_RULE))
-	run((IPTABLES,'-N',BLACKLIST_RULE))
-	run((IPTABLES,'-F',BLACKLIST_RULE))
-	run((IPTABLES,'-I','FORWARD','2','-j',BLACKLIST_RULE))
+	iptables('-D','FORWARD','-j',BLACKLIST_RULE)
+	iptables('-N',BLACKLIST_RULE)
+	iptables('-F',BLACKLIST_RULE)
+	iptables('-I','FORWARD','2','-j',BLACKLIST_RULE)
 
 	# delete existing rejection rule
-	run((IPTABLES,'-D','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset'))
-	run((IPTABLES,'-D','FORWARD','-j','REJECT','--reject-with',REJECT_MODE))
+	iptables('-D','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset')
+	iptables('-D','FORWARD','-j','REJECT','--reject-with',REJECT_MODE)
 	
 	# define port forwarding chain
-	run((IPTABLES,'-t','nat','-D','PREROUTING','-j',IP4PF_RULE))
-	run((IPTABLES,'-t','nat','-N',IP4PF_RULE))
-	run((IPTABLES,'-t','nat','-F',IP4PF_RULE))
-	run((IPTABLES,'-t','nat','-I','PREROUTING','1','-j',IP4PF_RULE))
+	iptables('-t','nat','-D','PREROUTING','-j',IP4PF_RULE)
+	iptables('-t','nat','-N',IP4PF_RULE)
+	iptables('-t','nat','-F',IP4PF_RULE)
+	iptables('-t','nat','-I','PREROUTING','1','-j',IP4PF_RULE)
 
-	run((IPTABLES,'-t','filter','-D','FORWARD','-j',IP4PF_RULE))
-	run((IPTABLES,'-t','filter','-N',IP4PF_RULE))
-	run((IPTABLES,'-t','filter','-F',IP4PF_RULE))
-	run((IPTABLES,'-t','filter','-I','FORWARD','1','-j',IP4PF_RULE))
+	iptables('-t','filter','-D','FORWARD','-j',IP4PF_RULE)
+	iptables('-t','filter','-N',IP4PF_RULE)
+	iptables('-t','filter','-F',IP4PF_RULE)
+	iptables('-t','filter','-I','FORWARD','1','-j',IP4PF_RULE)
 	
 	# handle captivity properly with tproxy
-	run((IPTABLES,'-D','FORWARD','-m','mark','--mark','0x1','-i',INTERN_IFACE,'-j','ACCEPT'))
-	run((IPTABLES,'-D','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-j','ACCEPT'))
-	run((IPTABLES,'-A','FORWARD','-m','mark','--mark','0x1','-i',INTERN_IFACE,'-j','ACCEPT'))
-	run((IPTABLES,'-A','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-j','ACCEPT'))
+	iptables('-D','FORWARD','-m','mark','--mark','0x1','-i',INTERN_IFACE,'-j','ACCEPT')
+	iptables('-D','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-j','ACCEPT')
+	iptables('-A','FORWARD','-m','mark','--mark','0x1','-i',INTERN_IFACE,'-j','ACCEPT')
+	iptables('-A','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-j','ACCEPT')
 	
 	# create new rejection rule
 	if REJECT_TCP_RESET:
-		run((IPTABLES,'-A','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset'))
-	run((IPTABLES,'-A','FORWARD','-j','REJECT','--reject-with',REJECT_MODE))
+		iptables('-A','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset')
+	iptables('-A','FORWARD','-j','REJECT','--reject-with',REJECT_MODE)
 	
-	run((IPTABLES,'-P','FORWARD','DROP'))
+	iptables('-P','FORWARD','DROP')
 
 	# captivity related entries
 	# define unmetered chain
-	run((IPTABLES,'-t','mangle','-D','PREROUTING','-j',UNMETERED_RULE))
-	run((IPTABLES,'-t','mangle','-N',UNMETERED_RULE))
-	run((IPTABLES,'-t','mangle','-F',UNMETERED_RULE))
-	run((IPTABLES,'-t','mangle','-I','PREROUTING','1','-j',UNMETERED_RULE))
+	iptables('-t','mangle','-D','PREROUTING','-j',UNMETERED_RULE)
+	iptables('-t','mangle','-N',UNMETERED_RULE)
+	iptables('-t','mangle','-F',UNMETERED_RULE)
+	iptables('-t','mangle','-I','PREROUTING','1','-j',UNMETERED_RULE)
 
 	# define blacklist chain
-	run((IPTABLES,'-t','mangle','-D','PREROUTING','-j',BLACKLIST_RULE))
-	run((IPTABLES,'-t','mangle','-N',BLACKLIST_RULE))
-	run((IPTABLES,'-t','mangle','-F',BLACKLIST_RULE))
-	run((IPTABLES,'-t','mangle','-I','PREROUTING','2','-j',BLACKLIST_RULE))
+	iptables('-t','mangle','-D','PREROUTING','-j',BLACKLIST_RULE)
+	iptables('-t','mangle','-N',BLACKLIST_RULE)
+	iptables('-t','mangle','-F',BLACKLIST_RULE)
+	iptables('-t','mangle','-I','PREROUTING','2','-j',BLACKLIST_RULE)
 
 	# define "captive" rule (DIVERT)
-	run((IPTABLES,'-t','mangle','-N',CAPTIVE_RULE))
-	run((IPTABLES,'-t','mangle','-F',CAPTIVE_RULE))
-	run((IPTABLES,'-t','mangle','-A',CAPTIVE_RULE,'-j','MARK','--set-mark','1'))
-	run((IPTABLES,'-t','mangle','-A',CAPTIVE_RULE,'-j','ACCEPT'))
+	iptables('-t','mangle','-N',CAPTIVE_RULE)
+	iptables('-t','mangle','-F',CAPTIVE_RULE)
+	iptables('-t','mangle','-A',CAPTIVE_RULE,'-j','MARK','--set-mark','1')
+	iptables('-t','mangle','-A',CAPTIVE_RULE,'-j','ACCEPT')
 	
 	# define the catch-all
 	# -m socket handles connections that have already been opened, and sends them to the "captive" rule above.
-	run((IPTABLES,'-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-p','tcp','--dport','80','-m','socket','-j',CAPTIVE_RULE))
-	run((IPTABLES,'-t','mangle','-A','PREROUTING','-i',INTERN_IFACE,'-p','tcp','--dport','80','-m','socket','-j',CAPTIVE_RULE))
+	iptables('-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-p','tcp','--dport','80','-m','socket','-j',CAPTIVE_RULE)
+	iptables('-t','mangle','-A','PREROUTING','-i',INTERN_IFACE,'-p','tcp','--dport','80','-m','socket','-j',CAPTIVE_RULE)
 	
 	# This handles traffic that is a new connection.  For that, we mark the socket, and send it down to the tproxy handler.
-	run((IPTABLES,'-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','TPROXY','--tproxy-mark','0x1/0x1','--on-port',str(CAPTIVE_PORT)))
-	run((IPTABLES,'-t','mangle','-A','PREROUTING','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','TPROXY','--tproxy-mark','0x1/0x1','--on-port',str(CAPTIVE_PORT)))
+	iptables('-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','TPROXY','--tproxy-mark','0x1/0x1','--on-port',str(CAPTIVE_PORT))
+	iptables('-t','mangle','-A','PREROUTING','-i',INTERN_IFACE,'-p','tcp','--dport','80','-j','TPROXY','--tproxy-mark','0x1/0x1','--on-port',str(CAPTIVE_PORT))
 
 
 def add_unmetered(ip,proto=None,port=None):
-	cmd1 = [IPTABLES,'-A',UNMETERED_RULE,'-i',INTERN_IFACE,'-d',ip,'-j','ACCEPT']
-	cmd2 = [IPTABLES,'-t','mangle','-A',UNMETERED_RULE,'-i',INTERN_IFACE,'-d',ip,'-j','ACCEPT']
+	cmd1 = ['-A',UNMETERED_RULE,'-i',INTERN_IFACE,'-d',ip,'-j','ACCEPT']
+	cmd2 = ['-t','mangle','-A',UNMETERED_RULE,'-i',INTERN_IFACE,'-d',ip,'-j','ACCEPT']
 	arg = []
 	if proto != None and port == None:
 		arg = ['-p', proto]
@@ -245,23 +248,23 @@ def add_unmetered(ip,proto=None,port=None):
 		raise Exception, 'proto must be set if port is.'
 	elif port != None:
 		arg = ['-p', proto, '--dport', port]
-	run(cmd1+arg)
-	run(cmd2+arg)
+	iptables(*cmd1+arg)
+	iptables(*cmd2+arg)
 
 	# now do reverse rule
-	cmd = [IPTABLES,'-A',UNMETERED_RULE,'-o',INTERN_IFACE,'-s',ip,'-j','ACCEPT']
+	cmd = ['-A',UNMETERED_RULE,'-o',INTERN_IFACE,'-s',ip,'-j','ACCEPT']
 	if proto != None and port == None:
 		cmd = cmd + ['-p', proto]
 	elif proto != None and port != None:
 		cmd = cmd + ['-p', proto, '--sport', port]
-	run(cmd)
+	iptables(*cmd)
 
 def add_blacklist(ip,proto=None,port=None):
 	r = REJECT_MODE
 	if proto == 'tcp' and REJECT_TCP_RESET:
 		r = 'tcp-reset'
-	cmd1 = [IPTABLES,'-A',BLACKLIST_RULE,'-i',INTERN_IFACE,'-d',ip,'-j','REJECT','--reject-with',r]
-	cmd2 = [IPTABLES,'-t','mangle','-A',BLACKLIST_RULE,'-i',INTERN_IFACE,'-d',ip,'-j',CAPTIVE_RULE]
+	cmd1 = ['-A',BLACKLIST_RULE,'-i',INTERN_IFACE,'-d',ip,'-j','REJECT','--reject-with',r]
+	cmd2 = ['-t','mangle','-A',BLACKLIST_RULE,'-i',INTERN_IFACE,'-d',ip,'-j',CAPTIVE_RULE]
 	arg = []
 	if proto != None and port == None:
 		arg = ['-p', proto]
@@ -274,16 +277,16 @@ def add_blacklist(ip,proto=None,port=None):
 		if REJECT_TCP_RESET:
 			add_blacklist(ip, 'tcp')
 
-	run(cmd1 + arg)
-	run(cmd2 + arg)
+	iptables(*cmd1 + arg)
+	iptables(*cmd2 + arg)
 
 	# now do reverse rule
-	cmd = [IPTABLES,'-A',BLACKLIST_RULE,'-o',INTERN_IFACE,'-s',ip,'-j','REJECT','--reject-with',r]
+	cmd = ['-A',BLACKLIST_RULE,'-o',INTERN_IFACE,'-s',ip,'-j','REJECT','--reject-with',r]
 	if proto != None and port == None:
 		cmd = cmd + ['-p', proto]
 	elif proto != None and port != None:
 		cmd = cmd + ['-p', proto, '--sport', port]
-	run(cmd)
+	iptables(*cmd)
 
 def user_rule(uid):
 	return USER_RULE_PREFIX + str(uid)
@@ -331,7 +334,7 @@ class PortalBackendAPI(dbus.service.Object):
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def create_user(self, uid):
 		"""Creates a user in the firewall."""
-		run((IPTABLES,'-N',user_rule(uid)))
+		iptables('-N',user_rule(uid))
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def enable_user_unmetered(self, uid):
@@ -342,14 +345,14 @@ class PortalBackendAPI(dbus.service.Object):
 	def enable_user(self, uid, quota):
 		"""Enables a user and sets a quota on a user."""
 		# delete all rules on that user first
-		run((IPTABLES,'-F',user_rule(uid)))
+		iptables('-F',user_rule(uid))
 
 		# then make them allowed
 		if quota != None:
 			# enforce quota limits for user.
 			# Allow the traffic through if there is quota available, record it's
 			# use on the positive counter.
-			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota',str(quota),'-m','quota2','--name',user_rule(uid),'--grow','-j',ALLOWED_RULE))
+			iptables('-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota',str(quota),'-m','quota2','--name',user_rule(uid),'--grow','-j',ALLOWED_RULE)
 			set_quota2_amount(user_rule(uid), 0L)
 			
 			set_quota2_amount(limit_rule(uid), long(quota))
@@ -365,7 +368,7 @@ class PortalBackendAPI(dbus.service.Object):
 			# This will likely break with packets bigger than the amount
 			# specified. It is set to stop at about 10 MiB, which is still
 			# bigger than the MTU for most systems.
-			run((IPTABLES,'-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota','10485760','--no-change','-m','quota2','--name',user_rule(uid),'--grow','-j',ALLOWED_RULE))
+			iptables('-A',user_rule(uid),'-m','quota2','--name',limit_rule(uid),'--quota','10485760','--no-change','-m','quota2','--name',user_rule(uid),'--grow','-j',ALLOWED_RULE)
 			set_quota2_amount(user_rule(uid), 0L)
 			set_quota2_amount(limit_rule(uid), 10485760)
 
@@ -373,20 +376,20 @@ class PortalBackendAPI(dbus.service.Object):
 	def add_host(self, uid, mac, ip):
 		"""Registers a host as belonging to a certain user id."""
 		# filter outgoing packets by ip + mac
-		run((IPTABLES,'-I','FORWARD','4','-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-j',user_rule(uid)))
+		iptables('-I','FORWARD','4','-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-j',user_rule(uid))
 
 		# filter outgoing packets by ip only... after all you can't establish a connection without a correct MAC
-		run((IPTABLES,'-I','FORWARD','4','-o',INTERN_IFACE,'-d',ip,'-j',user_rule(uid)))
+		iptables('-I','FORWARD','4','-o',INTERN_IFACE,'-d',ip,'-j',user_rule(uid))
 
 		# take the host out of captivity
 		start_at = '3'
-		run((IPTABLES,'-t','mangle','-I','PREROUTING',start_at,'-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT'))
+		iptables('-t','mangle','-I','PREROUTING',start_at,'-i',INTERN_IFACE,'-s',ip,'-m','mac','--mac-source',mac,'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT')
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def flush_hosts(self, uid):
 		"""Removes all hosts for a user."""
 		# TODO: This is somewhat dangerous, really should prevent multiple actions occuring while this one is.
-		d = run_capture_output((IPTABLES,'-L','FORWARD','-n','--line-numbers'))
+		d = run_capture_output(IPTABLES,'-L','FORWARD','-n','--line-numbers')
 		a = d.split('\n')
 
 		rules_to_remove = []
@@ -404,7 +407,7 @@ class PortalBackendAPI(dbus.service.Object):
 
 					if r.group('mac') != None:
 						# take the host out of captive-exempt mode, we know it's mac address.
-						run((IPTABLES,'-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-s',r.group('ip'),'-m','mac','--mac-source',r.group('mac'),'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT'))
+						iptables('-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-s',r.group('ip'),'-m','mac','--mac-source',r.group('mac'),'-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT')
 				except:
 					# Non-match, we don't care.
 					pass
@@ -416,10 +419,10 @@ class PortalBackendAPI(dbus.service.Object):
 		#print "Will delete: %s" % (rules_to_remove,)
 		# now remove those rules
 		for ln in rules_to_remove:
-			run((IPTABLES,'-D','FORWARD',str(ln)))
+			iptables('-D','FORWARD',str(ln))
 
 		# doesn't work as you have to provide exact rule
-		#run((IPTABLES,'-D','FORWARD','-j',user_rule(uid)))
+		#iptables('-D','FORWARD','-j',user_rule(uid))
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='bt')
 	def get_quota(self, uid):
@@ -468,7 +471,7 @@ class PortalBackendAPI(dbus.service.Object):
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def disable_user(self, uid):
 		"""Disables a user's internet access by removing all their quota."""
-		run((IPTABLES,'-F',USER_RULE_PREFIX + str(uid)))
+		iptables('-F',USER_RULE_PREFIX + str(uid))
 		try:
 			set_quota2_amount(user_rule(uid), 0)
 		except:
@@ -481,24 +484,24 @@ class PortalBackendAPI(dbus.service.Object):
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='', out_signature='')
 	def ip4pf_flush(self):
 		"""Remove all IPv4 port forwarding rules."""
-		run((
+		run(
 			IPTABLES,
 			'-t', 'nat',
 			'-F', IP4PF_RULE
-		))
+		)
 
-		run((
+		run(
 			IPTABLES,
 			'-t', 'filter',
 			'-F', IP4PF_RULE
-		))
+		)
 
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='sxxx', out_signature='')
 	def ip4pf_add(self, ip, protocol, port, external_port):
 		"""Add a port forwarding entry"""
 		if port != 0:
 			# it's something with a port we need to handle.
-			run((
+			run(
 				IPTABLES,
 				'-t', 'nat',
 				'-A', IP4PF_RULE,
@@ -507,10 +510,10 @@ class PortalBackendAPI(dbus.service.Object):
 				'--dport', str(external_port),
 				'-j', 'DNAT',
 				'--to-destination', ('%s:%s' % (ip, port)),
-			))
+			)
 
 			# allow in forwarding
-			run((
+			run(
 				IPTABLES,
 				'-t', 'filter',
 				'-A', IP4PF_RULE,
@@ -520,10 +523,10 @@ class PortalBackendAPI(dbus.service.Object):
 				'-m', 'state',
 				'--state', 'NEW',
 				'-j', 'ACCEPT',
-			))
+			)
 		else:
 			# it doesn't have a port, it's just an ipv4 protocol number
-			run((
+			run(
 				IPTABLES,
 				'-t', 'nat',
 				'-A', IP4PF_RULE,
@@ -531,10 +534,10 @@ class PortalBackendAPI(dbus.service.Object):
 				'-p', str(protocol),
 				'-j', 'DNAT',
 				'--to-destination', ip,
-			))
+			)
 
 			# allow in forwarding
-			run((
+			run(
 				IPTABLES,
 				'-t', 'filter',
 				'-A', IP4PF_RULE,
@@ -543,7 +546,7 @@ class PortalBackendAPI(dbus.service.Object):
 				'-m', 'state',
 				'--state', 'NEW',
 				'-j', 'ACCEPT',
-			))
+			)
 
 
 def setup_dbus():
