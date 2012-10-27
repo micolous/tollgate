@@ -850,7 +850,7 @@ def usage_disable(request, aid):
 def pclist(request):
 	hosts = NetworkHost.objects.exclude(
 		user_profile__exact=None
-	).order_by('ip_address')
+	).order_by('user_profile__user__username')
 	
 	return render_to_response('frontend/pclist.html', {
 		'hosts': hosts,
@@ -862,7 +862,7 @@ def pclist(request):
 def pclist_unowned(request):
 	hosts = NetworkHost.objects.filter(
 		user_profile__exact=None
-	).order_by('ip_address')
+	).order_by('user_profile__user__username')
 	
 	return render_to_response('frontend/pclist.html', {
 		'hosts': hosts,
