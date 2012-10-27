@@ -106,6 +106,15 @@ quanta = ^quanta
 seagate = ^seagate
 telco = ^telco systems
 zyxel = ^zyxel
+vivotek = ^vivotek
+areca = ^areca
+virtualbox = ^cadmus computer systems
+azurewave = ^azurewave tech
+raspberrypi = ^raspberry pi
+sparklan = ^sparklan communications
+clipsal = ^clipsal
+
+
 
 [oui-console]
 ; could this be a console?
