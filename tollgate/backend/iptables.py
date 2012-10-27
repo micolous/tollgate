@@ -343,6 +343,12 @@ class PortalBackendAPI(dbus.service.Object):
 		"""Creates a user in the firewall."""
 		iptables('-N',user_rule(uid))
 
+		# Create ipsets for the user if they don't already exist
+		# match by ip+mac for outgoing, ip only for incoming
+		ipset('create', ipmac_set_name(uid), 'bitmap:ip,mac', 'range', INTERN_SUBNET)
+		ipset('create', ip_set_name(uid), 'bitmap:ip', 'range', INTERN_SUBNET)
+
+
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def enable_user_unmetered(self, uid):
 		"""Enableds a user and sets unmetered quota on a user."""
@@ -393,12 +399,7 @@ class PortalBackendAPI(dbus.service.Object):
 			iptables('-t','mangle','-I','PREROUTING','3','-i',INTERN_IFACE,'-m','set','--match-set',ipmac_set_name(uid),'src,src','-m','quota2','--name',limit_rule(uid),'--quota','10485860','--no-change','-j','ACCEPT')
 			set_quota2_amount(user_rule(uid), 0L)
 			set_quota2_amount(limit_rule(uid), 10485760)
-			
-		# Create ipsets for the user if they don't already exist
-		# match by ip+mac for outgoing, ip only for incoming
-		ipset('create', ipmac_set_name(uid), 'bitmap:ip,mac', 'range', INTERN_SUBNET)
-		ipset('create', ip_set_name(uid), 'bitmap:ip', 'range', INTERN_SUBNET)
-		
+				
 		# add packet handlers for user
 		iptables('-I','FORWARD','4','-i',INTERN_IFACE,'-m','set','--match-set',ipmac_set_name(uid),'src,src','-j',user_rule(uid))
 		iptables('-I','FORWARD','4','-o',INTERN_IFACE,'-m','set','--match-set',ip_set_name(uid),'dst','-j',user_rule(uid))
