@@ -183,6 +183,7 @@ def create_nat():
 	iptables('-I','FORWARD','2','-j',BLACKLIST_RULE)
 
 	# delete existing rejection rule
+	iptables('-D','FORWARD','-p','tcp','-m','state','--state','ESTABLISHED','-j','DROP')
 	iptables('-D','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset')
 	iptables('-D','FORWARD','-j','REJECT','--reject-with',REJECT_MODE)
 	
@@ -204,6 +205,9 @@ def create_nat():
 	iptables('-A','FORWARD','-m','mark','--mark','0x1','-o',INTERN_IFACE,'-j','ACCEPT')
 	
 	# create new rejection rule
+	# just drop traffic that has an open connection, that way it is just packet
+	# loss when the firewall is resyncing
+	iptables('-A','FORWARD','-p','tcp','-m','state','--state','ESTABLISHED','-j','DROP')
 	if REJECT_TCP_RESET:
 		iptables('-A','FORWARD','-p','tcp','-j','REJECT','--reject-with','tcp-reset')
 	iptables('-A','FORWARD','-j','REJECT','--reject-with',REJECT_MODE)
