@@ -113,7 +113,10 @@ azurewave = ^azurewave tech
 raspberrypi = ^raspberry pi
 sparklan = ^sparklan communications
 clipsal = ^clipsal
-
+qisda = ^qisda
+askey = ^askey
+ampak = ^ampak
+davicom = ^davicom
 
 
 [oui-console]
