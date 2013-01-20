@@ -585,7 +585,7 @@ def refresh_networkhost(portal=None):
 		portal = get_portalapi()
 	# use nbtscan to scan the whole network.  it's pretty quick
 	#fh = popen("nbtscan -qe " + settings.LAN_SUBNET)
-	fh = popen("nmap -sP -n -T5 -oG - " + settings.LAN_SUBNET)
+	fh = popen("nmap -sP -n -T4 -oG - " + settings.LAN_SUBNET)
 	hosts = fh.readlines()
 	fh.close()
 
