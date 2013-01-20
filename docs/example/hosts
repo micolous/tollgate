@@ -11,4 +11,5 @@
 
 # Add Nintendo WiFi Connection (WFC)
 # Allows Nintendo Wii and DS to use the captive portal.
-10.4.0.1 conntest.nintendowifi.net
+# Disabling this, as it will break Nintendo 3DS and WiiU (Issue #47)
+#10.4.0.1 conntest.nintendowifi.net

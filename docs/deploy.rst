@@ -467,19 +467,36 @@ Unfortunately, there isn't a simple way at this time to exempt blocking of SMTP 
 Nintendo Consoles / WFC
 =======================
 
-.. WARNING::
-   Nintendo DS and DS Lite, as well as any DS games on the DSi and 3DS will **only** connect to wireless networks that are either unencrypted or encrypted with WEP.  Additionally, they will only connect to 2.4GHz 802.11b networks.
-   
-   Because of the additional radio bandwidth that 802.11b clients require, it is recommended that you run a separate 802.11b-only network for those devices.
+.. NOTE::
+   This information is subject to change and revision while the author further investigates the effects of these workarounds on the WiiU.  At the moment there are some assumptions that the 3DS and WiiU work similarly, which may not be correct.  Tracking for this is `Issue #47`_.
    
 .. NOTE::
-   On the Nintendo DSi and 3DS, connection profiles 1 - 3 do not support WPA or WPA2 encryption (for compatibility with DS games), only the profiles 4 - 6 support it.
+   In this article, "Nintendo DS" also refers to the DSlite, and "Nintendo DSi" also refers to the DSi XL.
 
-All of Nintendo's gaming consoles, with the exception of the Gamecube, will probe a site called ``conntest.nintendowifi.net`` during connection setup.
+Nintendo DS, DSi and Wii require a workaround in the form of DNS interception in order to make them work with captive portals.
 
-If this site is inaccessible or does not return a "200 OK" response, the console will assume it cannot connect to the Internet, and refuse to save the connection profile.
+However, the 3DS and Wii U now support captive portals natively, and are broken by this DNS interception method because they perform an additional test which attempts to register with WFC servers over a non-HTTP method.
+
+Additionally, different versions of DS and Wii consoles make little attempt by DHCP to identify themselves differently, and DS games on the 3DS bring the DS' flawed version of WFC.
+
+At the moment, the only solution is to allow either 3DS/WiiU consoles to work on the network (by having no interception), or allow DS/DSi/Wii consoles to work on the network (by having interception).
+
+.. _Issue #47: https://github.com/micolous/tollgate/issues/47
+
+
+Enabling the interception method (for DS, DSi and Wii)
+------------------------------------------------------
+
+.. WARNING::
+   Enabling this will break internet connectivity for the 3DS and WiiU.  For this reason it is no longer enabled by default.
+
+.. NOTE::
+   Nintendo DS, and DS games on later hardware, will only support connecting to open or WEP access points.  WEP contains fundamental security flaws.
+
+DS, DSi and Wii expect a "200 OK" response to probes to ``conntest.nintendowifi.net``.  If something else is returned, or it is inaccessible, they will fail WFC's connection test, not connect to the access point, and not save the connection profile to enable you to login using Opera/Internet Channel.
 
 Included in tollgate's source repository in ``/www/wpad/`` is a website you can host at ``conntest.nintendowifi.net``, with a DNS record pointing to your server.  This must be accessible inside of your LAN.
+
 
 PlayStation Portable (PSP)
 ==========================
