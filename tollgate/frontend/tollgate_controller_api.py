@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """Tollgate Controller API
-Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2013 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -15,7 +15,6 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from pickle import loads
 from django.conf import settings
 from django.utils.translation import ugettext as _
 import warnings

@@ -1,5 +1,5 @@
 """tollgate frontend models
-Copyright 2008-2012 Michael Farrell <http://micolous.id.au>
+Copyright 2008-2013 Michael Farrell <http://micolous.id.au>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -20,7 +20,7 @@ from django.contrib.auth.models import User
 from datetime import datetime
 from django.conf import settings
 from tollgate.frontend.tollgate_controller_api import TollgateController
-from os import popen
+from subprocess import call
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from socket import gethostbyaddr
 try:
@@ -584,11 +584,13 @@ def refresh_networkhost(portal=None):
 	if portal == None:
 		portal = get_portalapi()
 	# use nbtscan to scan the whole network.  it's pretty quick
-	#fh = popen("nbtscan -qe " + settings.LAN_SUBNET)
-	fh = popen("nmap -sP -n -T4 -oG - " + settings.LAN_SUBNET)
-	hosts = fh.readlines()
-	fh.close()
-
+	devnull_w = open('/dev/null', 'w')
+	devnull_r = open('/dev/null', 'r')
+	call('nmap -sP -n -T4 -oG -'.split() + [settings.LAN_SUBNET], stdout=devnull_w, stderr=devnull_w, stdin=devnull_r)
+	
+	devnull_w.close()
+	devnull_r.close()
+	
 	arp_cache = get_arp_cache()
 	netinfo = {}
 
@@ -609,7 +611,8 @@ def refresh_networkhost(portal=None):
 	# now we have all the network information
 	# update the system
 	users_needing_refresh = []
-	offline_hosts = NetworkHost.objects.all()
+	online_macs = set()
+	
 	for ip in netinfo:
 		mac = netinfo[ip][0]
 		name = ''
@@ -619,7 +622,8 @@ def refresh_networkhost(portal=None):
 		# find by mac
 		try:
 			hostinfo = NetworkHost.objects.get(mac_address__iexact=mac)
-			offline_hosts = offline_hosts.exclude(mac_address__iexact=mac)
+			#offline_hosts = offline_hosts.exclude(mac_address__iexact=mac)
+			online_macs.add(mac)
 
 			# existing PC, run update...
 			hostinfo.mac_address = mac
@@ -649,6 +653,8 @@ def refresh_networkhost(portal=None):
 			# no troubles
 			pass
 
+	offline_hosts = NetworkHost.objects.exclude(mac_address__in=online_macs)
+
 	# now hide offline hosts.
 	for nh in offline_hosts:
 		if nh.online:
@@ -668,7 +674,6 @@ def refresh_networkhost_quick():
 	# now we have all the network information
 	# update the system
 	users_needing_refresh = []
-	offline_hosts = NetworkHost.objects.all()
 	for ip in arp_cache:
 		mac = arp_cache[ip]
 		if settings.ONLY_CONSOLE and not is_console(mac):
@@ -677,7 +682,6 @@ def refresh_networkhost_quick():
 		# find by mac
 		try:
 			hostinfo = NetworkHost.objects.get(mac_address__iexact=mac)
-			offline_hosts = offline_hosts.exclude(mac_address__iexact=mac)
 
 			# existing PC, run update...
 			hostinfo.mac_address = mac
