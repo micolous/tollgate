@@ -30,7 +30,7 @@ class Command(BaseCommand):
 		# refresh information about networkhosts and quota for crontab.
 		portal = get_portalapi()
 		try:
-			refresh_networkhost(portal)
+			refresh_networkhost_quick(portal)
 		except Exception, ex:
 			print "Failed refreshing network hosts"
 			print ex

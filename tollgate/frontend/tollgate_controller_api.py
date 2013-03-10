@@ -46,12 +46,28 @@ class NotAConsoleException(Exception):
 
 
 class TollgateController:
-	def __init__(self):
+	def __init__(self, mainloop=False):
 		if not dbus:
 			return
+			
+		if mainloop:
+			# mainloop requested, register with glib
+			from dbus.mainloop.glib import DBusGMainLoop
+			DBusGMainLoop(set_as_default=True)
+
 		bus = dbus.SystemBus()
 		remote_object = bus.get_object(DBUS_SERVICE, DBUS_PATH)
 		self.__interface = dbus.Interface(remote_object, DBUS_INTERFACE)
+		
+		
+	def register_arp_packet(self, callback):
+		"""
+		Registers an event listener for ARP packets recieved by the backend on
+		the internal network interface.
+		"""
+		if not dbus:
+			return
+		self.__interface.connect_to_signal(signal_name='on_arp_packet', handler_function=callback)
 
 	def connect(self, user_id, mac_address, ip):
 		if not dbus:

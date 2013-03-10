@@ -421,7 +421,16 @@ class PortalBackendAPI(dbus.service.Object):
 		
 		# add ip ipset entry
 		ipset('add', ip_set_name(uid), ip)
-
+	
+	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='sss', out_signature='')
+	def del_host(self, uid, mac, ip):
+		"""De-registers a host as belonging to a certain user id."""
+		# add ip+mac ipset entry
+		ipset('del', ipmac_set_name(uid), ','.join([ip, mac]))
+		
+		# add ip ipset entry
+		ipset('del', ip_set_name(uid), ip)
+	
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def flush_hosts(self, uid):
 		"""Removes all hosts for a user."""
