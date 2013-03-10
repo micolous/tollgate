@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """tollgate backend service
-Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2013 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -39,7 +39,8 @@ DEFAULT_SETTINGS = {
 		'limit_rule_prefix': 'p2l_',
 		'ipset_prefix': 'p2i_',
 		'ipmacset_prefix': 'p2m_',
-		'debug': True
+		'debug': True,
+		'generate_arp_events': True
 	},
 	'captive': {
 		'enable': True,
@@ -104,6 +105,7 @@ def main(daemon_enable, pid_file, settings_file=SETTINGS_FILE):
 	iptables.REJECT_MODE = config.get('tollgate', 'reject_mode')
 	iptables.REJECT_TCP_RESET = config.getboolean('tollgate', 'reject_reset_tcp')
 	iptables.DEBUG = config.getboolean('tollgate', 'debug')
+	iptables.GENERATE_ARP_EVENTS = config.getboolean('tollgate', 'generate_arp_events')
 
 	iptables.CAPTIVE_ENABLED = config.getboolean('captive', 'enable')
 	iptables.CAPTIVE_PORT = config.getint('captive', 'port')
@@ -152,7 +154,6 @@ def main(daemon_enable, pid_file, settings_file=SETTINGS_FILE):
 	if blacklist_hosts != None:
 		print "Setting blacklist hosts..."
 		parse_hostlist(blacklist_hosts, iptables.add_blacklist)
-
 
 	print "Starting DBUS Server (only debug messages will appear now)"
 	try:

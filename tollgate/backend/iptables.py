@@ -20,8 +20,13 @@ from os import system, listdir
 from os.path import exists, join, isfile
 from sys import exit
 from re import compile as re_compile
-import dbus, dbus.service, dbus.glib, glib
+import dbus, dbus.service, dbus.glib, glib, sys, gobject
 from dbus.mainloop.glib import DBusGMainLoop
+from threading import Thread
+try:
+	from scapy import all as scapy
+except:
+	scapy = None
 
 DEBUG = False
 
@@ -546,6 +551,30 @@ class PortalBackendAPI(dbus.service.Object):
 				'--state', 'NEW',
 				'-j', 'ACCEPT',
 			)
+	
+	@dbus.service.signal(dbus_interface=DBUS_INTERFACE, signature='ss')
+	def on_arp_packet(self, mac, ip):
+		pass
+
+
+class ArpPacketSniffer(object):
+	def __init__(self, dev, api):
+		self.dev = dev
+		self.api = api
+		
+	def start(self):
+		#print 'sniffer: start on %r!' % self.dev
+		# only sniff ARP packets
+		scapy.sniff(iface=self.dev, prn=self.handle_packet, filter='arp', store=0)
+	
+	def handle_packet(self, packet):
+		if scapy.ARP in packet and packet[scapy.ARP].op in (1, 2):
+			# who-has or is-at
+			# fire event on api for handling
+			self.api.on_arp_packet(packet[scapy.ARP].hwsrc, packet[scapy.ARP].psrc)
+			
+			# source address
+			#print 'sniffer: src=%r, ip=%r' % (packet[scapy.ARP].hwsrc, packet[scapy.ARP].psrc)
 
 
 def setup_dbus():
@@ -555,11 +584,27 @@ def setup_dbus():
 	return name
 
 def boot_dbus(daemonise, name, pid_file=None):
-	PortalBackendAPI(name)
+	# die early if scapy isn't available and arp events are requested
+	assert (scapy or not GENERATE_ARP_EVENTS), 'scapy must be installed in order to capture arp events.'
+
+	api = PortalBackendAPI(name)
 	loop = glib.MainLoop()
 	if daemonise:
 		assert pid_file, 'Running in daemon mode means pid_file must be specified.'
 		from daemon import daemonize
+
+		# parent process drops here, child lives on
 		daemonize(pid_file)
+		
+		
+	if GENERATE_ARP_EVENTS:
+		# fork off a loop to handle arp packets
+		sniffer = ArpPacketSniffer(str(INTERN_IFACE), api)
+		# this means it will be called again if it dies
+		gobject.threads_init()
+		Thread(target=sniffer.start).start()
+		#glib.timeout_add(1000, sniffer.start)
+		
+		
 	loop.run()
 	
