@@ -294,15 +294,23 @@ def add_blacklist(ip,proto=None,port=None):
 	iptables(*cmd)
 
 def ipmac_set_name(uid):
+	uid = int(uid)
+	assert uid >= 0, 'uid must be at least 0'
 	return IPMACSET_PREFIX + str(uid)
 
 def ip_set_name(uid):
+	uid = int(uid)
+	assert uid >= 0, 'uid must be at least 0'
 	return IPSET_PREFIX + str(uid)
 
 def user_rule(uid):
+	uid = int(uid)
+	assert uid >= 0, 'uid must be at least 0'
 	return USER_RULE_PREFIX + str(uid)
 
 def limit_rule(uid):
+	uid = int(uid)
+	assert uid >= 0, 'uid must be at least 0'
 	return LIMIT_RULE_PREFIX + str(uid)
 
 def get_quota2_amount(label=str):
@@ -470,7 +478,7 @@ class PortalBackendAPI(dbus.service.Object):
 	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
 	def disable_user(self, uid):
 		"""Disables a user's internet access by removing all their quota."""
-		iptables('-F',USER_RULE_PREFIX + str(uid))
+		iptables('-F',user_rule(uid))
 		try:
 			set_quota2_amount(user_rule(uid), 0)
 		except:
