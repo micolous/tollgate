@@ -1,5 +1,5 @@
 """tollgate frontend urls
-Copyright 2008-2012 Michael Farrell
+Copyright 2008-2013 Michael Farrell
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -19,11 +19,17 @@ from django.conf.urls.defaults import *
 from django.conf import settings
 from tollgate.frontend.forms import *
 from tollgate.frontend.views import *
-from django.views.generic.simple import direct_to_template
+#from django.views.generic.simple import direct_to_template
+from django.views.generic import TemplateView
+
 from django.contrib.auth.decorators import permission_required
-from django.views.generic.list_detail import object_list
-from django.views.generic.create_update \
-	import update_object, delete_object, create_object
+#from django.views.generic.list_detail import object_list
+from django.views.generic.list import ListView
+#from django.views.generic.create_update \
+#	import update_object, delete_object, create_object
+from django.views.generic.edit import UpdateView, DeleteView, CreateView
+
+
 from tollgate.frontend.models import IP4PortForward
 from django.contrib.auth.views import password_change
 from django.utils.decorators import decorator_from_middleware
@@ -207,30 +213,27 @@ urlpatterns = (
 	# help pages
 	url(
 		r'^help/new/$',
-		direct_to_template,
-		dict(
-			template='frontend/help/new.html',
-			extra_context=dict(settings=settings)
+		TemplateView.as_view(
+			template_name='frontend/help/new.html',
+			get_context_data=lambda s, **k: dict(super(TemplateView.get_context_data(**k), settings=settings))
 		),
 		name='help-new'
 	),
 	
 	url(
 		r'^help/api/$',
-		direct_to_template,
-		dict(
-			template='frontend/help/api.html',
-			extra_context=dict(settings=settings)
+		TemplateView.as_view(
+			template_name='frontend/help/api.html',
+			get_context_data=lambda s, **k: dict(super(TemplateView.get_context_data(**k), settings=settings))
 		),
 		name='help-api'
 	),
 
 	url(
 		r'^help/source/$',
-		direct_to_template,
-		dict(
-			template='frontend/help/source.html',
-			extra_context=dict(settings=settings)
+		TemplateView.as_view(
+			template_name='frontend/help/source.html',
+			get_context_data=lambda s, **k: dict(super(TemplateView.get_context_data(**k), settings=settings))
 		),
 		name='source'
 	),
@@ -257,8 +260,9 @@ urlpatterns = (
 	# port forwarding system
 	url(
 		r'^ip4portforwards/$',
-		permission_required('frontend.can_ip4portforward')(object_list),
-		ip4portforward_qsd,
+		permission_required('frontend.can_ip4portforward')(ListView.as_view(
+			get_queryset=lambda s: ip4portforward_qsd,		
+		)),
 		name='ip4portforward_list'
 	),
 
@@ -281,9 +285,10 @@ urlpatterns = (
 	url(
 		r'^ip4portforwards/(?P<object_id>\d+)/$',
 		permission_required('frontend.can_ip4portforward')(	
-			update_object
+			UpdateView.as_view(
+				form_class=IP4PortForwardForm,
+			)
 		),
-		dict(form_class=IP4PortForwardForm),
 		name='ip4portforward_edit'
 	),
 
@@ -298,9 +303,10 @@ urlpatterns = (
 	url(
 		r'^ip4portforwards/(?P<object_id>\d+)/delete/$',
 		permission_required('frontend.can_ip4portforward')(
-			delete_object
+			DeleteView.as_view(model=IP4PortForward)
+
 		),
-		dict(model=IP4PortForward, post_delete_redirect='../..'),
+		dict(post_delete_redirect='../..'),
 		name='ip4portforward_delete'
 	),
 
