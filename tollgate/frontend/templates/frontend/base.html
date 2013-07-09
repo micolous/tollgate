@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% endcomment %}
 {% load url from future %}
 {% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{{ LANGUAGE_CODE }}" lang="{{ LANGUAGE_CODE }}">
 	<head>
 		<script language="javascript" type="text/javascript" src="{{ STATIC_URL }}tollgate/jquery.min.js"></script>
