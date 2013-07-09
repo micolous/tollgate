@@ -215,7 +215,6 @@ urlpatterns = (
 		r'^help/new/$',
 		TemplateView.as_view(
 			template_name='frontend/help/new.html',
-			get_context_data=lambda s, **k: dict(super(TemplateView.get_context_data(**k), settings=settings))
 		),
 		name='help-new'
 	),
@@ -224,7 +223,6 @@ urlpatterns = (
 		r'^help/api/$',
 		TemplateView.as_view(
 			template_name='frontend/help/api.html',
-			get_context_data=lambda s, **k: dict(super(TemplateView.get_context_data(**k), settings=settings))
 		),
 		name='help-api'
 	),
@@ -233,7 +231,6 @@ urlpatterns = (
 		r'^help/source/$',
 		TemplateView.as_view(
 			template_name='frontend/help/source.html',
-			get_context_data=lambda s, **k: dict(super(TemplateView.get_context_data(**k), settings=settings))
 		),
 		name='source'
 	),
