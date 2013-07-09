@@ -100,12 +100,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		</td>
 		
 		<td>
+		<!--
 			<div id="usage_graph" style="width:500px;height:300px;">Loading...</div>
 			<p>Newest data is shown on the right.</p>
+		-->
 		</td>
 	</tr>
 </table>
 
+
+<!-- 
 <script type="text/javascript">
 $(function () {
 	// use the tollgate api to get usage history
@@ -153,14 +157,9 @@ $(function () {
 });
 
 </script>
+-->
 
 <p><strong>Remember:</strong> Both uploads and downloads use quota.</p>
-
-{% comment %}
-<h2>Usage Graph</h2>
-<p>This graph is refreshed every 10 minutes, whenever you use this page, and whenever you switch on or off your internet connectivity.  As a result, peak usage is generally averaged out over the period.  Unmetered internet usage doesn't show here.</p>
-<div><img src="graph.png" alt="[usage graph]"/></div>
-{% endcomment %}
 
 <h2>Internet Switch</h2>
 {% if profile.internet_on %}
