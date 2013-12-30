@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 tollgate frontend views
-Copyright 2008-2012 Michael Farrell
+Copyright 2008-2013 Michael Farrell
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -39,6 +39,9 @@ from django.core.exceptions import *
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 import random
+from django.views.generic.list import ListView
+from django.views.generic.edit import UpdateView, CreateView, DeleteView
+from django.core.urlresolvers import get_callable, reverse_lazy
 
 
 class NoCurrentEventException(Exception):
@@ -1179,4 +1182,19 @@ def ip4portforward_create(request):
 	return render_to_response('frontend/ip4portforward_form.html', dict(
 		form=form
 	), context_instance=RequestContext(request))
+
+
+class IP4PortForwardListView(ListView):
+	model = IP4PortForward
+
+
+class IP4PortForwardUpdateView(UpdateView):
+	model = IP4PortForward
+	form_class = IP4PortForwardForm
+
+
+class IP4PortForwardDeleteView(DeleteView):
+	model = IP4PortForward
+	success_url = reverse_lazy('ip4portforward_list')
+	
 

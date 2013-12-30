@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """tollgate frontend api views
-Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2013 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -15,25 +15,29 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+from __future__ import absolute_import
 import tollgate
-from tollgate.frontend.models import *
+from ..frontend.models import *
+from .resources import *
 from datetime import datetime, timedelta
-from djangorestframework.views import ModelView, View
-from djangorestframework.mixins import ReadModelMixin
-from djangorestframework import status
-from djangorestframework.response import ErrorResponse
+from rest_framework import generics, mixins, views, status
+from rest_framework.response import Response
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 
 
-class ReadOnlyInstanceModelView(ReadModelMixin, ModelView):
+class ReadOnlyInstanceModelView(mixins.ListModelMixin, generics.GenericAPIView):
 	"""
 	A read-only InstanceModelView, that only allows GET requests.
 	"""
 	_suffix = "ReadOnlyInstance"
+	
+	def get(self, request, *args, **kwargs):
+		return self.list(request, *args, **kwargs)
 
 
-class NetworkHostRootView(View):
+
+class NetworkHostRootView(views.APIView):
 	"""
 	Root of NetworkHost API.
 	Allows the client to get a complete list of all online NetworkHosts.
@@ -45,13 +49,15 @@ class NetworkHostRootView(View):
 		"""
 		hosts = NetworkHost.objects.filter(online=True).only('ip_address')
 		
-		return [reverse(
-			'api_whatis_ip',
-			kwargs={'ip_address': h.ip_address}
-		) for h in hosts]
+		return Response([
+			#reverse(
+			#	'api_whatis_ip',
+			#	kwargs={'ip_address': h.ip_address}
+			#) for h in hosts
+		])
 
 
-class UserProfileRootView(View):
+class UserProfileRootView(views.APIView):
 	"""
 	Root of User API.
 	Allows the client to information about users with online NetworkHosts.
@@ -63,27 +69,28 @@ class UserProfileRootView(View):
 		"""
 		hosts = NetworkHost.objects.filter(online=True).only('ip_address')
 		
-		return dict(
+		return Response(dict(
 			me=reverse('api_whoami'),
-			all_users=[reverse(
-				'api_whois_ip',
-				kwargs={'networkhost__ip_address': h.ip_address}
-			) for h in hosts]
-		)
+			#all_users=[reverse(
+			#	'api_whois_ip',
+			#	kwargs={'networkhost__ip_address': h.ip_address}
+			#) for h in hosts]
+		))
 
 
-class MyUserProfileModelView(ModelView):
+class MyUserProfileModelView(views.APIView):
 	"""
 	Reads the current NetworkHost record for this user.
 	"""
 	
 	def get(self, request, *args, **kwargs):
-		model = self.resource.model
+		#model = self.resource.model
 		
-		try:
+		#try:
+		if 1:
 			if request.user.is_authenticated():
 				# take the user data from the authentication.
-				return request.user.get_profile()
+				return Response(PermissiveUserProfileResource(request.user.get_profile()).data)
 			
 			# look up based on the NetworkHost of this request
 			profile = None
@@ -92,73 +99,73 @@ class MyUserProfileModelView(ModelView):
 			mac = get_mac_address(ip)
 			if mac == None:
 				# unknown MAC
-				raise ErrorResponse(status.HTTP_404_NOT_FOUND)
+				return Response(status=status.HTTP_404_NOT_FOUND)
 
 			try:
 				h = NetworkHost.objects.get(mac_address__iexact=mac)
 				if h.user_profile == None:
 					# no user associated with this host
-					raise ErrorResponse(status.HTTP_404_NOT_FOUND)
+					return Response(status=status.HTTP_404_NOT_FOUND)
 
-				return h.user_profile
+				return Response(PermissiveUserProfileResource(h.user_profile).data)
 			except:
 				# networkhost record does not exist
-				raise ErrorResponse(status.HTTP_404_NOT_FOUND)
-		except:
-			pass
+				return Response(status=status.HTTP_404_NOT_FOUND)
+		#except:
+		#	pass
 			
 		# other error
-		raise ErrorResponse(status.HTTP_500_INTERNAL_SERVER_ERROR)
+		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class MyEventAttendanceModelView(MyUserProfileModelView):
-	"""
-	Reads the current EventAttendance for the user.
-	"""
-	def get(self, request, *args, **kwargs):
-		# gets the user_profile associated with the request.
-		user_profile = super(MyEventAttendanceModelView, self).get(
-			request,
-			*args,
-			**kwargs
-		)
-		
-		# now look up their attendance.
-		try:
-			attendance = get_attendance_currentevent(user_profile)
-		except:
-			# there is no attendance currently for the user.
-			raise ErrorResponse(status.HTTP_404_NOT_FOUND)
-		
-		# now return the attendance.
-		return attendance
+#class MyEventAttendanceModelView(MyUserProfileModelView):
+#	"""
+#	Reads the current EventAttendance for the user.
+#	"""
+#	def get(self, request, *args, **kwargs):
+#		# gets the user_profile associated with the request.
+#		user_profile = super(MyEventAttendanceModelView, self).get(
+#			request,
+#			*args,
+#			**kwargs
+#		)
+#		
+#		# now look up their attendance.
+#		try:
+#			attendance = get_attendance_currentevent(user_profile)
+#		except:
+#			# there is no attendance currently for the user.
+#			raise ErrorResponse(status.HTTP_404_NOT_FOUND)
+#		
+#		# now return the attendance.
+#		return attendance
+#
+#
+#class MyNetworkUsageDataPointsView(MyEventAttendanceModelView):
+#	"""
+#	Reads the NetworkUsageDataPoints associated with the user's attendance at
+#	the current event.
+#	"""
+#	def get(self, request, *args, **kwargs):
+#		# gets the attendance associated with the request.
+#		attendance = super(MyNetworkUsageDataPointsView, self).get(
+#			request,
+#			*args,
+#			**kwargs
+#		)
+#		
+#		# now lookup their usages in the last 36 hours
+#		return attendance.networkusagedatapoint_set.filter(
+#			when__gte=utcnow() - timedelta(hours=36)
+#		).order_by('when')
 
 
-class MyNetworkUsageDataPointsView(MyEventAttendanceModelView):
-	"""
-	Reads the NetworkUsageDataPoints associated with the user's attendance at
-	the current event.
-	"""
-	def get(self, request, *args, **kwargs):
-		# gets the attendance associated with the request.
-		attendance = super(MyNetworkUsageDataPointsView, self).get(
-			request,
-			*args,
-			**kwargs
-		)
-		
-		# now lookup their usages in the last 36 hours
-		return attendance.networkusagedatapoint_set.filter(
-			when__gte=utcnow() - timedelta(hours=36)
-		).order_by('when')
-
-
-class TollgateAPIView(View):
+class TollgateAPIView(views.APIView):
 	"""
 	This is the API for tollgate.
 	"""
 	def get(self, request):
-		return dict(
+		return Response(dict(
 			tollgate_api_version=1,
 			tollgate_version=tollgate.__version__,
 			methods=[
@@ -174,16 +181,17 @@ class TollgateAPIView(View):
 					url=reverse('api_user_root')
 				),
 				
-				dict(
-					name='usage', 
-					description=_('Get your usage information'),
-					url=reverse('api_usage')
-				),
-				
-				dict(
-					name='usage_history',
-					description=_('Get your usage history'),
-					url=reverse('api_usage_history')
-				),
+				#dict(
+				#	name='usage', 
+				#	description=_('Get your usage information'),
+				#	url=reverse('api_usage')
+				#),
+				#
+				#dict(
+				#	name='usage_history',
+				#	description=_('Get your usage history'),
+				#	url=reverse('api_usage_history')
+				#),
 			]
-		)
+		))
+

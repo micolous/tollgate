@@ -1,5 +1,5 @@
 """tollgate api resources
-Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2013 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -14,61 +14,76 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from djangorestframework.resources import ModelResource
+from rest_framework.serializers import ModelSerializer
 from tollgate.frontend.models import \
 	NetworkHost, UserProfile, EventAttendance, NetworkUsageDataPoint
 from django.core.urlresolvers import reverse
 
 
-class NetworkHostResource(ModelResource):
-	model = NetworkHost
-	fields = (
-		'mac_address',
-		'ip_address',
-		'first_connection',
-		'online',
-		'vendor',
-		'is_console'
-	)
-	ordering = ('mac_address')
+class NetworkHostResource(ModelSerializer):
+	class Meta:
+		model = NetworkHost
+		fields = (
+			'mac_address',
+			'ip_address',
+			'first_connection',
+			'online',
+			'vendor',
+			'is_console'
+		)
+		ordering = ('mac_address')
 
 
-class PermissiveUserProfileResource(ModelResource):
+class PermissiveUserProfileResource(ModelSerializer):
 	"""
 	Permissive version of UserProfileResource, which provides the user's real
 	name.
 	"""
-	model = UserProfile
-	fields = ('internet_on', 'username', 'user_id', 'first_name', 'last_name')
+	class Meta:
+		model = UserProfile
+		fields = (
+			'internet_on', 
+			#'username',
+			#'user_id',
+			#'first_name',
+			#'last_name',
+		)
 	
 
-class UserProfileResource(ModelResource):
+class UserProfileResource(ModelSerializer):
 	"""
 	Restricted UserProfile resource, which doesn't provide the user's real
 	name.
 	"""
-	model = UserProfile
-	fields = ('internet_on', 'username', 'user_id')
+	class Meta:
+		model = UserProfile
+		fields = (
+			'internet_on',
+			#'username',
+			#'user_id',
+		)
 
 
-class EventAttendanceResource(ModelResource):
+class EventAttendanceResource(ModelSerializer):
 	"""
 	Event attendance object.
 	"""
-	model = EventAttendance
-	fields = (
-		'quota_amount',
-		'reset_count',
-		'quota_unmetered',
-		'quota_used',
-		'quota_remaining'
-	)
+	class Meta:
+		model = EventAttendance
+		fields = (
+			'quota_amount',
+			'reset_count',
+			'quota_unmetered',
+			'quota_used',
+			'quota_remaining'
+		)
 
 
-class NetworkUsageDataPointResource(ModelResource):
+class NetworkUsageDataPointResource(ModelSerializer):
 	"""
 	NetworkUsageDataPoint object.
 	"""
-	model = NetworkUsageDataPoint
-	fields = ('when', 'bytes')
+	class Meta:
+		model = NetworkUsageDataPoint
+		fields = ('when', 'bytes')
 	

@@ -2,9 +2,9 @@
 
 tollgate - A captive portal software for Linux for LAN parties.
 
-Copyright 2008-2012 Michael Farrell <http://micolous.id.au>.
+Copyright 2008-2013 Michael Farrell <http://micolous.id.au>.
 
-Version 3.0.2 "Cavity Protection".
+Version 3.0.2+.
 
 Website: <http://tollgate.org.au/>
 
@@ -12,7 +12,7 @@ Website: <http://tollgate.org.au/>
 
 Welcome to tollgate.  This is a captive portal system for Linux, designed for operating LAN parties.  A lot of the concepts in the software are specific to how a LAN party operates, however you could use it for a sharehouse if you wanted, or something else.
 
-It was originally called 'portal2'.  It managed the StreetGeek and SAGA internet connection for about two years, before I discontinued my involvement with the event.  It was called 'portal2' as it we previously experimented with a modified version of WiFiDog before abandoning it at the event.  It's changed the name to avoid potential trademark issues.
+It was originally called `portal2`.  It managed the StreetGeek and SAGA internet connection for about two years, before I discontinued my involvement with the event.    It's name was changed before public release due to the release of [a video game of the same name](http://www.valvesoftware.com/games/portal2.html) about the same time (April 2011).
 
 It consists of two parts, connected via dbus:
 
