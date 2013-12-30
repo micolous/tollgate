@@ -256,7 +256,6 @@ urlpatterns = (
 		permission_required('frontend.can_ip4portforward')(
 			IP4PortForwardListView.as_view()
 		),
-		ip4portforward_qsd,
 		name='ip4portforward_list'
 	),
 
