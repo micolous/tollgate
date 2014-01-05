@@ -44,7 +44,7 @@ from django.core.management.base import BaseCommand, CommandError
 # other constants
 OUI_LIST_URL = 'http://standards.ieee.org/develop/regauth/oui/oui.txt'
 OUI_LIST_FILE = 'oui.txt'
-OUI_RE = re_compile(r'^([0-9A-F]{6})\s+\(base 16\)\s+(.*)\s*$')
+OUI_RE = re_compile(r'^\s+([0-9A-F]{6})\s+\(base 16\)\s+(.*)\s*$')
 
 IP4P_LIST_URL = \
 	'http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xml'
@@ -96,16 +96,28 @@ def download_file(filename, url):
 			raise ex
 
 	if response != None:
-		length = long(response.info()['Content-Length'])
-		print "Copying %s bytes..." % length
+		try:
+			length = long(response.info()['Content-Length'])
+		except KeyError:
+			# missing header, booo
+			length = 0L
 		# download the file to disk
 		fp = open(filename, 'wb')
-		progress = ProgressBar(widgets=PBAR_WIDGET_STYLE, maxval=length).start()
+		
+		if length > 0:
+			print "Copying %s bytes..." % length
+			progress = ProgressBar(widgets=PBAR_WIDGET_STYLE, maxval=length).start()
+		else:
+			print "Downloading..."
+			progress = None
 
 		for data in response:
 			fp.write(data)
-			progress.update(fp.tell())
-		progress.finish()
+			if progress is not None:
+				progress.update(fp.tell())
+
+		if progress is not None:
+			progress.finish()
 
 		# write out etag
 		try:
