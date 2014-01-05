@@ -7,15 +7,27 @@ Changelog
 
 All releases in the 3.x series are named after types of toothpaste.
 
-3.1.0 "Tartar Control" (?? July 2012)
+3.1.0 "Tartar Control" (?? ???? 2014)
 -------------------------------------
 
 This release is still in development.
 
+* ``frontend``: Ported API to ``djangorestframework >=2.0.0`` (upstream incompatible changes). (`Issue #55`_)
+* ``frontend``: Migrate to Django 1.5. (`Issue #56`_)
+* ``frontend``: Add more device icons (Issues `#48`_, `#49`_)
+* ``scripts``: Fix issue with OUI and protocol number scraper no longer working owing to upstream changes.  (`Issue #57`_)
+
+.. _#48: https://github.com/micolous/tollgate/issues/48
+.. _#49: https://github.com/micolous/tollgate/issues/49
+.. _Issue #55: https://github.com/micolous/tollgate/issues/55
+.. _Issue #56: https://github.com/micolous/tollgate/issues/56
+.. _Issue #57: https://github.com/micolous/tollgate/issues/57
+
+
 3.0.2 "Cavity Protection" (20 July 2012)
 ----------------------------------------
 
-This release is still in development.  This release includes security fixes, and is recommended for all users.
+This release includes security fixes, and is recommended for all users.
 
 * Commenced cleanup of PEP8 warnings, wrote style guide documentation.
 * ``docs``: Documented permissions.
