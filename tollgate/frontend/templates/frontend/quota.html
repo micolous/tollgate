@@ -100,16 +100,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		</td>
 		
 		<td>
-		<!--
 			<div id="usage_graph" style="width:500px;height:300px;">Loading...</div>
 			<p>Newest data is shown on the right.</p>
-		-->
 		</td>
 	</tr>
 </table>
 
 
-<!-- 
 <script type="text/javascript">
 $(function () {
 	// use the tollgate api to get usage history
@@ -150,6 +147,9 @@ $(function () {
 					mode: 'time',
 					min: start.getTime() + utc_offset,
 					max: (new Date()).getTime() + utc_offset
+				},
+				yaxis: {
+					min: 0
 				}
 			});
 		}
@@ -157,7 +157,6 @@ $(function () {
 });
 
 </script>
--->
 
 <p><strong>Remember:</strong> Both uploads and downloads use quota.</p>
 
