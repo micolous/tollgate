@@ -22,8 +22,34 @@ from .resources import *
 from datetime import datetime, timedelta
 from rest_framework import generics, mixins, views, status
 from rest_framework.response import Response
-from django.core.urlresolvers import reverse
+from rest_framework.reverse import reverse
 from django.utils.translation import ugettext as _
+
+
+def get_userprofile_for_request(request):
+	if request.user.is_authenticated():
+		# take the user data from the authentication.
+		return request.user.get_profile()
+	
+	# look up based on the NetworkHost of this request
+	profile = None
+	
+	ip = request.META['REMOTE_ADDR']
+	mac = get_mac_address(ip)
+	if mac == None:
+		# unknown MAC
+		return None
+
+	try:
+		h = NetworkHost.objects.get(mac_address__iexact=mac)
+		if h.user_profile == None:
+			# no user associated with this host
+			return None
+
+		return h.user_profile
+	except NetworkHost.DoesNotExist:
+		# networkhost record does not exist
+		return None
 
 
 class ReadOnlyInstanceModelView(mixins.ListModelMixin, generics.GenericAPIView):
@@ -31,6 +57,8 @@ class ReadOnlyInstanceModelView(mixins.ListModelMixin, generics.GenericAPIView):
 	A read-only InstanceModelView, that only allows GET requests.
 	"""
 	_suffix = "ReadOnlyInstance"
+	serializer_class = None
+	queryset = None
 	
 	def get(self, request, *args, **kwargs):
 		return self.list(request, *args, **kwargs)
@@ -50,10 +78,10 @@ class NetworkHostRootView(views.APIView):
 		hosts = NetworkHost.objects.filter(online=True).only('ip_address')
 		
 		return Response([
-			#reverse(
-			#	'api_whatis_ip',
-			#	kwargs={'ip_address': h.ip_address}
-			#) for h in hosts
+			reverse(
+				'api_whatis_ip',
+				kwargs={'ip_address': h.ip_address}
+			) for h in hosts
 		])
 
 
@@ -71,10 +99,10 @@ class UserProfileRootView(views.APIView):
 		
 		return Response(dict(
 			me=reverse('api_whoami'),
-			#all_users=[reverse(
-			#	'api_whois_ip',
-			#	kwargs={'networkhost__ip_address': h.ip_address}
-			#) for h in hosts]
+			all_users=[reverse(
+				'api_whois_ip',
+				kwargs={'networkhost__ip_address': h.ip_address}
+			) for h in hosts]
 		))
 
 
@@ -86,78 +114,61 @@ class MyUserProfileModelView(views.APIView):
 	def get(self, request, *args, **kwargs):
 		#model = self.resource.model
 		
-		#try:
-		if 1:
-			if request.user.is_authenticated():
-				# take the user data from the authentication.
-				return Response(PermissiveUserProfileResource(request.user.get_profile()).data)
-			
-			# look up based on the NetworkHost of this request
-			profile = None
-			
-			ip = request.META['REMOTE_ADDR']
-			mac = get_mac_address(ip)
-			if mac == None:
-				# unknown MAC
-				return Response(status=status.HTTP_404_NOT_FOUND)
+		profile = get_userprofile_for_request(request)
+		
+		if profile is None:
+			return Response(status=status.HTTP_404_NOT_FOUND)
+		else:
+			return Response(PermissiveUserProfileResource(request.user.get_profile()).data)
 
+
+class MyEventAttendanceModelView(views.APIView):
+	"""
+	Reads the current EventAttendance for the user.
+	"""
+	def get(self, request, *args, **kwargs):
+		# gets the user_profile associated with the request.
+		user_profile = get_userprofile_for_request(request)
+		attendance = None
+		if user_profile is not None:
+			# now look up their attendance.
 			try:
-				h = NetworkHost.objects.get(mac_address__iexact=mac)
-				if h.user_profile == None:
-					# no user associated with this host
-					return Response(status=status.HTTP_404_NOT_FOUND)
-
-				return Response(PermissiveUserProfileResource(h.user_profile).data)
+				attendance = get_attendance_currentevent(user_profile)
 			except:
-				# networkhost record does not exist
-				return Response(status=status.HTTP_404_NOT_FOUND)
-		#except:
-		#	pass
-			
-		# other error
-		return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+				# there is no attendance currently for the user.
+				pass
+		
+		if attendance is not None:
+			return Response(EventAttendanceResource(attendance).data)
+
+		return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-#class MyEventAttendanceModelView(MyUserProfileModelView):
-#	"""
-#	Reads the current EventAttendance for the user.
-#	"""
-#	def get(self, request, *args, **kwargs):
-#		# gets the user_profile associated with the request.
-#		user_profile = super(MyEventAttendanceModelView, self).get(
-#			request,
-#			*args,
-#			**kwargs
-#		)
-#		
-#		# now look up their attendance.
-#		try:
-#			attendance = get_attendance_currentevent(user_profile)
-#		except:
-#			# there is no attendance currently for the user.
-#			raise ErrorResponse(status.HTTP_404_NOT_FOUND)
-#		
-#		# now return the attendance.
-#		return attendance
-#
-#
-#class MyNetworkUsageDataPointsView(MyEventAttendanceModelView):
-#	"""
-#	Reads the NetworkUsageDataPoints associated with the user's attendance at
-#	the current event.
-#	"""
-#	def get(self, request, *args, **kwargs):
-#		# gets the attendance associated with the request.
-#		attendance = super(MyNetworkUsageDataPointsView, self).get(
-#			request,
-#			*args,
-#			**kwargs
-#		)
-#		
-#		# now lookup their usages in the last 36 hours
-#		return attendance.networkusagedatapoint_set.filter(
-#			when__gte=utcnow() - timedelta(hours=36)
-#		).order_by('when')
+class MyNetworkUsageDataPointsView(views.APIView):
+	"""
+	Reads the NetworkUsageDataPoints associated with the user's attendance at
+	the current event.
+	"""
+	def get(self, request, *args, **kwargs):
+		# gets the user_profile associated with the request.
+		user_profile = get_userprofile_for_request(request)
+		attendance = None
+		if user_profile is not None:
+			# now look up their attendance.
+			try:
+				attendance = get_attendance_currentevent(user_profile)
+			except:
+				# there is no attendance currently for the user.
+				pass
+		
+		if attendance is not None:
+			return Response(NetworkUsageDataPointResource(
+				attendance.networkusagedatapoint_set.filter(
+					when__gte=utcnow() - timedelta(hours=36)
+				)		
+			).data)
+
+		return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class TollgateAPIView(views.APIView):
@@ -181,17 +192,17 @@ class TollgateAPIView(views.APIView):
 					url=reverse('api_user_root')
 				),
 				
-				#dict(
-				#	name='usage', 
-				#	description=_('Get your usage information'),
-				#	url=reverse('api_usage')
-				#),
-				#
-				#dict(
-				#	name='usage_history',
-				#	description=_('Get your usage history'),
-				#	url=reverse('api_usage_history')
-				#),
+				dict(
+					name='usage', 
+					description=_('Get your usage information'),
+					url=reverse('api_usage')
+				),
+
+				dict(
+					name='usage_history',
+					description=_('Get your usage history'),
+					url=reverse('api_usage_history')
+				),
 			]
 		))
 
