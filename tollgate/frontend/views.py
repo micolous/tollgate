@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 tollgate frontend views
-Copyright 2008-2013 Michael Farrell
+Copyright 2008-2014 Michael Farrell
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -109,15 +109,17 @@ def login(request):
 			# a user has.
 			profile = get_userprofile(user)
 			try:
-				sync_user_connections(profile)
+				sync_user_connections(user)
 			except:
 				# why did this error out?  it probably doesn't need to.
 				#return controller_error(request)
 				pass
 
 			current_event = get_current_event()
-			# check if they need to have their attendance reset
-			if not has_userprofile_attended(current_event, profile):
+			
+			attendance = get_attendance_currentevent(user)
+			if attendance is None:
+				# check if they need to have their attendance reset
 				if user.has_perm('frontend.can_register_attendance'):
 					# user is allowed to sign other people in, so let them login.
 
@@ -143,8 +145,6 @@ def login(request):
 
 					return render_to_response('frontend/login.html', d,
 						context_instance=RequestContext(request))
-
-			attendance = get_attendance_currentevent(profile)
 
 			# turn on the user's internet connection if they say they wanted it on
 			if f.cleaned_data['internet'] or profile.internet_on:
@@ -228,7 +228,7 @@ def internet_login(request, mac_address):
 		return render_to_response('frontend/event-not-active.html',
 			context_instance=RequestContext(request))
 
-	attendance = get_userprofile_attendance(current_event, profile)
+	attendance = get_user_attendance(current_event, user)
 	if attendance == None:
 		return render_to_response('frontend/not-signed-in.html', {
 			'event': current_event
@@ -257,14 +257,14 @@ def internet_login(request, mac_address):
 		if ip != None:
 			h.ip_address = ip
 
-		old_owner = h.user_profile
-		if h.user_profile != None and h.user_profile != profile:
+		old_owner = h.owner
+		if h.owner is not None and h.owner is not user:
 			# only allow this if it is the current machine
 			ip = request.META['REMOTE_ADDR']
 			mac = get_mac_address(ip)
 			if mac.upper() == mac_address.upper():
 				# mac addresses match, allow the change
-				h.user_profile = profile
+				h.owner = user
 			else:
 				# this isn't the current machine, disallow the change
 				return render_to_response(
@@ -273,13 +273,13 @@ def internet_login(request, mac_address):
 					context_instance=RequestContext(request)
 				)
 		else:
-			h.user_profile = profile
+			h.owner = user
 
 		# before we save, we must log this change if there is in fact a change
-		if old_owner != h.user_profile:
+		if old_owner != h.owner:
 			NetworkHostOwnerChangeEvent.objects.create(
 				old_owner=old_owner,
-				new_owner=h.user_profile,
+				new_owner=h.owner,
 				network_host=h
 			)
 
@@ -293,7 +293,7 @@ def internet_login(request, mac_address):
 
 	try:
 		# sync the database to the firewall
-		sync_user_connections(profile)
+		sync_user_connections(user)
 
 		# enable internet access
 		enable_user_quota(attendance)
@@ -313,22 +313,21 @@ def internet_disown(request, host_id):
 	h = get_object_or_404(NetworkHost, id=host_id)
 	profile = get_userprofile(request.user)
 
-	if h.user_profile == profile or \
+	if h.owner == request.user or \
 		request.user.has_perm('frontend.can_view_ownership'):
 		# it's owned by me or i'm allowed to change it, so i can disown it.
 		# make sure "profile" variable is set correctly in this context, for
 		# handling third party disownership.
-		profile = h.user_profile
 		NetworkHostOwnerChangeEvent.objects.create(
-			old_owner=profile,
+			old_owner=h.owner,
 			new_owner=None,
 			network_host=h
 		)
-		h.user_profile = None
+		h.owner = None
 		h.save()
 
 		# resync internet for user
-		sync_user_connections(profile)
+		sync_user_connections(request.user)
 		if request.META.has_key('HTTP_REFERER'):
 			return HttpResponseRedirect(request.META['HTTP_REFERER'])
 		else:
@@ -374,8 +373,8 @@ def quota(request):
 		return render_to_response('frontend/event-not-active.html',
 			context_instance=RequestContext(request))
 	
-	attendance = get_userprofile_attendance(current_event, profile)
-	if attendance == None:
+	attendance = get_user_attendance(current_event, user)
+	if attendance is None:
 		return render_to_response('frontend/not-signed-in.html', {
 			'event': current_event
 		}, context_instance=RequestContext(request))
@@ -392,7 +391,7 @@ def quota(request):
 	except:
 		quota_update_fail = True
 
-	my_hosts = NetworkHost.objects.filter(user_profile__exact=profile)
+	my_hosts = NetworkHost.objects.filter(owner=user)
 
 	has_free_reset = False
 	could_get_a_reset_later = False
@@ -420,7 +419,7 @@ def quota_on(request):
 			return render_to_response('frontend/event-not-active.html',
 				context_instance=RequestContext(request))
 	
-		attendance = get_userprofile_attendance(current_event, profile)
+		attendance = get_user_attendance(current_event, user)
 		if attendance == None:
 			return render_to_response('frontend/not-signed-in.html', dict(
 				event=current_event
@@ -429,7 +428,7 @@ def quota_on(request):
 		if not attendance.is_revoked:	
 			try:
 				enable_user_quota(attendance)
-				sync_user_connections(profile)
+				sync_user_connections(user)
 			except:
 				return controller_error(request)
 
@@ -445,7 +444,7 @@ def quota_user_reset(request):
 		return render_to_response('frontend/event-not-active.html',
 			context_instance=RequestContext(request))
 	
-	attendance = get_userprofile_attendance(current_event, profile)
+	attendance = get_userprofile_attendance(current_event, user)
 	if attendance == None:
 		return render_to_response('frontend/not-signed-in.html', dict(
 			event=current_event
@@ -472,7 +471,7 @@ def quota_user_reset(request):
 						excuse = ''
 					QuotaResetEvent.objects.create(
 						event_attendance=attendance,
-						performer=profile,
+						performer=user,
 						excuse=excuse
 					)
 
@@ -480,7 +479,7 @@ def quota_user_reset(request):
 					attendance.save()
 
 				enable_user_quota(attendance)
-				sync_user_connections(profile)
+				sync_user_connections(user)
 			except:
 				return controller_error(request)
 
@@ -508,7 +507,7 @@ def quota_off(request):
 		if current_event == None:
 			return render_to_response('frontend/event-not-active.html',
 				context_instance=RequestContext(request))
-		attendance = get_userprofile_attendance(current_event, profile)
+		attendance = get_userprofile_attendance(current_event, user)
 		if attendance == None:
 			return render_to_response('frontend/not-signed-in.html', dict(
 				event=current_event
@@ -536,7 +535,7 @@ def usage(request):
 
 	attendances = EventAttendance.objects.filter(
 		event__exact=current_event
-	).order_by('user_profile')
+	).order_by('user__username')
 	total = 0L
 	for a in attendances:
 		total += a.quota_used
@@ -650,7 +649,7 @@ def usage_info(request, aid):
 		refresh_quota_usage(a)
 	except:
 		quota_update_fail = True
-	pcs = NetworkHost.objects.filter(user_profile__exact=a.user_profile)
+	pcs = NetworkHost.objects.filter(owner=a.user)
 
 	if request.method == 'POST':
 		reset_form = ResetExcuseForm(request.POST)
@@ -693,7 +692,7 @@ def usage_reset(request, aid):
 	# check if I'm trying to reset quota for the current user.
 	my_profile = get_userprofile(request.user)
 	if not request.user.has_perm('frontend.can_reset_own_quota') and \
-		(a.user_profile == my_profile and a.quota_multiplier > 1):
+		(a.user == request.user and a.quota_multiplier > 1):
 		# current user is trying to reset their own quota, and they have already
 		# reset quota before, and they do not have permission to reset their own
 		# quota.
@@ -714,7 +713,7 @@ def usage_reset(request, aid):
 		excuse = reset_form.cleaned_data['excuse']
 		QuotaResetEvent.objects.create(
 			event_attendance=a,
-			performer=get_userprofile(request.user),
+			performer=request.user,
 			excuse=excuse
 		)
 
@@ -740,7 +739,7 @@ def usage_all_on(request):
 
 		attendances = EventAttendance.objects.filter(event__exact=current_event)
 		for attendance in attendances:
-			if attendance.user_profile.internet_on:
+			if attendance.user.get_profile().internet_on:
 				enable_user_quota(attendance)
 				
 	return redirect('usage')
@@ -777,12 +776,14 @@ def usage_all_off(request):
 				context_instance=RequestContext(request))
 
 		attendances = EventAttendance.objects.filter(event__exact=current_event)
-
+		# TODO: use better transaction method
+		# TODO: select by user rather than attendance, use FK to get distinct
 		sid = transaction.savepoint()
 		for attendance in attendances:
-			attendance.user_profile.internet_on = False
-			attendance.user_profile.save()
+			profile = attendance.user.get_profile()
+			profile.internet_on = False
 			disable_user_quota(attendance)
+			profile.save()
 		transaction.savepoint_commit(sid)
 
 	return redirect('usage')
@@ -851,9 +852,9 @@ def usage_disable(request, aid):
 
 @user_passes_test(lambda u: u.has_perm('frontend.can_view_ownership'))
 def pclist(request):
-	hosts = NetworkHost.objects.exclude(
-		user_profile__exact=None
-	).order_by('user_profile__user__username')
+	hosts = NetworkHost.objects.filter(
+		owner__isnull=False
+	).order_by('owner__username')
 	
 	return render_to_response('frontend/pclist.html', {
 		'hosts': hosts,
@@ -864,8 +865,8 @@ def pclist(request):
 @user_passes_test(lambda u: u.has_perm('frontend.can_view_ownership'))
 def pclist_unowned(request):
 	hosts = NetworkHost.objects.filter(
-		user_profile__exact=None
-	).order_by('user_profile__user__username')
+		owner__isnull=True
+	).order_by('mac_address')
 	
 	return render_to_response('frontend/pclist.html', {
 		'hosts': hosts,
@@ -935,11 +936,11 @@ def captive_landing(request):
 	
 	try:
 		h = NetworkHost.objects.get(mac_address__iexact=mac)
-		if h.user_profile == None:
+		if h.owner is None:
 			raise Exception, 'no user associated with this host'
 
 		# now get the event information
-		attendance = get_attendance_currentevent(h.user_profile)
+		attendance = get_attendance_currentevent(h.owner)
 
 		# okay, there's active attendance
 		# check quota
@@ -949,7 +950,7 @@ def captive_landing(request):
 
 			# check if the internet access is switched on
 
-			if h.user_profile.internet_on:
+			if h.owner.get_profile().internet_on:
 				# user is marked as online.
 				# check if the host is detected as online
 				if h.online:
@@ -1060,7 +1061,7 @@ def signin2(request):
 				u.save()
 
 				# create matching userprofile
-				UserProfile(user=u).save()
+				UserProfile.objects.create(user=u)
 
 				# now go to next step
 				return redirect('signin3', u.id)
@@ -1076,8 +1077,8 @@ def signin2(request):
 @user_passes_test(lambda u: u.has_perm('frontend.can_register_attendance'))
 def signin3(request, uid):
 	u = get_object_or_404(User, id=uid)
-	my_profile = get_userprofile(request.user)
-	
+	my_profile = request.user.get_profile()
+
 	current_event = get_current_event()
 	if current_event == None:
 		messages.warning(request,
@@ -1085,7 +1086,7 @@ def signin3(request, uid):
 		)
 		return redirect('admin:frontend_event_add')
 
-	if has_userprofile_attended(current_event, u.get_profile()):
+	if has_user_attended(current_event, u):
 		# see if the user is already signed in.
 		# if so, direct them back to the start.
 		messages.error(request,
@@ -1107,8 +1108,8 @@ def signin3(request, uid):
 					a = EventAttendance(
 						quota_unmetered=True,
 						event=current_event,
-						user_profile=u.get_profile(),
-						registered_by=request.user.get_profile()
+						user=u,
+						registrar=request.user
 					)
 				else:
 					a = None
@@ -1123,8 +1124,8 @@ def signin3(request, uid):
 					a = EventAttendance(
 						quota_amount=quota_amount * 1048576,
 						event=current_event,
-						user_profile=u.get_profile(),
-						registered_by=request.user.get_profile()
+						user=u,
+						registrar=request.user
 					)
 				else:
 					a = None

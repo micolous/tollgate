@@ -53,7 +53,7 @@ urlpatterns = patterns('tollgate.api.views',
 		r'\.\d{1,3})/$',
 		ReadOnlyInstanceModelView.as_view(
 			serializer_class=UserProfileResource,
-			queryset=UserProfile.objects.filter(networkhost__online=True)
+			queryset=UserProfile.objects.filter(user__hosts__online=True)
 		),
 		name='api_whois_ip'
 	),

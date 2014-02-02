@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 tollgate frontend admin hooks
-Copyright 2008-2012 Michael Farrell
+Copyright 2008-2014 Michael Farrell
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -24,7 +24,7 @@ from tollgate.frontend.models import *
 class EventAttendanceAdmin(admin.ModelAdmin):
 	list_display = (
 		'event',
-		'user_profile',
+		'user',
 		'quota_used',
 		'quota_multiplier',
 		'quota_amount',
@@ -42,7 +42,7 @@ class NetworkHostAdmin(admin.ModelAdmin):
 		'mac_address',
 		'ip_address',
 		'computer_name',
-		'user_profile',
+		'owner',
 		'online',
 		'vendor'
 	)
@@ -53,7 +53,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 
 class QuotaResetEventAdmin(admin.ModelAdmin):
-	list_display = ('when', 'event_attendance', 'performer', 'excuse')
+	list_display = ('when', 'event_attendance', 'user', 'excuse')
 
 
 class NetworkHostOwnerChangeEventAdmin(admin.ModelAdmin):

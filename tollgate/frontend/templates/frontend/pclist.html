@@ -46,10 +46,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			</tr>
 		{% endfor %}
 	{% else %}
-		{% regroup hosts by user_profile as profile_list %}
-		{% for p in profile_list %}
+		{% regroup hosts by owner as owner_list %}
+		{% for p in owner_list %}
 			<tr class="uh">
-				<td colspan="5">{{ p.grouper.user.username }} ({{ p.grouper.user.first_name }} {{ p.grouper.user.last_name }})</td>
+				<td colspan="5">{{ p.grouper.username }} ({{ p.grouper.first_name }} {{ p.grouper.last_name }})</td>
 			</tr>		
 
 			{% for host in p.list %}

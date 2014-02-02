@@ -1,5 +1,5 @@
 Django>=1.5,<1.6
-South
+South>=0.8.4
 lxml>=2.2.8
 progressbar>=2.2
 configparser>=3.2.0
@@ -8,5 +8,5 @@ djangorestframework>=2.3.10,<3.0.0
 IPy
 
 # required for operation on linux
-dbus
+#dbus
 daemon

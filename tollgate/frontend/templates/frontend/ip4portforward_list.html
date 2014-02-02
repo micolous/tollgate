@@ -64,7 +64,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 					<td>{{ object.external_port }}</td>
 					<td>{{ object.port }}</td>
 				{% endif %}
-				<td>{{ object.created }} by {{ object.creator.user }}</td>
+				<td>{{ object.created }} by {{ object.creator }}</td>
 				<td><form method="post" action="{% url 'ip4portforward_toggle' object.id %}">{% csrf_token %}<input type="submit" class="{{ object.enabled|yesno }}" value="{{ object.enabled|yesno }}" /></form></td>
 				<td><a href="{% url 'ip4portforward_edit' object.id %}">Edit</a> <a href="{% url 'ip4portforward_delete' object.id %}">Delete</a></td>
 			</tr>

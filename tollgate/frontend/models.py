@@ -1,5 +1,5 @@
 """tollgate frontend models
-Copyright 2008-2013 Michael Farrell <http://micolous.id.au>
+Copyright 2008-2014 Michael Farrell <http://micolous.id.au>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -105,12 +105,9 @@ class UserProfile(Model):
 		""")
 	)
 
-	def get_hosts(self):
-		return NetworkHost.objects.filter(user_profile=self)
-
-	def get_changes(self):
+	def host_changes(self):
 		return NetworkHostOwnerChangeEvent.objects.filter(
-			Q(old_owner=self) | Q(new_owner=self)
+			Q(old_owner=self.user) | Q(new_owner=self.user)
 		)
 	
 	@property
@@ -138,7 +135,8 @@ class NetworkHost(Model):
 	ip_address = IPAddressField()
 	computer_name = CharField(max_length=128)
 	first_connection = DateTimeField('first connection')
-	user_profile = ForeignKey(UserProfile, blank=True, null=True)
+
+	owner = ForeignKey(User, blank=True, null=True, related_name='hosts')
 	online = BooleanField(default=True)
 
 	def get_console_oui(self):
@@ -163,7 +161,7 @@ class NetworkHost(Model):
 		return o != None and o.is_console
 
 	def __unicode__(self):
-		return u'%s (Name = %s, User = %s)' % (self.mac_address, self.computer_name, self.user_profile)
+		return u'%s (Name = %s, User = %s)' % (self.mac_address, self.computer_name, self.owner)
 
 class Event(Model):
 	class Meta:
@@ -199,7 +197,7 @@ class Event(Model):
 
 class EventAttendance(Model):
 	class Meta:
-		ordering = ['event', 'user_profile']
+		ordering = ['event', 'user__username']
 		permissions = (
 			("can_register_attendance", "Register event attendance"),
 			("can_view_quota", "View quota"),
@@ -209,7 +207,8 @@ class EventAttendance(Model):
 			('can_revoke_access', 'Revoke internet access for a user'),
 		)
 	event = ForeignKey(Event)
-	user_profile = ForeignKey(UserProfile)
+	user = ForeignKey(User, related_name='attendances')
+
 	quota_used = BigIntegerField(default=0, validators=[unsigned_validator])
 	quota_multiplier = PositiveIntegerField(default=1, validators=[unsigned_validator])
 	quota_amount = BigIntegerField(default=long(settings.DEFAULT_QUOTA_AMOUNT)*1048576L, validators=[unsigned_validator])
@@ -218,7 +217,7 @@ class EventAttendance(Model):
 	# ALTER TABLE `tollgate`.`frontend_eventattendance` ADD COLUMN `coffee` TINYINT(1)  NOT NULL DEFAULT 0 AFTER `quota_unmetered`;
 	coffee = BooleanField(default=False)
 
-	registered_by = ForeignKey(UserProfile, null=True, blank=True, related_name="registered_by")
+	registrar = ForeignKey(User, null=True, blank=True, related_name='registrations')
 	registered_on = DateTimeField(auto_now_add=True)
 	
 	@property
@@ -273,7 +272,7 @@ class EventAttendance(Model):
 			return u"0"
 	
 	def __unicode__(self):
-		return u'(Event = %s) (User = %s) (Quota = %s/%s)' % (self.event, self.user_profile, bytes_str(self.quota_used), bytes_str(self.quota_amount * self.quota_multiplier))
+		return u'(Event = %s) (User = %s) (Quota = %s/%s)' % (self.event, self.user, bytes_str(self.quota_used), bytes_str(self.quota_amount * self.quota_multiplier))
 
 
 
@@ -282,7 +281,7 @@ class QuotaResetEvent(Model):
 		ordering = ['when']
 	when = DateTimeField(auto_now_add=True)
 	event_attendance = ForeignKey(EventAttendance)
-	performer = ForeignKey(UserProfile, related_name='performer')
+	user = ForeignKey(User, related_name='resets_performed', help_text=_('The user which performed the reset operation'))
 	excuse = CharField(max_length=256)
 
 	def __unicode__(self):
@@ -292,8 +291,8 @@ class NetworkHostOwnerChangeEvent(Model):
 	class Meta:
 		ordering = ['when']
 	when = DateTimeField(auto_now_add=True)
-	old_owner = ForeignKey(UserProfile, blank=True, null=True, related_name="old_owner")
-	new_owner = ForeignKey(UserProfile, blank=True, null=True, related_name="new_owner")
+	old_owner = ForeignKey(User, blank=True, null=True, related_name='old_host_changes')
+	new_owner = ForeignKey(User, blank=True, null=True, related_name='new_host_changes')
 	network_host = ForeignKey(NetworkHost)
 
 
@@ -383,7 +382,7 @@ class IP4PortForward(Model):
 	protocol = ForeignKey(IP4Protocol, default=6, help_text='The IPv4 protocol that this service uses.  If you don\'t know, try TCP or UDP.')
 	port = PositiveIntegerField(default=0, help_text='The internal port that the service is running on.  This has no effect if the protocol does not have port numbers.')
 	external_port = PositiveIntegerField(default=0, help_text='The external port that this service should show as running on.  This has no effect if the protocol does not have port numbers.')
-	creator = ForeignKey(UserProfile)
+	creator = ForeignKey(User, related_name='ipv4_port_forwards_created')
 	created = DateTimeField(auto_now_add=True)
 	enabled = BooleanField(blank=True, default=True)
 	label = CharField(max_length=64, help_text="Optional description of the port forward", blank=True, default="")
@@ -448,35 +447,32 @@ def get_userprofile(user):
 		profile.save()
 		return profile
 
-def has_userprofile_attended(event, userprofile):
-	return EventAttendance.objects.filter(event__exact=event, user_profile__exact=userprofile).exists()
+def has_user_attended(event, user):
+	return EventAttendance.objects.filter(event__exact=event, user=user).exists()
 
-def get_userprofile_attendance(event, userprofile):
+def get_user_attendance(event, user):
 	"""
 	Gets the EventAttendance associated with that userprofile at this event.
 	
 	Returns None if the user is not signed in.
 	"""
 	try:
-		return EventAttendance.objects.get(event__exact=event, user_profile__exact=userprofile)
-	except ObjectDoesNotExist:
+		return EventAttendance.objects.get(event__exact=event, user=user)
+	except EventAttendance.DoesNotExist:
 		return None
 
-def get_attendance_currentevent(userprofile):
+def get_attendance_currentevent(user):
 	"""
 	Gets the user's attendance at the current event.
 	
-	Returns None if there is no current event, or the user is not registered as attendending this event.
+	Returns None if there is no current event, or the user is not registered as
+	attendending this event.
 	"""
 	e = get_current_event()
 	
-	if e != None:
-		return get_userprofile_attendance(e, userprofile)
-	else:
-		return None
+	if e is not None:
+		return get_user_attendance(e, user)
 
-def has_attended_currentevent(userprofile):
-	return has_userprofile_attended(get_current_event(), userprofile)
 
 def user_exists(name):
 	return User.objects.filter(username__iexact=name).exists()
@@ -485,50 +481,57 @@ def find_user_exact(name):
 	return User.objects.filter(username__iexact=name)[0]
 
 def get_signed_in_users(event):
-	return EventAttendance.objects.filter(event__exact=event).order_by('user_profile')
+	return EventAttendance.objects.filter(event__exact=event).order_by('user')
 
 def get_portalapi():
 	return TollgateController()
 
 def enable_user_quota(event_attendance):
+	# TODO: migrate to EventAttendance model
+	# TODO: validate event
 	portal = get_portalapi()
 	refresh_quota_usage(event_attendance, portal)
 
 	# we've had some success so far, mark their connection as on
-	event_attendance.user_profile.internet_on = True
-	event_attendance.user_profile.save()
+	profile = event_attendance.user.get_profile()
+	profile.internet_on = True
+	profile.save()
 
 	# add to firewall
 	if event_attendance.quota_unmetered:
 		# add unmetered connection
-		portal.enable(event_attendance.user_profile.user.id)
+		portal.enable(event_attendance.user.id)
 	elif event_attendance.quota_remaining() > 0:
 		# add quota
-		portal.enable(event_attendance.user_profile.user.id, event_attendance.quota_remaining())
+		portal.enable(event_attendance.user.id, event_attendance.quota_remaining())
 
-	sync_user_connections(event_attendance.user_profile)
+	sync_user_connections(event_attendance.user)
 
 def disable_user_quota(event_attendance):
+	# TODO: migrate to EventAttendance model
+	# TODO: validate event
+	
 	# lets read from the portal how much quota they have used
 	portal = get_portalapi()
 	# refresh usage
 	refresh_quota_usage(event_attendance, portal)
 
 	# make connection as disabled
-	event_attendance.user_profile.internet_on = False
-	event_attendance.user_profile.save()
+	profile = event_attendance.user.get_profile()
+	profile.internet_on = True
+	profile.save()
 
-	portal.disable(event_attendance.user_profile.user.id)
+	portal.disable(event_attendance.user.id)
 
-def sync_user_connections(profile, portal=None):
+def sync_user_connections(user, portal=None):
 	"""Sync the database's copy of a user's connections with the portal"""
-	user_id = profile.user.id
+	user_id = user.id
 	if portal == None:
 		portal = get_portalapi()
 
 	# find all the user's computers.
 	hosts = list(NetworkHost.objects.filter(
-		user_profile__exact=profile, online__exact=True
+		user=user, online=True
 	).only('mac_address', 'ip_address'))
 	
 	# flush the 
@@ -548,7 +551,7 @@ def refresh_quota_usage(event_attendance, portal=None):
 		# not part of this event
 		return False
 	
-	r = portal.get_quota(event_attendance.user_profile.user.id)
+	r = portal.get_quota(event_attendance.user.id)
 	if r != None:
 		# now set counters
 		EventAttendance.objects.filter(id=event_attendance.id).update(quota_used=F('quota_used') + r)
@@ -575,7 +578,7 @@ def refresh_all_quota_usage(portal=None):
 	counters = portal.get_all_users_quota_remaining()
 	for uid, quota in counters:
 		# check to see if they are on the list of attendees
-		if not r.filter(user_profile__user__id=uid).exists():
+		if not r.filter(user__id=uid).exists():
 			# this user isn't signed on, disable their internet access.
 			portal.disable(uid)
 
@@ -583,7 +586,7 @@ def refresh_all_quota_usage(portal=None):
 def refresh_networkhost(portal=None):
 	if portal == None:
 		portal = get_portalapi()
-	# use nbtscan to scan the whole network.  it's pretty quick
+	# do a ping scan
 	devnull_w = open('/dev/null', 'w')
 	devnull_r = open('/dev/null', 'r')
 	call('nmap -sP -n -T4 -oG -'.split() + [settings.LAN_SUBNET], stdout=devnull_w, stderr=devnull_w, stdin=devnull_r)
@@ -633,8 +636,8 @@ def refresh_networkhost(portal=None):
 			hostinfo.online = True
 			hostinfo.ip_address = ip
 
-			if hostinfo.user_profile != None and old_online_state != hostinfo.online and not users_needing_refresh.__contains__(hostinfo.user_profile):
-				users_needing_refresh.append(hostinfo.user_profile)
+			if hostinfo.owner != None and old_online_state != hostinfo.online and hostinfo.owner not in users_needing_refresh:
+				users_needing.append(hostinfo.owner)
 			hostinfo.save()
 		except ObjectDoesNotExist:
 			NetworkHost.objects.create(mac_address=mac, computer_name=name, first_connection=utcnow(), online=True, ip_address=ip)
@@ -647,8 +650,8 @@ def refresh_networkhost(portal=None):
 				hostinfo.online = False
 				hostinfo.save()
 
-				if hostinfo.user_profile != None and not users_needing_refresh.__contains__(hostinfo.user_profile):
-					users_needing_refresh.append(hostinfo.user_profile)
+				if hostinfo.user != None and hostinfo.user not in users_needing_refresh:
+					users_needing_refresh.append(hostinfo.user)
 		except ObjectDoesNotExist:
 			# no troubles
 			pass
@@ -660,13 +663,13 @@ def refresh_networkhost(portal=None):
 		if nh.online:
 			old_online_state = nh.online
 			nh.online = False
-			if nh.user_profile != None and old_online_state != nh.online and not users_needing_refresh.__contains__(nh.user_profile):
-				users_needing_refresh.append(nh.user_profile)
+			if nh.owner != None and old_online_state != nh.online and nh.owner not in users_needing_refresh:
+				users_needing_refresh.append(nh.owner)
 			nh.save()
 
 	# now refresh the specfic users
-	for profile in users_needing_refresh:
-		sync_user_connections(profile, portal)
+	for user in users_needing_refresh:
+		sync_user_connections(user, portal)
 
 def refresh_networkhost_quick():
 	arp_cache = get_arp_cache()
@@ -688,8 +691,8 @@ def refresh_networkhost_quick():
 			old_online_state = hostinfo.online
 			hostinfo.online = True
 			hostinfo.ip_address = ip
-			if hostinfo.user_profile != None and old_online_state != hostinfo.online and not users_needing_refresh.__contains__(hostinfo.user_profile):
-				users_needing_refresh.append(hostinfo.user_profile)
+			if hostinfo.owner != None and old_online_state != hostinfo.online and hostinfo.owner not in users_needing_refresh:
+				users_needing_refresh.append(hostinfo.owner)
 			hostinfo.save()
 		except ObjectDoesNotExist:
 			NetworkHost.objects.create(mac_address=mac, computer_name='', first_connection=utcnow(), online=True, ip_address=ip)
@@ -701,8 +704,8 @@ def refresh_networkhost_quick():
 				hostinfo.online = False
 				hostinfo.save()
 
-				if hostinfo.user_profile != None and not users_needing_refresh.__contains__(hostinfo.user_profile):
-					users_needing_refresh.append(hostinfo.user_profile)
+				if hostinfo.owner != None and hostinfo.owner not in users_needing_refresh:
+					users_needing_refresh.append(hostinfo.owner)
 		except ObjectDoesNotExist:
 			# no troubles
 			pass
@@ -711,18 +714,22 @@ def refresh_networkhost_quick():
 		sync_user_connections(profile)
 
 def get_unclaimed_online_hosts():
-	return NetworkHost.objects.filter(online__exact=True, user_profile__exact=None).order_by('-first_connection')
+	return NetworkHost.objects.filter(online__exact=True, owner__isnull=True).order_by('-first_connection')
 
 def get_unclaimed_offline_hosts():
-	return NetworkHost.objects.filter(online__exact=False, user_profile__exact=None).order_by('-first_connection')
+	return NetworkHost.objects.filter(online__exact=False, owner__isnull=True).order_by('-first_connection')
 
 def apply_ip4portforwards():
-	forwards = IP4PortForward.objects.filter(enabled=True, host__online=True, host__user_profile__internet_on=True).select_related(depth=1)
+	forwards = IP4PortForward.objects.filter(enabled=True, host__online=True).select_related(depth=1)
 
 	portal = get_portalapi()
 	portal.ip4pf_flush()
 
 	for pf in forwards:
+		# internets are offline, don't apply the forward
+		if not pf.host.user.get_profile().internet_on:
+			continue
+
 		# remove port number from things that shouldn't have one.
 		if pf.protocol.has_port:
 			port = pf.port

@@ -1,7 +1,7 @@
 {% extends "frontend/base-usage.html" %}
 {% comment %}
 tollgate admin usage info page
-Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2014 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% load url from future %}
 {% load i18n %}
 {% load humanize %}
-{% block windowtitle %}internet usage report for {{ a.user_profile.user.username }} at {{ a.event.name }}{% endblock %}
-{% block title %}internet usage report for {{ a.user_profile.user.username }} at {{ a.event.name }}{% endblock %}
+{% block windowtitle %}internet usage report for {{ a.user.username }} at {{ a.event.name }}{% endblock %}
+{% block title %}internet usage report for {{ a.user.username }} at {{ a.event.name }}{% endblock %}
 
 {% block content %}
 {% if quota_update_fail %}
@@ -29,32 +29,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <h2>Quota Details</h2>
 {% if a.quota_unmetered %}
-	<p>{{ a.user_profile.user.username }} has unlimited quota.  They've used <strong>{{ a.quota_used_str }}</strong> at this event.</p>
+	<p>{{ a.user.username }} has unlimited quota.  They've used <strong>{{ a.quota_used_str }}</strong> at this event.</p>
 {% else %}
 	{% if a.is_revoked %}
-		<p>{{ a.user_profile.user.username }} has had their internet connectivity revoked.</p>
+		<p>{{ a.user.username }} has had their internet connectivity revoked.</p>
 		
 		<p>They used <strong>{{ a.quota_used_str }}</strong>.</p>
 	{% else %}
-		<p>{{ a.user_profile.user.username }} gets <strong>{{ a.quota_amount_str }}</strong> of quota, which, so far, has been reset <strong>{{ a.reset_count }}</strong> time{{ a.reset_count|pluralize }}.</p>
+		<p>{{ a.user.username }} gets <strong>{{ a.quota_amount_str }}</strong> of quota, which, so far, has been reset <strong>{{ a.reset_count }}</strong> time{{ a.reset_count|pluralize }}.</p>
 	
 		<p>They've used <strong>{{ a.quota_used_str }}</strong>, and have <strong>{{ a.quota_remaining_str }}</strong> remaining.</p>
 	{% endif %}
 {% endif %}
 
-<h2>Internet Switch (currently {% if a.user_profile.internet_on %}<span class="yes">ON</span>{% else %}<span class="no">OFF</span>{% endif %})</h2>
+<h2>Internet Switch (currently {% if a.user.get_profile.internet_on %}<span class="yes">ON</span>{% else %}<span class="no">OFF</span>{% endif %})</h2>
 <ul>
 	{% if perms.frontend.can_toggle_internet %}
 		{% if not a.is_revoked %}
 		<li>
 			<form method="post" action="{% url 'usage-on' a.id %}">{% csrf_token %}
-				<input type="submit" value="Switch on {{ a.user_profile.user.username }}'s internet connectivity" />  If they have quota available, internet access will be granted to all of their computers and devices.
+				<input type="submit" value="Switch on {{ a.user.username }}'s internet connectivity" />  If they have quota available, internet access will be granted to all of their computers and devices.
 			</form>
 		</li>
 		{% endif %}
 		<li>
 			<form method="post" action="{% url 'usage-off' a.id %}">{% csrf_token %}
-				<input type="submit" value="Switch off {{ a.user_profile.user.username }}'s internet connectivity" />  All computers listed here will loose internet access <em>immediately</em>, and all unfinished downloads will be terminated.  Internet access will resume when you or they opt to, or when they try to connect another computer to the internet in their name.
+				<input type="submit" value="Switch off {{ a.user.username }}'s internet connectivity" />  All computers listed here will loose internet access <em>immediately</em>, and all unfinished downloads will be terminated.  Internet access will resume when you or they opt to, or when they try to connect another computer to the internet in their name.
 			</form>
 		</li>
 	{% else %}
@@ -69,7 +69,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 				<form method="post" action="{% url 'usage-reset' a.id %}">{% csrf_token %}
 					{{ reset_form.as_p }}
 					<p><strong>Warning:</strong> This excuse will be logged and visible to the user as well, even if they're not an administrator.  Be polite. :)</p>
-					<p><input type="submit" value="Reset {{ a.user_profile.user.username }}'s quota."/>  They will gain an additional {{ a.quota_amount_str }} of quota, and their internet access will be enabled (if it is disabled).</p>
+					<p><input type="submit" value="Reset {{ a.user.username }}'s quota."/>  They will gain an additional {{ a.quota_amount_str }} of quota, and their internet access will be enabled (if it is disabled).</p>
 				</form>
 			</li>
 		{% endif %}
@@ -87,7 +87,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	{% endif %}
 </ul>
 
-<h2>{{ a.user_profile.user.username }}'s Resets ({{ a.get_resets|length }})</h2>
+<h2>{{ a.user.username }}'s Resets ({{ a.get_resets|length }})</h2>
 {% if a.get_resets %}
 	<table class="internet">
 		<tr>
@@ -108,7 +108,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	<p>No resets have been peformed on this account this event.</p>
 {% endif %}
 
-<h2>{{ a.user_profile.user.username }}'s Computers and Devices</h2>
+<h2>{{ a.user.username }}'s Computers and Devices</h2>
 <p>All traffic generated by these systems will be registered in their name.</p>
 
 {% if perms.frontend.can_view_ownership %}
@@ -120,7 +120,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			<th>Online</th>
 			<th>Disown/Disconnect</th>
 		</tr>
-		{% for host in a.user_profile.get_hosts %}
+		{% for host in a.user.hosts.objects.all %}
 			<form method="post" action="{% url 'internet-disown' host.id %}">{% csrf_token %}
 				<tr class="{% cycle row1,row2 %}">
 					<td>{{ host.computer_name }}</td>
@@ -142,7 +142,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	<p>You don't have permission to view this (requires <code>can_view_ownership</code>).</p>
 {% endif %}
 
-<h2>{{ a.user_profile.user.username }}'s changes of network host ownership</h2>
+<h2>{{ a.user.username }}'s changes of network host ownership</h2>
 <p>This is when systems came in to or out of this user's ownership.</p>
 
 {% if perms.frontend.can_view_ownership %}
@@ -156,18 +156,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			<th>IP Address</th>
 			<th>Online</th>
 		</tr>
-		{% for change in a.user_profile.get_changes %}
+		{% for change in a.user.get_profile.host_changes %}
 			<tr class="{% cycle row1,row2 %}">
 				<td>
 					{% if change.old_owner %}
-						{{ change.old_owner.user.username }}
+						{{ change.old_owner.username }}
 					{% else %}
 						<em>(nobody)</em>
 					{% endif %}
 				</td>
 				<td>
 					{% if change.new_owner %}
-						{{ change.new_owner.user.username }}
+						{{ change.new_owner.username }}
 					{% else %}
 						<em>(nobody)</em>
 					{% endif %}

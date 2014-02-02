@@ -151,6 +151,6 @@ class IP4PortForwardForm(forms.ModelForm):
 	def save(self):
 		pf = super(IP4PortForwardForm, self).save(commit=False)
 		if not pf.id and self.user != None:
-			pf.creator = self.user.get_profile()
+			pf.creator = self.user
 		pf.save()
 		return pf
