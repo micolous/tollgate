@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """iptables support module for tollgate
-Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2014 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -20,8 +20,10 @@ from os import system, listdir
 from os.path import exists, join, isfile
 from sys import exit
 from re import compile as re_compile
-import dbus, dbus.service, dbus.glib, glib
-from dbus.mainloop.glib import DBusGMainLoop
+from twisted.internet import reactor, defer
+from txdbus import client, objects, error
+from txdbus.interface import DBusInterface, Method
+
 
 DEBUG = False
 
@@ -93,6 +95,10 @@ def check_symbols(*symbols):
 	symbols = list(symbols)
 	d = read_all_file('/proc/kallsyms')
 	for l in d.split('\n'):
+		# newline at EOF
+		if l == '':
+			continue
+
 		symbol_name = l.split(' ')[2].split("\t")[0]
 		if symbol_name in symbols:
 			symbols.remove(symbol_name)
@@ -105,7 +111,7 @@ def check_symbols(*symbols):
 
 def load_modules(*modules):
 	for module in modules:
-		run('modprobe', '-v', module)
+		run(MODPROBE, '-v', module)
 	
 def create_nat():
 	# load kernel modules that may not have loaded.
@@ -141,7 +147,7 @@ def create_nat():
 			print "Though some of those modules may be in-kernel.  These symbols are missing:"
 			print missing_symbols
 			print ""
-			print "This may mean that you have not built all dependancies."
+			print "This may mean that you have not built and installed all dependencies, or you're not running this as a superuser."
 			exit(1)
 		else:
 			# all symbols are there, continue onward.
@@ -346,12 +352,29 @@ def write_file(filename, value):
 	fh.close()
 
 # backend api exposing
-class PortalBackendAPI(dbus.service.Object):
-	def __init__(self, bus, object_path=DBUS_PATH):
-		dbus.service.Object.__init__(self, bus, object_path)
+class PortalBackendAPI(objects.DBusObject):
+	iface = DBusInterface(
+		DBUS_INTERFACE,
+		Method('create_user', 's', ''),
+		Method('enable_user_unmetered', 's', ''),
+		Method('enable_user', 'sx', ''),
+		Method('add_host', 'sss', ''),
+		Method('flush_hosts', 's', ''),
+		Method('get_quota', 's', 'bt'),
+		Method('get_all_users_quota_remaining', '', 'a(sx)'),
+		Method('disable_user', 's', ''),
+		Method('ip4pf_flush', '', ''),
+		Method('ip4pf_add', 'sxxx', '')
+	)
+	
+	dbusInterfaces = [iface]
 
-	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
-	def create_user(self, uid):
+
+	def __init__(self, object_path=DBUS_PATH):
+		super(PortalBackendAPI, self).__init__(object_path)
+
+
+	def dbus_create_user(self, uid):
 		"""Creates a user in the firewall."""
 		iptables('-N',user_rule(uid))
 
@@ -361,17 +384,15 @@ class PortalBackendAPI(dbus.service.Object):
 		ipset('create', ip_set_name(uid), 'bitmap:ip', 'range', INTERN_SUBNET)
 
 
-	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
-	def enable_user_unmetered(self, uid):
+	def dbus_enable_user_unmetered(self, uid):
 		"""Enableds a user and sets unmetered quota on a user."""
 		self.enable_user(uid, None)
 
-	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='sx', out_signature='')
-	def enable_user(self, uid, quota):
+	def dbus_enable_user(self, uid, quota):
 		"""Enables a user and sets a quota on a user."""
 		# delete all rules on that user first
 		iptables('-F',user_rule(uid))
-		
+
 		# ipset bitmap:ip,mac strangeness from http://comments.gmane.org/gmane.linux.network/217806
 		# "bitmap:ip,mac is a two dimensional set and therefore it requires two directional parameters" (src,src)
 		# (why you would want to match based on ip on one way and mac from another is beyond me...)
@@ -383,7 +404,6 @@ class PortalBackendAPI(dbus.service.Object):
 		iptables('-t','mangle','-D','PREROUTING','-i',INTERN_IFACE,'-m','set','--match-set',ipmac_set_name(uid),'src,src','-m','quota2','--name',limit_rule(uid),'--no-change','-j','ACCEPT')
 		iptables('-D','FORWARD','-i',INTERN_IFACE,'-m','set','--match-set',ipmac_set_name(uid),'src,src','-j',user_rule(uid))
 		iptables('-D','FORWARD','-o',INTERN_IFACE,'-m','set','--match-set',ip_set_name(uid),'dst','-j',user_rule(uid))
-
 
 		# then make them allowed
 		if quota != None:
@@ -416,8 +436,8 @@ class PortalBackendAPI(dbus.service.Object):
 		iptables('-I','FORWARD','4','-i',INTERN_IFACE,'-m','set','--match-set',ipmac_set_name(uid),'src,src','-j',user_rule(uid))
 		iptables('-I','FORWARD','4','-o',INTERN_IFACE,'-m','set','--match-set',ip_set_name(uid),'dst','-j',user_rule(uid))
 
-	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='sss', out_signature='')
-	def add_host(self, uid, mac, ip):
+
+	def dbus_add_host(self, uid, mac, ip):
 		"""Registers a host as belonging to a certain user id."""
 		# add ip+mac ipset entry
 		ipset('add', ipmac_set_name(uid), ','.join([ip, mac]))
@@ -425,14 +445,14 @@ class PortalBackendAPI(dbus.service.Object):
 		# add ip ipset entry
 		ipset('add', ip_set_name(uid), ip)
 
-	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
-	def flush_hosts(self, uid):
+
+	def dbus_flush_hosts(self, uid):
 		"""Removes all hosts for a user."""
 		ipset('flush', ipmac_set_name(uid))
 		ipset('flush', ip_set_name(uid))
 
-	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='bt')
-	def get_quota(self, uid):
+
+	def dbus_get_quota(self, uid):
 		"""Gets the user's quota.
 
 		Returns a tuple:
@@ -445,9 +465,9 @@ class PortalBackendAPI(dbus.service.Object):
 			return (True, reset_quota2_amount(user_rule(uid)))
 		except:
 			return (False, 0)
-	
-	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='', out_signature='a(sx)')
-	def get_all_users_quota_remaining(self):
+
+
+	def dbus_get_all_users_quota_remaining(self):
 		"""
 		Gets all user's remaining quota.
 		
@@ -474,9 +494,9 @@ class PortalBackendAPI(dbus.service.Object):
 			o.append((f[len(LIMIT_RULE_PREFIX):], quota))
 		
 		return o
-		
-	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='s', out_signature='')
-	def disable_user(self, uid):
+
+
+	def dbus_disable_user(self, uid):
 		"""Disables a user's internet access by removing all their quota."""
 		iptables('-F',user_rule(uid))
 		try:
@@ -488,8 +508,7 @@ class PortalBackendAPI(dbus.service.Object):
 		except:
 			pass
 
-	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='', out_signature='')
-	def ip4pf_flush(self):
+	def dbus_ip4pf_flush(self):
 		"""Remove all IPv4 port forwarding rules."""
 		run(
 			IPTABLES,
@@ -503,8 +522,7 @@ class PortalBackendAPI(dbus.service.Object):
 			'-F', IP4PF_RULE
 		)
 
-	@dbus.service.method(dbus_interface=DBUS_INTERFACE, in_signature='sxxx', out_signature='')
-	def ip4pf_add(self, ip, protocol, port, external_port):
+	def dbus_ip4pf_add(self, ip, protocol, port, external_port):
 		"""Add a port forwarding entry"""
 		if port != 0:
 			# it's something with a port we need to handle.
@@ -555,19 +573,28 @@ class PortalBackendAPI(dbus.service.Object):
 				'-j', 'ACCEPT',
 			)
 
-
+@defer.inlineCallbacks
 def setup_dbus():
-	DBusGMainLoop(set_as_default=True)
-	system_bus = dbus.SystemBus()
-	name = dbus.service.BusName(DBUS_SERVICE, bus=system_bus)
-	return name
+	"""
+	Sets up the PortalBackendAPI and exposes it to the System Bus.
 
-def boot_dbus(daemonise, name, pid_file=None):
-	PortalBackendAPI(name)
-	loop = glib.MainLoop()
+	Called by the reactor when it is running.
+	"""
+	conn = yield client.connect(reactor, 'system')
+	api = PortalBackendAPI()
+	conn.exportObject(api)
+	yield conn.requestBusName(DBUS_SERVICE)
+
+
+def start(daemonise, pid_file=None):
+	reactor.callWhenRunning(setup_dbus)
+	
+	# TODO: replace with twistd
 	if daemonise:
-		assert pid_file, 'Running in daemon mode means pid_file must be specified.'
+		assert pid_file is not None, 'Running in daemon mode means pid_file must be specified.'
 		from daemon import daemonize
 		daemonize(pid_file)
-	loop.run()
 	
+	reactor.run()
+
+

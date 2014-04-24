@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """tollgate backend service
-Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2014 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from configparser import ConfigParser
 from sys import argv, exit
 from optparse import OptionParser
-import BaseHTTPServer, iptables
+import BaseHTTPServer, iptables, netifaces
 
 # constants
 # default settings doesn't quite work yet.
@@ -28,6 +28,7 @@ DEFAULT_SETTINGS = {
 		'reject_tcp_rst': True,
 		'iptables': '/sbin/iptables',
 		'ipset': '/usr/sbin/ipset',
+		'modprobe': '/sbin/modprobe',
 		'internal_iface': 'eth1',
 		'external_iface': 'eth0',
 		'captive_rule': 'p2_captive',
@@ -83,13 +84,14 @@ def main(daemon_enable, pid_file, settings_file=SETTINGS_FILE):
 	print "Loading configuration: %s" % settings_file
 	
 	if not config.read([settings_file,]):
-		print "Failure reading configuration file!"
+		print "Failure reading configuration file %r!" % settings_file
 		exit(1)
 
 	print "Setting configuration values..."
 	# FIXME: this should be done with proper classes instead of ugly global variables.
 	iptables.IPTABLES = config.get('tollgate', 'iptables')
 	iptables.IPSET = config.get('tollgate', 'ipset')
+	iptables.MODPROBE = config.get('tollgate', 'modprobe')
 	iptables.INTERN_IFACE = config.get('tollgate', 'internal_iface')
 	iptables.EXTERN_IFACE = config.get('tollgate', 'external_iface')
 	iptables.CAPTIVE_RULE = config.get('tollgate', 'captive_rule')
@@ -123,26 +125,22 @@ def main(daemon_enable, pid_file, settings_file=SETTINGS_FILE):
 	blacklist_hosts = None
 	if config.has_section('blacklist'):
 		blacklist_hosts = config.items('blacklist')
-		
-	# get network interface configuration for LAN side
-	# TODO: replace this.  This does some sanity checks
-	iface_info = iptables.run_capture_output('ip', '-4', 'addr', 'show', 'dev', iptables.INTERN_IFACE).split('\n')
-	if len(iface_info) != 3:
-		print "Error: Interface %s (internal side) does not have exactly 1 IPv4 address defined." % iptables.INTERN_IFACE
-		exit(1)
-	
-	ip_parts = iface_info[1].split()
-	assert ip_parts[0] == 'inet', 'Interface does not have inet address!?'
-	assert '/' in ip_parts[1], 'Does not appear to be a CIDR address?'
-	
+
+	# Get network interface configuration for LAN side in CIDR notation
+	#
 	# This gives slightly funny address, but ipset doesn't care that the IP in
 	# here is not the network address (but the host address).
-	iptables.INTERN_SUBNET = ip_parts[1]
-	
+	#
+	# Note: This only gets the first IP address on the interface.
+	try:
+		intern_addresses = netifaces.ifaddresses(iptables.INTERN_IFACE)[netifaces.AF_INET]
+	except KeyError:
+		raise Exception, 'interface %s has no IPv4 addresses set' % (iptables.INTERN_IFACE,)
 
-	print "Creating DBUS API..."
-	b = iptables.setup_dbus()
+	assert len(intern_addresses) == 1, 'Interface %r must have exactly 1 IPv4 address set.' % (iptables.INTERN_IFACE,)
+	iptables.INTERN_SUBNET = '/'.join([intern_addresses[0][k] for k in ('addr', 'netmask')])
 
+	print "OK, no turning back now!"
 	print "Creating NAT..."
 	iptables.create_nat()
 
@@ -153,13 +151,13 @@ def main(daemon_enable, pid_file, settings_file=SETTINGS_FILE):
 		print "Setting blacklist hosts..."
 		parse_hostlist(blacklist_hosts, iptables.add_blacklist)
 
-
-	print "Starting DBUS Server (only debug messages will appear now)"
+	print "Creating DBUS API..."
 	try:
-		iptables.boot_dbus(daemon_enable, b, pid_file)
+		iptables.start(daemon_enable, pid_file)
 	except KeyboardInterrupt:
 		print "Got Control-C!"
 		exit(0)
+
 
 def main_optparse():
 	"Version of main() that takes arguments as if it were a normal program."

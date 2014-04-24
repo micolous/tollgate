@@ -51,8 +51,7 @@ Install some required depedencies that are needed to use the setup.py infrastruc
 
 Now the rest of the installation can be resumed::
 
-   # apt-get install build-essential libxml2-dev libxslt-dev python-dev module-assistant
-   # m-a a-i xtables-addons
+   # apt-get install build-essential libxml2-dev libxslt-dev python-dev xtables-addons-dkms
    # pip install -r requirements.txt
 
 This will automatically upgrade any packages which are missing or out of date.
