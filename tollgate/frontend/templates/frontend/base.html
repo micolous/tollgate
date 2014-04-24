@@ -54,7 +54,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 			You should have received a copy of the GNU Affero General Public License
 			along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-			Source Code URL: {{ settings.SOURCE_URL }}
+			Source Code URL: {{ source_url }}
 		-->
 	</head>
 
@@ -122,14 +122,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 		
 		{% if messages %}
 		<ul class="messages">
-		    {% for message in messages %}
-		    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-		    {% endfor %}
+			{% for message in messages %}
+				<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+			{% endfor %}
 		</ul>
 		{% endif %}
 		
 		<div id="content">
-	    {% block content %}{% endblock %}
+			{% block content %}{% endblock %}
 		</div>
 		
 		<div id="copyrights">

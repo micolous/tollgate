@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 {% block content %}
 
-{% if settings.ONLY_CONSOLE %}
+{% if only_console %}
 	<p class="information">Only gaming consoles can be logged in to this instance of portal.</p>
 {% else %}
 	<form method="post" action="{% url 'internet-login-here' %}">{% csrf_token %}

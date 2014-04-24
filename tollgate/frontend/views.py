@@ -29,7 +29,9 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as login_do
 from django.contrib.auth import logout as logout_do
-from django.template import RequestContext as RequestContextOriginal
+from django.template import RequestContext as RequestContextOriginal, \
+	Context
+from django.template.response import TemplateResponse
 from django.db import transaction
 from traceback import extract_tb
 import sys
@@ -41,6 +43,7 @@ from django.views.decorators.http import require_http_methods
 import random
 from django.views.generic.list import ListView
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
+from django.views.generic.base import TemplateView
 from django.core.urlresolvers import get_callable, reverse_lazy
 
 
@@ -50,9 +53,27 @@ class NoCurrentEventException(Exception):
 
 class RequestContext(RequestContextOriginal):
 	"Our version of the RequestContext that includes additional stuff."
-	settings = settings
+	source_url = settings.SOURCE_URL
+	only_console = settings.ONLY_CONSOLE
+	reset_purchase = settings.RESET_PURCHASE
+	reset_excuse_required = settings.RESET_EXCUSE_REQUIRED
 	themes = THEME_CHOICES
 	tollgate_version = tollgate.__version__
+
+
+class TollgateTemplateResponse(TemplateResponse):
+	"""
+	Use tollgate's RequestContext to get our standard context data into template
+	responses.
+	"""
+	def resolve_context(self, context):
+		if isinstance(context, Context):
+			return context
+		return RequestContext(self._request, context, current_app=self._current_app)
+
+
+class TollgateTemplateView(TemplateView):
+	response_class = TollgateTemplateResponse
 
 
 def controller_error(request):

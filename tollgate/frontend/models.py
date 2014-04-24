@@ -179,8 +179,14 @@ class Event(Model):
 		
 	def clean(self):
 		# check that start is less than end
+		if self.start is None:
+			raise ValidationError(_(u'Start datetime is not valid.'))
+
+		if self.end is None:
+			raise ValidationError(_(u'End datetime is not valid.'))
+
 		if self.start >= self.end:
-			raise ValidationError(_(u'Start date must be before the end date.'))
+			raise ValidationError(_(u'Start datetime must be before the end datetime.'))
 		
 		# find all other events.
 		other_events = Event.objects.exclude(id=self.id) if self.id else Event.objects.all()
@@ -531,7 +537,7 @@ def sync_user_connections(user, portal=None):
 
 	# find all the user's computers.
 	hosts = list(NetworkHost.objects.filter(
-		user=user, online=True
+		owner=user, online=True
 	).only('mac_address', 'ip_address'))
 	
 	# flush the 

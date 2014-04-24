@@ -20,11 +20,6 @@ from django.conf import settings
 from tollgate.frontend.forms import *
 from tollgate.frontend.views import *
 from django.contrib.auth.decorators import permission_required
-
-# TODO: shuffle these into views.py
-from django.views.generic.base import TemplateView
-
-
 from tollgate.frontend.models import IP4PortForward
 from django.contrib.auth.views import password_change
 from django.utils.decorators import decorator_from_middleware
@@ -208,7 +203,7 @@ urlpatterns = (
 	# help pages
 	url(
 		r'^help/new/$',
-		TemplateView.as_view(
+		TollgateTemplateView.as_view(
 			template_name='frontend/help/new.html',
 		),
 		name='help-new'
@@ -216,7 +211,7 @@ urlpatterns = (
 	
 	url(
 		r'^help/api/$',
-		TemplateView.as_view(
+		TollgateTemplateView.as_view(
 			template_name='frontend/help/api.html',
 		),
 		name='help-api'
@@ -224,7 +219,7 @@ urlpatterns = (
 
 	url(
 		r'^help/source/$',
-		TemplateView.as_view(
+		TollgateTemplateView.as_view(
 			template_name='frontend/help/source.html',
 		),
 		name='source'
