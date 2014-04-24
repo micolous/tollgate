@@ -1,7 +1,7 @@
 {% extends "frontend/base-internet.html" %}
 {% comment %}
 tollgate login success page
-Copyright 2008-2012 Michael Farrell <http://micolous.id.au/>
+Copyright 2008-2014 Michael Farrell <http://micolous.id.au/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -28,9 +28,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <p><strong>Warning:</strong> All internet access is metered, including uploads and downloads.  You have a limited amount of quota available, please see the <a href="{% url 'quota' %}">quota page</a> to show the current status.</p>
 
-<p>Disable programs that are downloading in the background, pause Steam updates, and <strong>shut down peer to peer programs, such as Bear Share, Bittorrent, Gnutella, Hamachi, Limewire, Skype and World of Warcraft (under some configurations)</strong>.  <strong>Both uploads and downloads are counted</strong>, and the unmetered sites list is <strong>not</strong> the same as what is available on your ISP, <strong>nor the same as the ISP we are using</strong>.  Failure to comply with this will result in <em>termination</em> of your internet connectivity after you exceed your quota.</p>
+<p>Disable programs that are downloading in the background, and <strong>shut down peer to peer programs</strong>.</p>
 
-<p>Downloads from local file shares on the LAN are unmetered.</p>
+<p><strong>Both uploads and downloads are counted</strong>, and the unmetered sites list is <strong>not</strong> the same as what is available on your ISP, <strong>nor the same as the ISP we are using</strong>.  Failure to comply with this will result in <em>termination</em> of your internet connectivity after you exceed your quota.</p>
+
+<p>Downloads from local file shares on the LAN are unmetered.  You are strongly encouraged to use them instead of using our shared Internet connection.</p>
+
+<p>There are other people who also are trying to get online as well, so <em>be considerate</em>.</p>
 
 <p>You will be taken back to the <a href="{% url 'index' %}">main portal page</a> in 30 seconds.</p>
 
