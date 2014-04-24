@@ -151,7 +151,7 @@ def main(daemon_enable, pid_file, settings_file=SETTINGS_FILE):
 		print "Setting blacklist hosts..."
 		parse_hostlist(blacklist_hosts, iptables.add_blacklist)
 
-	print "Creating DBUS API..."
+	print "Starting DBUS server (only debug messages might appear now)"
 	try:
 		iptables.start(daemon_enable, pid_file)
 	except KeyboardInterrupt:
