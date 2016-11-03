@@ -6,7 +6,7 @@ Copyright 2008-2014 Michael Farrell <http://micolous.id.au>.
 
 Version 3.0.2+.
 
-Website: <http://tollgate.org.au/>
+Website: <http://tollgate.blackhats.net.au/>
 
 ## Introduction ##
 
