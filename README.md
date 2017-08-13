@@ -8,6 +8,14 @@ Version 3.0.2+.
 
 Website: <http://tollgate.blackhats.net.au/>
 
+## Project Status (2017) ##
+
+This code isn't being actively worked on anymore, but is fairly stable.  It
+will need updates to work with newer version of Django, as there may be
+security issues in the old version of it that this software still runs on.
+
+I'm not running LAN parties much these days anymore.
+
 ## Introduction ##
 
 Welcome to tollgate.  This is a captive portal system for Linux, designed for operating LAN parties.  A lot of the concepts in the software are specific to how a LAN party operates, however you could use it for a sharehouse if you wanted, or something else.
